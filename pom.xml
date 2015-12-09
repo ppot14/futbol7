@@ -37,16 +37,10 @@
 			<version>1.47.1</version>
 		</dependency>
 		
-		<dependency>
-			<groupId>com.google.api-client</groupId>
-			<artifactId>google-api-client</artifactId>
-			<version>1.21.0</version>
-		</dependency>
-		
-		<dependency>
-	      <groupId>com.google.code.gson</groupId>
-	      <artifactId>gson</artifactId>
-	      <version>2.5</version>
+	    <dependency>
+	      <groupId>com.google.apis</groupId>
+	      <artifactId>google-api-services-drive</artifactId>
+	      <version>v2-rev195-1.21.0</version>
 	    </dependency>
 		
 		<dependency>
@@ -54,19 +48,6 @@
 			<artifactId>jackson-mapper-asl</artifactId>
 			<version>1.9.13</version>
 		</dependency>
-		
-		<dependency>
-			<groupId>com.googlecode.json-simple</groupId>
-			<artifactId>json-simple</artifactId>
-			<version>1.1</version>
-		</dependency>
-		
-	    <dependency>
-	      <groupId>com.google.apis</groupId>
-	      <artifactId>google-api-services-drive</artifactId>
-	      <version>v2-rev195-1.21.0</version>
-	    </dependency>
-		
 			
 	</dependencies>
 </project>
