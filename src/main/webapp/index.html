@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+
+<html>
+
+  <head>
+  
+  	<meta charset="UTF-8">
+  
+	<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" />
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.9.1/bootstrap-table.min.css" />
+	<script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.9.1/bootstrap-table.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.9.1/locale/bootstrap-table-es-ES.min.js"></script>
+	<script src="resources/json/full.js"></script>
+	<script src="resources/json/permanents.js"></script>
+	<script src="resources/json/substitutes.js"></script>
+	<script src="resources/json/vs.js"></script>
+	<script src="resources/json/pair.js"></script>
+	<link rel="shortcut icon" href="resources/images/futbol.ico" />
+
+  </head>
+
+  <body>
+  
+  <script>
+
+	  function decimal(value, row) {
+	
+	      return parseFloat(Math.round(value * 100) / 100).toFixed(2);
+	  }
+  
+	  $(function () {
+		  
+		    $('#table-full').bootstrapTable({
+		        data: full,
+		        locale:'es-ES'
+		    });
+		  
+		    $('#table-permanents').bootstrapTable({
+		        data: permanents,
+		        locale:'es-ES'
+		    });
+		  
+		    $('#table-substitutes').bootstrapTable({
+		        data: substitutes,
+		        locale:'es-ES'
+		    });
+		  
+		    $('#table-vs').bootstrapTable({
+		        data: vs,
+		        locale:'es-ES'
+		    });
+		  
+		    $('#table-pair').bootstrapTable({
+		        data: pair,
+		        locale:'es-ES'
+		    });
+
+		});
+  </script>
+  
+	<nav class="navbar navbar-inverse" id="top-navbar">
+	  <div class="container-fluid">
+	    <div class="navbar-header">
+<!-- 	      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse" aria-expanded="false"> -->
+<!-- 	        <span class="sr-only">Toggle navigation</span> -->
+<!-- 	        <span class="icon-bar"></span> -->
+<!-- 	        <span class="icon-bar"></span> -->
+<!-- 	        <span class="icon-bar"></span> -->
+<!-- 	      </button> -->
+	      <img alt="Pelota de futbol" src="resources/images/futbol.png" style="position:absolute"/>
+	      <a class="navbar-brand" href="#" style="margin-left: 65px">Futbol 7</a>
+	    </div>
+	    
+<!-- 	    <div class="collapse navbar-collapse" id="navbar-collapse"> -->
+<!-- 	      <ul id="menu-list" class="nav navbar-nav"> -->
+	      
+<!-- 	      </ul> -->
+<!-- <!-- 	      <form class="navbar-form navbar-left" role="search"> --> -->
+<!-- <!-- 	        <div class="form-group"> --> -->
+<!-- <!-- 	          <input type="text" class="form-control" placeholder="Search"> --> -->
+<!-- <!-- 	        </div> --> -->
+<!-- <!-- 	      </form> --> -->
+<!-- 	    </div> -->
+	  </div>
+	</nav>
+	
+	<div id="home-page" class="container-fluid" style="">
+		<div class="row">
+			<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+			
+				<div id="" class="panel panel-default">
+				  <div class="panel-heading">
+				    <h3 class="panel-title">Total</h3>
+				  </div>
+				  <div class="panel-body">
+						<table id="table-full" data-sort-name="points" data-sort-order="desc">
+							<thead>
+								<tr>
+									<th data-field="name" data-sortable="true">Nombre</th>
+									<th data-field="points" data-sortable="true" data-align="right">Puntos</th>
+									<th data-field="wins" data-sortable="true" data-align="right">Victorias</th>
+									<th data-field="draws" data-sortable="true" data-align="right">Empates</th>
+									<th data-field="defeats" data-sortable="true" data-align="right">Derrotas</th>
+									<th data-field="matches" data-sortable="true" data-align="right">Partidos</th>
+									<th data-field="goalsFor" data-sortable="true" data-align="right">Goles F</th>
+									<th data-field="goalsAgainst" data-sortable="true" data-align="right">Goles C</th>
+									<th data-field="pointsAVG" data-sortable="true" data-align="right" data-formatter="decimal">Med. Ptos</th>
+									<th data-field="goalsForAVG" data-sortable="true" data-align="right" data-formatter="decimal">Med. Goles F.</th>
+									<th data-field="goalsAgainstAVG" data-sortable="true" data-align="right" data-formatter="decimal">Med. Goles C.</th>
+								</tr>
+							</thead>
+						</table>
+					</div>
+				</div>
+			
+			</div>
+		</div>
+			
+		<div class="row">
+			<div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
+			
+				<div id="" class="panel panel-default">
+				  <div class="panel-heading">
+				    <h3 class="panel-title">Titulares</h3>
+				  </div>
+				  <div class="panel-body">
+						<table id="table-permanents" data-sort-name="points" data-sort-order="desc">
+							<thead>
+								<tr>
+									<th data-field="name" data-sortable="true">Nombre</th>
+									<th data-field="points" data-sortable="true" data-align="right">Puntos</th>
+									<th data-field="matches" data-sortable="true" data-align="right">Partidos</th>
+									<th data-field="goalsFor" data-sortable="true" data-align="right">Goles</th>
+									<th data-field="pointsAVG" data-sortable="true" data-align="right" data-formatter="decimal">Med. Ptos</th>
+									<th data-field="goalsForAVG" data-sortable="true" data-align="right" data-formatter="decimal">Med. Goles</th>
+								</tr>
+							</thead>
+						</table>
+					</div>
+				</div>
+			
+			</div>
+			<div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
+			
+				<div id="" class="panel panel-default">
+				  <div class="panel-heading">
+				    <h3 class="panel-title">Suplentes</h3>
+				  </div>
+				  <div class="panel-body">
+						<table id="table-substitutes" data-sort-name="points" data-sort-order="desc">
+							<thead>
+								<tr>
+									<th data-field="name" data-sortable="true">Nombre</th>
+									<th data-field="points" data-sortable="true" data-align="right">Puntos</th>
+									<th data-field="matches" data-sortable="true" data-align="right">Partidos</th>
+									<th data-field="goalsFor" data-sortable="true" data-align="right">Goles</th>
+									<th data-field="pointsAVG" data-sortable="true" data-align="right" data-formatter="decimal">Med. Ptos</th>
+									<th data-field="goalsForAVG" data-sortable="true" data-align="right" data-formatter="decimal">Med. Goles</th>
+								</tr>
+							</thead>
+						</table>
+					</div>
+				</div>
+			
+			</div>
+		</div>
+		
+		<div class="row">
+			<div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
+			
+				<div id="" class="panel panel-default">
+				  <div class="panel-heading">
+				    <h3 class="panel-title">Veces como adversarios</h3>
+				  </div>
+				  <div class="panel-body">
+						<table id="table-vs" data-sort-name="vs" data-sort-order="desc"
+               data-pagination="true">
+							<thead>
+								<tr>
+									<th data-field="player1" data-sortable="true">Nombre</th>
+									<th data-field="player2" data-sortable="true">Nombre</th>
+									<th data-field="vs" data-sortable="true" data-align="right">Partidos</th>
+								</tr>
+							</thead>
+						</table>
+					</div>
+				</div>
+			
+			</div>
+			<div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
+			
+				<div id="" class="panel panel-default">
+				  <div class="panel-heading">
+				    <h3 class="panel-title">Veces en el mismo equipo</h3>
+				  </div>
+				  <div class="panel-body">
+						<table id="table-pair" data-sort-name="pair" data-sort-order="desc"
+               data-pagination="true">
+							<thead>
+								<tr>
+									<th data-field="player1" data-sortable="true">Nombre</th>
+									<th data-field="player2" data-sortable="true">Nombre</th>
+									<th data-field="pair" data-sortable="true" data-align="right">Partidos</th>
+								</tr>
+							</thead>
+						</table>
+					</div>
+				</div>
+			
+			</div>
+		</div>
+	</div>
+		
+  </body>
+</html>
