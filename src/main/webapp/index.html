@@ -12,11 +12,14 @@
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.9.1/bootstrap-table.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.9.1/locale/bootstrap-table-es-ES.min.js"></script>
+	<script src="https://code.highcharts.com/highcharts.js"></script>
+<!-- 	<script src="https://code.highcharts.com/highcharts-more.js"></script> -->
 	<script src="resources/json/full.js"></script>
 	<script src="resources/json/permanents.js"></script>
 	<script src="resources/json/substitutes.js"></script>
 	<script src="resources/json/vs.js"></script>
 	<script src="resources/json/pair.js"></script>
+	<script src="resources/json/pointsSeries.js"></script>
 	<link rel="shortcut icon" href="resources/images/futbol.ico" />
 
   </head>
@@ -31,6 +34,46 @@
 	  }
   
 	  $(function () {
+		  
+		  $('#container').highcharts({
+		        chart: {
+		            type: 'spline'
+		        },
+		        title: {
+		            text: 'Acumulación de Puntos',
+		            style: { "display": "none"}
+		        },
+		        xAxis: {
+		            type: 'datetime',
+		            dateTimeLabelFormats: {
+		                month: '%e. %b',
+		                year: '%b'
+		            },
+		            title: {
+		                text: 'Dia'
+		            }
+		        },
+		        yAxis: {
+		            title: {
+		                text: 'Puntos'
+		            },
+		            min: 0
+		        },
+// 		        tooltip: {
+// 		            headerFormat: '<b>{series.name}</b><br>',
+// 		            pointFormat: '{point.x:%e. %b}: {point.y:.2f} m'
+// 		        },
+
+// 		        plotOptions: {
+// 		            spline: {
+// 		                marker: {
+// 		                    enabled: true
+// 		                }
+// 		            }
+// 		        },
+
+		        series: pointsSeries
+		    });
 		  
 		    $('#table-full').bootstrapTable({
 		        data: full,
@@ -211,6 +254,23 @@
 			
 			</div>
 		</div>
+		
+		
+		<div class="row">
+			<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+			
+				<div id="" class="panel panel-default">
+				  <div class="panel-heading">
+				    <h3 class="panel-title">Evolución de Puntos</h3>
+				  </div>
+				  <div class="panel-body">
+				  		<div id="container" style="min-width: 310px; height: 600px; margin: 0 auto"></div>
+					</div>
+				</div>
+			
+			</div>
+		</div>
+		
 	</div>
 		
   </body>

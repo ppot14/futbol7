@@ -6,10 +6,12 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.SocketTimeoutException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,6 +40,7 @@ public class Main {
 	private List<Map<String,String>> fullRanking = null;
 	private int numMatches = 0;
 	private List<List<String>> matches = null;
+	private List<Map<String,Object>> pointsSeries = null;
 	private Set<String> players = null;
     
     public Main(){
@@ -63,13 +66,17 @@ public class Main {
 			
 			logger.info("PERMANENTS: "+PERMANENTS);
 			
-
-			
-			InputStream inputStreamCSV = GoogleImporter.importFromGoogleDrive(config);
-			if(inputStreamCSV==null){
-				logger.info("Importing CSV from local: "+"Futbol7.csv");
-				ClassLoader classLoader = Main.class.getClassLoader();
-				inputStreamCSV = classLoader.getResourceAsStream("Futbol7.csv");
+			InputStream inputStreamCSV = null;
+			try{
+				inputStreamCSV = GoogleImporter.importFromGoogleDrive(config);
+			}catch(SocketTimeoutException e){
+				logger.info("Error downloading from Google Drive: "+e.getMessage());
+			}finally{
+				if(inputStreamCSV==null){
+					logger.info("Importing CSV from local: "+"Futbol7.csv");
+					ClassLoader classLoader = Main.class.getClassLoader();
+					inputStreamCSV = classLoader.getResourceAsStream("Futbol7.csv");
+				}
 			}
 			matches = formatCSVdata(inputStreamCSV);
 			numMatches = matches.size()-1;
@@ -78,11 +85,10 @@ public class Main {
 			logger.info("Matches: "+matches);
 			
 			fullRanking = getRanking(matches);
+			
+			pointsSeries = getPointsSeries();
 
 			File project =  new File("");
-			
-//			String jsonFolderURL = project+"target"+File.separatorChar+
-//					"futbol7-0.0.1-SNAPSHOT"+File.separatorChar+"resources"+File.separatorChar+"json"+File.separatorChar;
 			
 			String jsonSrcFolder = project.getAbsolutePath()+"\\src\\main\\webapp\\resources\\json\\";
 			
@@ -93,6 +99,7 @@ public class Main {
 			writeJSONtoFile(jsonSrcFolder,"permanents.js",getRankingPermanentsJSON());
 			writeJSONtoFile(jsonSrcFolder,"substitutes.js",getRankingSubstitutesJSON());
 			writeJSONtoFile(jsonSrcFolder,"vs.js",getVSJSON());
+			writeJSONtoFile(jsonSrcFolder,"pointsSeries.js",getPointsSerieJSON());
 			
 			logger.info("DONE.");
         
@@ -101,6 +108,58 @@ public class Main {
 		}
     	
     }
+
+	private List<Map<String, Object>> getPointsSeries() throws ParseException {
+        List<Map<String,Object>> data = new ArrayList<Map<String,Object>>();
+        for(String name : players){
+        	List<List<Object>> playerData = new ArrayList<List<Object>>();
+        	int points = 0;
+        	for(List<String> row : matches){
+        		if(row.contains(name)){
+	        		int i=0;
+	        		int gA=0,gB=0;
+	        		String date = null;
+	        		String colour=null;
+	        		for(String cell : row){
+	        			if(i==0){date=cell;}
+	        			if(i==8){gA=Integer.parseInt(cell);}
+	        			if(i==9){gB=Integer.parseInt(cell);}
+	            		if(cell.equals(name)){
+	            			if(i<9){colour="a";}
+	            			if(i>8){colour="b";}
+	            		}
+	            		i++;
+	            	}
+	        		if(colour!=null){
+	        			List<Object> game = new ArrayList<Object>();
+	        			SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+	        			Date d = formatter.parse(date);
+	        			game.add(d);
+						int gFor = ("a".equals(colour)?gA:gB);
+						int gAgainst = ("a".equals(colour)?gB:gA);
+						int pointsM = ((gFor>gAgainst)?3:((gFor<gAgainst)?1:2));
+	        			points += pointsM;
+	        			game.add(points);
+	        			playerData.add(game);
+	        		}else{
+	        			continue;
+	        		}
+        		}
+        	}
+        	Map<String, Object> e = new HashMap<String, Object>();
+        	e.put("name", name);
+        	e.put("data", playerData);
+			data.add(e);
+        }
+		return data;
+	}
+
+	private String getPointsSerieJSON() throws JsonGenerationException, JsonMappingException, IOException {
+		logger.info("PointsSeries: "+pointsSeries.toString());
+        ObjectMapper mapper = new ObjectMapper();
+        String jsonInString = mapper.writeValueAsString(pointsSeries);
+        return jsonInString;
+	}
 
 	private void writeJSONtoFile(String folder, String file, String jsonString) throws IOException {
 		String varName = file.split("\\.")[0];
@@ -237,22 +296,20 @@ public class Main {
         logger.info(players.toString());
         List<Map<String,String>> data = new ArrayList<Map<String,String>>();
         for(String name : players){
-//        	if(isPermanent&&PERMANENTS.contains(name) || !isPermanent&&!PERMANENTS.contains(name) ){
-	        	Map<String, String> e = new HashMap<String, String>();
-	        	e.put("name", name);
-	        	e.put("points", points.get(name).toString());
-	        	e.put("goalsFor", goalsFor.get(name).toString());
-	        	e.put("goalsAgainst", goalsAgainst.get(name).toString());
-	        	e.put("wins", wins.containsKey(name)?wins.get(name).toString():"0");
-	        	e.put("draws", draws.containsKey(name)?draws.get(name).toString():"0");
-	        	e.put("defeats", defeats.containsKey(name)?defeats.get(name).toString():"0");
-	        	e.put("matches", matches.get(name).toString());
-	        	//*(matches.get(name)<(numMatches/3)?0:1) in case of less than 1/3 of total match is 0
-	        	e.put("pointsAVG", new Float(points.get(name)*1.0F/matches.get(name)).toString());
-	        	e.put("goalsForAVG", new Float(goalsFor.get(name)*1.0F/matches.get(name)).toString());
-	        	e.put("goalsAgainstAVG", new Float(goalsAgainst.get(name)*1.0F/matches.get(name)).toString());
-				data.add(e);
-//        	}
+        	Map<String, String> e = new HashMap<String, String>();
+        	e.put("name", name);
+        	e.put("points", points.get(name).toString());
+        	e.put("goalsFor", goalsFor.get(name).toString());
+        	e.put("goalsAgainst", goalsAgainst.get(name).toString());
+        	e.put("wins", wins.containsKey(name)?wins.get(name).toString():"0");
+        	e.put("draws", draws.containsKey(name)?draws.get(name).toString():"0");
+        	e.put("defeats", defeats.containsKey(name)?defeats.get(name).toString():"0");
+        	e.put("matches", matches.get(name).toString());
+        	//*(matches.get(name)<(numMatches/3)?0:1) in case of less than 1/3 of total match is 0
+        	e.put("pointsAVG", new Float(points.get(name)*1.0F/matches.get(name)).toString());
+        	e.put("goalsForAVG", new Float(goalsFor.get(name)*1.0F/matches.get(name)).toString());
+        	e.put("goalsAgainstAVG", new Float(goalsAgainst.get(name)*1.0F/matches.get(name)).toString());
+			data.add(e);
         }
 		return data;
 	}
