@@ -12,6 +12,7 @@
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.9.1/bootstrap-table.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.9.1/locale/bootstrap-table-es-ES.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-timeago/1.4.3/jquery.timeago.min.js"></script>
 	<script src="https://code.highcharts.com/highcharts.js"></script>
 <!-- 	<script src="https://code.highcharts.com/highcharts-more.js"></script> -->
 	<script src="resources/json/full.js"></script>
@@ -20,7 +21,12 @@
 	<script src="resources/json/vs.js"></script>
 	<script src="resources/json/pair.js"></script>
 	<script src="resources/json/pointsSeries.js"></script>
+	<script src="resources/json/matches.js"></script>
 	<link rel="shortcut icon" href="resources/images/futbol.ico" />
+	
+	<style>
+	
+	</style>
 
   </head>
 
@@ -34,6 +40,24 @@
 	  }
   
 	  $(function () {
+		  
+		  $.timeago.settings.strings = {
+				   prefixAgo: "hace",
+				   prefixFromNow: "dentro de",
+				   suffixAgo: "",
+				   suffixFromNow: "",
+				   seconds: "menos de un minuto",
+				   minute: "un minuto",
+				   minutes: "unos %d minutos",
+				   hour: "una hora",
+				   hours: "%d horas",
+				   day: "un día",
+				   days: "%d días",
+				   month: "un mes",
+				   months: "%d meses",
+				   year: "un año",
+				   years: "%d años"
+				};
 		  
 		  $('#container').highcharts({
 		        chart: {
@@ -99,6 +123,49 @@
 		        data: pair,
 		        locale:'es-ES'
 		    });
+		  
+		    var numMatches = matches.length;
+		    var currentMatch = numMatches-1;
+		    var lastMatch = matches[numMatches-1].data;
+		    
+		    $('#table-results').bootstrapTable({
+		        data: lastMatch,
+		        locale:'es-ES'
+		    });
+		    
+		    $('#table-results thead tr:first th div.th-inner').text('Jornada '+numMatches+' ('+$.timeago(matches[numMatches-1].day)+')');
+		    $('#table-results thead tr:last th:first div.th-inner span').text(matches[numMatches-1].scoreBlues);
+		    $('#table-results thead tr:last th:last div.th-inner span').text(matches[numMatches-1].scoreWhites);
+		    
+		    $('#next-match').addClass('disabled');
+		    
+		    var updateResult = function(currentMatch){
+			    var newMatch = matches[currentMatch].data;
+			    
+			    $('#table-results').bootstrapTable('load',newMatch);
+			    
+			    $('#table-results thead tr:first th div.th-inner').text('Jornada '+(currentMatch+1)+' ('+$.timeago(matches[currentMatch].day)+')');
+			    $('#table-results thead tr:last th:first div.th-inner span').text(matches[currentMatch].scoreBlues);
+			    $('#table-results thead tr:last th:last div.th-inner span').text(matches[currentMatch].scoreWhites);
+			};
+		    
+		    $('#next-match').click(function(){
+		    	currentMatch = currentMatch + 1;
+			    $('#previous-match').removeClass('disabled');
+		    	if(currentMatch==(numMatches-1)){
+				    $('#next-match').addClass('disabled');
+		    	}
+		    	updateResult(currentMatch);
+		    });
+		    
+		    $('#previous-match').click(function(){
+		    	currentMatch = currentMatch - 1;
+			    $('#next-match').removeClass('disabled');
+		    	if(currentMatch==0){
+				    $('#previous-match').addClass('disabled');
+		    	}
+		    	updateResult(currentMatch);
+		    });
 
 		});
   </script>
@@ -138,7 +205,7 @@
 				    <h3 class="panel-title">Total</h3>
 				  </div>
 				  <div class="panel-body">
-						<table id="table-full" data-sort-name="points" data-sort-order="desc">
+						<table id="table-full" data-sort-name="points" data-sort-order="desc"  data-striped="true">
 							<thead>
 								<tr>
 									<th data-field="name" data-sortable="true">Nombre</th>
@@ -169,7 +236,7 @@
 				    <h3 class="panel-title">Titulares</h3>
 				  </div>
 				  <div class="panel-body">
-						<table id="table-permanents" data-sort-name="points" data-sort-order="desc">
+						<table id="table-permanents" data-sort-name="points" data-sort-order="desc" data-striped="true">
 							<thead>
 								<tr>
 									<th data-field="name" data-sortable="true">Nombre</th>
@@ -192,7 +259,7 @@
 				    <h3 class="panel-title">Suplentes</h3>
 				  </div>
 				  <div class="panel-body">
-						<table id="table-substitutes" data-sort-name="points" data-sort-order="desc">
+						<table id="table-substitutes" data-sort-name="points" data-sort-order="desc" data-striped="true">
 							<thead>
 								<tr>
 									<th data-field="name" data-sortable="true">Nombre</th>
@@ -248,6 +315,34 @@
 									<th data-field="pair" data-sortable="true" data-align="right">Partidos</th>
 								</tr>
 							</thead>
+						</table>
+					</div>
+				</div>
+			
+			</div>
+			<div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
+			
+				<div id="" class="panel panel-default">
+				  <div class="panel-heading">
+				    <h3 class="panel-title">Jornadas</h3>
+				  </div>
+				  <div class="panel-body">
+						<table id="table-results">
+							<thead>
+								<tr>
+									<th colspan="2">Jornada X - Dia Y</th>
+								</tr>
+								<tr>
+									<th data-field="blue" >Equipo Azul <span class="pull-right"></span></th>
+									<th data-field="white" >Equipo Blanco <span class="pull-right"></span></th>
+								</tr>
+							</thead>
+							<tfoot>
+								<tr>
+									<th><button id="previous-match" class="btn pull-left">Anterior</button></th>
+									<th><button id="next-match" class="btn pull-right">Siguiente</button></th>
+								</tr>
+							</tfoot>
 						</table>
 					</div>
 				</div>

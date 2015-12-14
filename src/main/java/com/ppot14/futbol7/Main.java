@@ -34,10 +34,13 @@ public class Main {
 	private static List<String> PERMANENTS = null;
 	
 	private static final Logger logger = Logger.getLogger(Main.class.getName());
+
+	SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
 	
 	private static Map<String,Object> config = null;
 	
 	private List<Map<String,String>> fullRanking = null;
+	private List<Map<String,Object>> results = null;
 	private int numMatches = 0;
 	private List<List<String>> matches = null;
 	private List<Map<String,Object>> pointsSeries = null;
@@ -86,6 +89,8 @@ public class Main {
 			
 			fullRanking = getRanking(matches);
 			
+			results = getResults(matches);
+			
 			pointsSeries = getPointsSeries();
 
 			File project =  new File("");
@@ -100,6 +105,7 @@ public class Main {
 			writeJSONtoFile(jsonSrcFolder,"substitutes.js",getRankingSubstitutesJSON());
 			writeJSONtoFile(jsonSrcFolder,"vs.js",getVSJSON());
 			writeJSONtoFile(jsonSrcFolder,"pointsSeries.js",getPointsSerieJSON());
+			writeJSONtoFile(jsonSrcFolder,"matches.js",getMatchesJSON());
 			
 			logger.info("DONE.");
         
@@ -109,8 +115,30 @@ public class Main {
     	
     }
 
+	private List<Map<String, Object>> getResults(List<List<String>> matches2) throws ParseException {
+		List<Map<String, Object>> res = new ArrayList<Map<String,Object>>();
+		
+		for(List<String> match : matches2){
+			Map<String, Object> formattedMatch = new HashMap<String, Object>();
+			
+			formattedMatch.put("day", formatter.parse(match.get(0)));
+			formattedMatch.put("scoreBlues", match.get(8));
+			formattedMatch.put("scoreWhites", match.get(9));
+			List<Map<String,String>> teams = new ArrayList<Map<String,String>>();
+			for(int i=1;i<8;i++){
+				Map<String,String> r = new HashMap<String, String>();
+				r.put("blue", match.get(i));
+				r.put("white", match.get(i+9));
+				teams.add(r);
+			}
+			formattedMatch.put("data", teams);
+			res.add(formattedMatch);
+		}
+		
+		return res;
+	}
+
 	private List<Map<String, Object>> getPointsSeries() throws ParseException {
-		SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
 		Date today = new Date();
         List<Map<String,Object>> data = new ArrayList<Map<String,Object>>();
         for(String name : players){
@@ -161,6 +189,13 @@ public class Main {
 			data.add(e);
         }
 		return data;
+	}
+
+	private String getMatchesJSON() throws JsonGenerationException, JsonMappingException, IOException {
+		logger.info("Matches: "+results.toString());
+        ObjectMapper mapper = new ObjectMapper();
+        String jsonInString = mapper.writeValueAsString(results);
+        return jsonInString;
 	}
 
 	private String getPointsSerieJSON() throws JsonGenerationException, JsonMappingException, IOException {
