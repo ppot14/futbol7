@@ -37,7 +37,7 @@
 		  
 		  $('#container').highcharts({
 		        chart: {
-		            type: 'spline'
+		            type: 'line'
 		        },
 		        title: {
 		            text: 'Acumulación de Puntos',
@@ -65,10 +65,10 @@
 // 		        },
 
 // 		        plotOptions: {
-// 		            spline: {
-// 		                marker: {
-// 		                    enabled: true
-// 		                }
+// 		            line: {
+// 		                step: false,
+// // 		                pointStart: 0
+// 		                connectNulls: true
 // 		            }
 // 		        },
 

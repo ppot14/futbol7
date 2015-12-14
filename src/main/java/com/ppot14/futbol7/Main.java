@@ -110,6 +110,8 @@ public class Main {
     }
 
 	private List<Map<String, Object>> getPointsSeries() throws ParseException {
+		SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+		Date today = new Date();
         List<Map<String,Object>> data = new ArrayList<Map<String,Object>>();
         for(String name : players){
         	List<List<Object>> playerData = new ArrayList<List<Object>>();
@@ -132,7 +134,6 @@ public class Main {
 	            	}
 	        		if(colour!=null){
 	        			List<Object> game = new ArrayList<Object>();
-	        			SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
 	        			Date d = formatter.parse(date);
 	        			game.add(d);
 						int gFor = ("a".equals(colour)?gA:gB);
@@ -146,6 +147,14 @@ public class Main {
 	        		}
         		}
         	}
+        	
+        	//Hack to add current points at current day
+        	Integer maxPts = (Integer) playerData.get(playerData.size()-1).get(1);
+			List<Object> game = new ArrayList<Object>();
+			game.add(today);
+			game.add(maxPts);
+			playerData.add(game);
+        	
         	Map<String, Object> e = new HashMap<String, Object>();
         	e.put("name", name);
         	e.put("data", playerData);
