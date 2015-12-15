@@ -2,6 +2,7 @@ package com.ppot14.futbol7;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,6 +26,10 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Logger;
 
+import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPClientConfig;
+import org.apache.commons.net.ftp.FTPFile;
+import org.apache.commons.net.ftp.FTPReply;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -44,26 +49,35 @@ public class Main {
 	private int numMatches = 0;
 	private List<List<String>> matches = null;
 	private List<Map<String,Object>> pointsSeries = null;
-	private Set<String> players = null;
-    
-    public Main(){
+	private Set<String> players = null;	
+
+	public static void main(String[] args) throws Exception {
+		Main m = new Main();
+		m.init();
+		m.run();
+	}
+
+	public void init() {
+		
+		config = null;
+		String propFileName = "config.json";
+        ObjectMapper mapper = new ObjectMapper();
+		InputStream inputStream = Main.class.getClassLoader().getResourceAsStream(propFileName);
+
+		try {
+			if (inputStream != null) {
+				config = mapper.readValue(inputStream, Map.class);
+			} else {
+				throw new FileNotFoundException("property file '" + propFileName + "' not found in the classpath");
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void run(){
     	
 		try{
-			
-			config = null;
-			String propFileName = "config.json";
-	        ObjectMapper mapper = new ObjectMapper();
-			InputStream inputStream = Main.class.getClassLoader().getResourceAsStream(propFileName);
-
-			try {
-				if (inputStream != null) {
-					config = mapper.readValue(inputStream, Map.class);
-				} else {
-					throw new FileNotFoundException("property file '" + propFileName + "' not found in the classpath");
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
 			
 			PERMANENTS = (List<String>) config.get("permanents");
 			
@@ -99,21 +113,20 @@ public class Main {
 			
 			logger.info("Project src json folder: "+jsonSrcFolder);
 					
-			writeJSONtoFile(jsonSrcFolder,"full.js",getRankingJSON());
-			writeJSONtoFile(jsonSrcFolder,"pair.js",getPairJSON());
-			writeJSONtoFile(jsonSrcFolder,"permanents.js",getRankingPermanentsJSON());
-			writeJSONtoFile(jsonSrcFolder,"substitutes.js",getRankingSubstitutesJSON());
-			writeJSONtoFile(jsonSrcFolder,"vs.js",getVSJSON());
-			writeJSONtoFile(jsonSrcFolder,"pointsSeries.js",getPointsSerieJSON());
-			writeJSONtoFile(jsonSrcFolder,"matches.js",getMatchesJSON());
+			writeToServer(writeJSONtoFile(jsonSrcFolder,"full.js",jsonToString(fullRanking)));
+			writeToServer(writeJSONtoFile(jsonSrcFolder,"pair.js",jsonToString(getPair(matches))));
+			writeToServer(writeJSONtoFile(jsonSrcFolder,"permanents.js",jsonToString(getRankingPermanents())));
+			writeToServer(writeJSONtoFile(jsonSrcFolder,"substitutes.js",jsonToString(getRankingSubstitutes())));
+			writeToServer(writeJSONtoFile(jsonSrcFolder,"vs.js",jsonToString(getVS(matches))));
+			writeToServer(writeJSONtoFile(jsonSrcFolder,"pointsSeries.js",jsonToString(pointsSeries)));
+			writeToServer(writeJSONtoFile(jsonSrcFolder,"matches.js",jsonToString(results)));
 			
 			logger.info("DONE.");
         
 		}catch(Exception e){
 			e.printStackTrace();
 		}
-    	
-    }
+	}
 
 	private List<Map<String, Object>> getResults(List<List<String>> matches2) throws ParseException {
 		List<Map<String, Object>> res = new ArrayList<Map<String,Object>>();
@@ -191,28 +204,65 @@ public class Main {
 		return data;
 	}
 
-	private String getMatchesJSON() throws JsonGenerationException, JsonMappingException, IOException {
-		logger.info("Matches: "+results.toString());
-        ObjectMapper mapper = new ObjectMapper();
-        String jsonInString = mapper.writeValueAsString(results);
-        return jsonInString;
-	}
-
-	private String getPointsSerieJSON() throws JsonGenerationException, JsonMappingException, IOException {
-		logger.info("PointsSeries: "+pointsSeries.toString());
-        ObjectMapper mapper = new ObjectMapper();
-        String jsonInString = mapper.writeValueAsString(pointsSeries);
-        return jsonInString;
-	}
-
-	private void writeJSONtoFile(String folder, String file, String jsonString) throws IOException {
+	private File writeJSONtoFile(String folder, String file, String jsonString) throws IOException {
 		String varName = file.split("\\.")[0];
-		logger.info("varName: "+varName);
+		logger.info("File created: "+folder+file+"; var "+varName+" = "+ jsonString+ ";");
 		List<String> lines = Arrays.asList("var "+varName+" = ", jsonString, ";");
-		logger.info("folder+file: "+folder+file);
 		Path path = Paths.get(folder+file);
 		Files.write(path, lines, Charset.forName("UTF-8"));
-		
+		return path.toFile();
+	}
+	
+	private void writeToServer(File file){
+			String SFTPHOST = (String) config.get("sftp-host");
+			int    SFTPPORT = (Integer) config.get("sftp-port");
+			String SFTPUSER = (String) config.get("sftp-username");
+			String SFTPPASS = (String) config.get("sftp-password");
+			String SFTPWORKINGDIR = (String) config.get("sftp-directory");
+			 
+		    FTPClient ftp = new FTPClient();
+		    ftp.setConnectTimeout(5000);
+			 
+			try{
+			      int reply;
+			      ftp.connect(SFTPHOST,SFTPPORT);
+			      ftp.login(SFTPUSER, SFTPPASS);
+			      reply = ftp.getReplyCode();
+
+			      if(!FTPReply.isPositiveCompletion(reply)) {
+			        ftp.disconnect();
+					logger.severe("FTP server refused connection: "+ftp.getReplyString());
+			        return;
+			      }
+			      
+			      ftp.changeWorkingDirectory(SFTPWORKINGDIR);
+			      ftp.enterLocalPassiveMode();
+			      
+			      FileInputStream fis = new FileInputStream(file);
+			      ftp.storeFile(file.getName(), fis);
+
+			      reply = ftp.getReplyCode();
+			      if(!FTPReply.isPositiveCompletion(reply)) {
+			        ftp.disconnect();
+					logger.severe("FTP file transfer error: "+reply+" "+ftp.getReplyString());
+			        return;
+			      }
+			      
+			      fis.close();
+		          ftp.logout();				
+				logger.info("File transfered to server: "+file.getName());
+			}catch(Exception ex){
+				logger.severe("Impossible to transfer file to server: "+ex);
+				ex.printStackTrace();
+			}finally {
+		      if(ftp.isConnected()) {
+		          try {
+		            ftp.disconnect();
+		          } catch(IOException ioe) {
+		            // do nothing
+		          }
+		       }
+		    }
 	}
 
 	private List<Map<String,String>> getVS(List<List<String>> matches2) throws java.text.ParseException {
@@ -267,37 +317,16 @@ public class Main {
         }
 		return data;
 		
-	}	
-
-	public static void main(String[] args) throws Exception {
-		new Main();
 	}
 	
-	public String getVSJSON() throws java.text.ParseException, JsonGenerationException, JsonMappingException, IOException {
-		List<Map<String,String>> vs = getVS(matches);
-		logger.info("VS: "+vs.toString());
+	public String jsonToString(Object o) throws JsonGenerationException, JsonMappingException, IOException{
         ObjectMapper mapper = new ObjectMapper();
-        String jsonInString = mapper.writeValueAsString(vs);
+        String jsonInString = mapper.writeValueAsString(o);
         return jsonInString;
+		
 	}
 	
-	public String getPairJSON() throws java.text.ParseException, JsonGenerationException, JsonMappingException, IOException {
-		List<Map<String,String>> vs = getPair(matches);
-		logger.info("Pair: "+vs.toString());
-        ObjectMapper mapper = new ObjectMapper();
-        String jsonInString = mapper.writeValueAsString(vs);
-        return jsonInString;
-	}
-	
-	public String getRankingJSON() throws JsonGenerationException, JsonMappingException, IOException{
-		logger.info("Full: "+fullRanking.toString());
-        ObjectMapper mapper = new ObjectMapper();
-        String jsonInString = mapper.writeValueAsString(fullRanking);
-        return jsonInString;
-        
-	}
-	
-	public String getRankingPermanentsJSON() throws JsonGenerationException, JsonMappingException, IOException{
+	public List<Map<String,String>> getRankingPermanents(){
 
 		List<Map<String,String>> permanents = new ArrayList<Map<String,String>>();
 		for(Map<String, String> row : fullRanking){
@@ -305,24 +334,18 @@ public class Main {
         		permanents.add(row);
         	}
 		}
-		logger.info("Permanents: "+permanents.toString());
-        ObjectMapper mapper = new ObjectMapper();
-        String jsonInString = mapper.writeValueAsString(permanents);
-        return jsonInString;
+        return permanents;
         
 	}
 	
-	public String getRankingSubstitutesJSON() throws JsonGenerationException, JsonMappingException, IOException{
+	public List<Map<String,String>> getRankingSubstitutes(){
 		List<Map<String,String>> substitutes = new ArrayList<Map<String,String>>();
 		for(Map<String, String> row : fullRanking){
         	if(!PERMANENTS.contains(row.get("name")) ){
         		substitutes.add(row);
         	}
 		}
-		logger.info("Substitutes: "+substitutes.toString());
-        ObjectMapper mapper = new ObjectMapper();
-        String jsonInString = mapper.writeValueAsString(substitutes);
-        return jsonInString;
+        return substitutes;
 		
 	}
 		   
@@ -349,10 +372,11 @@ public class Main {
         	e.put("draws", draws.containsKey(name)?draws.get(name).toString():"0");
         	e.put("defeats", defeats.containsKey(name)?defeats.get(name).toString():"0");
         	e.put("matches", matches.get(name).toString());
-        	//*(matches.get(name)<(numMatches/3)?0:1) in case of less than 1/3 of total match is 0
-        	e.put("pointsAVG", new Float(points.get(name)*1.0F/matches.get(name)).toString());
-        	e.put("goalsForAVG", new Float(goalsFor.get(name)*1.0F/matches.get(name)).toString());
-        	e.put("goalsAgainstAVG", new Float(goalsAgainst.get(name)*1.0F/matches.get(name)).toString());
+        	//*(matches.get(name)<(numMatches/3)?0:1.0F) in case of less than 1/3 of total match the avg is 0 or 99
+        	boolean valid = matches.get(name)>=(numMatches/3);
+        	e.put("pointsAVG", (valid?new Float(points.get(name)*1.0F/matches.get(name)):"").toString());
+        	e.put("goalsForAVG", (valid?new Float(goalsFor.get(name)*1.0F/matches.get(name)):"").toString());
+        	e.put("goalsAgainstAVG", (valid?new Float(goalsAgainst.get(name)*1.0F/matches.get(name)):"").toString());
 			data.add(e);
         }
 		return data;
