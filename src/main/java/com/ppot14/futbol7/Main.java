@@ -52,9 +52,17 @@ public class Main {
 	private Set<String> players = null;	
 
 	public static void main(String[] args) throws Exception {
+		
+		long startTime = System.currentTimeMillis();
+		
 		Main m = new Main();
 		m.init();
 		m.run();
+		
+		long endTime = System.currentTimeMillis();
+		long duration = (endTime - startTime);  
+		
+		logger.info("Futbol7 executed in "+duration/1000+"s");
 	}
 
 	public void init() {
@@ -101,9 +109,9 @@ public class Main {
 			logger.info("Num of Matches: "+numMatches);
 			logger.info("Matches: "+matches);
 			
-			fullRanking = getRanking(matches);
+			fullRanking = getRanking();
 			
-			results = getResults(matches);
+			results = getResults();
 			
 			pointsSeries = getPointsSeries();
 
@@ -113,25 +121,25 @@ public class Main {
 			
 			logger.info("Project src json folder: "+jsonSrcFolder);
 					
-			writeToServer(writeJSONtoFile(jsonSrcFolder,"full.js",jsonToString(fullRanking)));
-			writeToServer(writeJSONtoFile(jsonSrcFolder,"pair.js",jsonToString(getPair(matches))));
-			writeToServer(writeJSONtoFile(jsonSrcFolder,"permanents.js",jsonToString(getRankingPermanents())));
-			writeToServer(writeJSONtoFile(jsonSrcFolder,"substitutes.js",jsonToString(getRankingSubstitutes())));
-			writeToServer(writeJSONtoFile(jsonSrcFolder,"vs.js",jsonToString(getVS(matches))));
-			writeToServer(writeJSONtoFile(jsonSrcFolder,"pointsSeries.js",jsonToString(pointsSeries)));
-			writeToServer(writeJSONtoFile(jsonSrcFolder,"matches.js",jsonToString(results)));
+			writeToServer(writeJSONtoFile(jsonSrcFolder,"full.js",jsonToString(fullRanking)),"/resources/json");
+			writeToServer(writeJSONtoFile(jsonSrcFolder,"pair.js",jsonToString(getPair())),"/resources/json");
+			writeToServer(writeJSONtoFile(jsonSrcFolder,"permanents.js",jsonToString(getRankingPermanents())),"/resources/json");
+			writeToServer(writeJSONtoFile(jsonSrcFolder,"substitutes.js",jsonToString(getRankingSubstitutes())),"/resources/json");
+			writeToServer(writeJSONtoFile(jsonSrcFolder,"vs.js",jsonToString(getVS())),"/resources/json");
+			writeToServer(writeJSONtoFile(jsonSrcFolder,"pointsSeries.js",jsonToString(pointsSeries)),"/resources/json");
+			writeToServer(writeJSONtoFile(jsonSrcFolder,"matches.js",jsonToString(results)),"/resources/json");
 			
-			logger.info("DONE.");
+			writeToServer(new File(project.getAbsolutePath()+"\\src\\main\\webapp\\index.html"),"");
         
 		}catch(Exception e){
 			e.printStackTrace();
 		}
 	}
 
-	private List<Map<String, Object>> getResults(List<List<String>> matches2) throws ParseException {
+	private List<Map<String, Object>> getResults() throws ParseException {
 		List<Map<String, Object>> res = new ArrayList<Map<String,Object>>();
 		
-		for(List<String> match : matches2){
+		for(List<String> match : matches){
 			Map<String, Object> formattedMatch = new HashMap<String, Object>();
 			
 			formattedMatch.put("day", formatter.parse(match.get(0)));
@@ -213,15 +221,15 @@ public class Main {
 		return path.toFile();
 	}
 	
-	private void writeToServer(File file){
+	private void writeToServer(File file, String subdir){
 			String SFTPHOST = (String) config.get("sftp-host");
 			int    SFTPPORT = (Integer) config.get("sftp-port");
 			String SFTPUSER = (String) config.get("sftp-username");
 			String SFTPPASS = (String) config.get("sftp-password");
-			String SFTPWORKINGDIR = (String) config.get("sftp-directory");
+			String SFTPWORKINGDIR = (String) config.get("sftp-directory") + subdir;
 			 
 		    FTPClient ftp = new FTPClient();
-		    ftp.setConnectTimeout(5000);
+		    ftp.setConnectTimeout(10000);
 			 
 			try{
 			      int reply;
@@ -250,7 +258,7 @@ public class Main {
 			      
 			      fis.close();
 		          ftp.logout();				
-				logger.info("File transfered to server: "+file.getName());
+				logger.info("File "+file.getName()+" transfered to server folder "+SFTPWORKINGDIR);
 			}catch(Exception ex){
 				logger.severe("Impossible to transfer file to server: "+ex);
 				ex.printStackTrace();
@@ -265,10 +273,10 @@ public class Main {
 		    }
 	}
 
-	private List<Map<String,String>> getVS(List<List<String>> matches2) throws java.text.ParseException {
+	private List<Map<String,String>> getVS() throws java.text.ParseException {
 		Map<Set<String>,Integer> vs = new HashMap<Set<String>,Integer>();
 		
-		for(List<String> row: matches2){
+		for(List<String> row: matches){
 			for(int i=1;i<8;i++){
 				for(int j=10;j<17;j++){
 					Set<String> pair = new HashSet<String>(Arrays.asList(row.get(i), row.get(j)));
@@ -289,10 +297,10 @@ public class Main {
 		
 	}
 	
-	private List<Map<String,String>> getPair(List<List<String>> matches2) throws java.text.ParseException {
+	private List<Map<String,String>> getPair() throws java.text.ParseException {
 		Map<Set<String>,Integer> vs = new HashMap<Set<String>,Integer>();
 		
-		for(List<String> row: matches2){
+		for(List<String> row: matches){
 			for(int i=1;i<8;i++){
 				for(int j=(i+1);j<8;j++){
 					Set<String> pair = new HashSet<String>(Arrays.asList(row.get(i), row.get(j)));
@@ -350,16 +358,16 @@ public class Main {
 	}
 		   
 
-	private List<Map<String, String>> getRanking(List<List<String>> table) throws java.text.ParseException {
+	private List<Map<String, String>> getRanking() throws java.text.ParseException {
         
 		Map<String,Integer> points = new HashMap<String,Integer>();
 		Map<String,Integer> goalsFor = new HashMap<String,Integer>();
 		Map<String,Integer> goalsAgainst = new HashMap<String,Integer>();
 		Map<String,Integer> wins = new HashMap<String,Integer>();
 		Map<String,Integer> draws = new HashMap<String,Integer>();
-		Map<String,Integer> defeats = new HashMap<String,Integer>();
+		Map<String,Integer> loses = new HashMap<String,Integer>();
 		Map<String,Integer> matches = new HashMap<String,Integer>();
-        players = getListOfPlayers(table, points, goalsFor, goalsAgainst, wins, draws, defeats, matches);
+        players = getListOfPlayers(points, goalsFor, goalsAgainst, wins, draws, loses, matches);
         logger.info(players.toString());
         List<Map<String,String>> data = new ArrayList<Map<String,String>>();
         for(String name : players){
@@ -370,8 +378,9 @@ public class Main {
         	e.put("goalsAgainst", goalsAgainst.get(name).toString());
         	e.put("wins", wins.containsKey(name)?wins.get(name).toString():"0");
         	e.put("draws", draws.containsKey(name)?draws.get(name).toString():"0");
-        	e.put("defeats", defeats.containsKey(name)?defeats.get(name).toString():"0");
+        	e.put("loses", loses.containsKey(name)?loses.get(name).toString():"0");
         	e.put("matches", matches.get(name).toString());
+        	e.put("lastMatches", getLastMatches(name));
         	//*(matches.get(name)<(numMatches/3)?0:1.0F) in case of less than 1/3 of total match the avg is 0 or 99
         	boolean valid = matches.get(name)>=(numMatches/3);
         	e.put("pointsAVG", (valid?new Float(points.get(name)*1.0F/matches.get(name)):"").toString());
@@ -380,6 +389,24 @@ public class Main {
 			data.add(e);
         }
 		return data;
+	}
+
+	private String getLastMatches(String name) {
+		String ret = "";
+		for(List<String> row: matches){
+			if(row.contains("Fecha")) continue;
+			if(row.contains(name)){
+				int i = row.indexOf(name);
+				int gFor = ((i<8)?Integer.parseInt(row.get(8)):Integer.parseInt(row.get(9)));
+				int gAgainst = ((i<8)?Integer.parseInt(row.get(9)):Integer.parseInt(row.get(8)));
+				if(gFor>gAgainst) ret += "w";
+				if(gFor<gAgainst) ret += "l";
+				if(gFor==gAgainst) ret += "d";
+			}else{
+				ret += "-";
+			}
+		}
+		return ret;
 	}
 
 	public static List<List<String>> formatCSVdata(InputStream is) throws IOException {
@@ -394,17 +421,16 @@ public class Main {
 		return table;
 	}
 
-	private static Set<String> getListOfPlayers(List<List<String>> table, 
-												Map<String,Integer> points,
+	private Set<String> getListOfPlayers(Map<String,Integer> points,
 												Map<String,Integer> goalsFor,
 												Map<String,Integer> goalsAgainst,
 												Map<String,Integer> wins,
 												Map<String,Integer> draws,
-												Map<String,Integer> defeats,
-												Map<String,Integer> matches) throws java.text.ParseException {
+												Map<String,Integer> loses,
+												Map<String,Integer> numMatches) throws java.text.ParseException {
 		Set<String> names = new TreeSet<String>();
 	
-		for(List<String> row: table){
+		for(List<String> row: matches){
 			if(row.contains("Fecha")) continue;
 //			SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
 //			Date date = formatter.parse(row.get(0));
@@ -425,10 +451,10 @@ public class Main {
 		                     break;
 		            case 2:  draws.put(player, (draws.get(player)!=null?draws.get(player):0) + 1 );
 		                     break;
-		            case 1:  defeats.put(player, (defeats.get(player)!=null?defeats.get(player):0) + 1 );
+		            case 1:  loses.put(player, (loses.get(player)!=null?loses.get(player):0) + 1 );
 		                     break;
 					}
-					matches.put(player, (matches.get(player)!=null?matches.get(player):0) + 1 );
+					numMatches.put(player, (numMatches.get(player)!=null?numMatches.get(player):0) + 1 );
 				}
 			}
 		}

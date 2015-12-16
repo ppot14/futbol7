@@ -8,6 +8,9 @@
   
 	<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" />
 	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.9.1/bootstrap-table.min.css" />
+	<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" />
+	
+	
 	<script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.9.1/bootstrap-table.min.js"></script>
@@ -22,10 +25,14 @@
 	<script src="resources/json/pair.js"></script>
 	<script src="resources/json/pointsSeries.js"></script>
 	<script src="resources/json/matches.js"></script>
+	
 	<link rel="shortcut icon" href="resources/images/futbol.ico" />
 	
 	<style>
-	
+	.label-lastmatch{
+	    display: inline-block;
+    	width: 20px;
+    }
 	</style>
 
   </head>
@@ -38,6 +45,20 @@
 	
 	      return parseFloat(Math.round(value * 100) / 100).toFixed(2);
 	  }
+	  
+
+	    function lastMatchesFormat(value) {
+	    	console.log('lastMatches: '+value);
+	    	var ret = '';
+	    	var len = value.length;
+	    	for (var i = len-5; i < len; i++) {
+		        if(value[i]=='w') ret = ret + '<span class="label label-success label-lastmatch">V</span>';
+		        if(value[i]=='d') ret = ret + '<span class="label label-warning label-lastmatch">E</span>';
+		        if(value[i]=='l') ret = ret + '<span class="label label-danger label-lastmatch">D</span>';
+		        if(value[i]=='-') ret = ret + '<span class="label label-default label-lastmatch">-</span>';
+	    	}
+	        return ret;
+	    }
   
 	  $(function () {
 		  
@@ -187,11 +208,11 @@
 <!-- 	      <ul id="menu-list" class="nav navbar-nav"> -->
 	      
 <!-- 	      </ul> -->
-<!-- <!-- 	      <form class="navbar-form navbar-left" role="search"> --> -->
-<!-- <!-- 	        <div class="form-group"> --> -->
-<!-- <!-- 	          <input type="text" class="form-control" placeholder="Search"> --> -->
-<!-- <!-- 	        </div> --> -->
-<!-- <!-- 	      </form> --> -->
+<!-- 	      <form class="navbar-form navbar-left" role="search"> -->
+<!-- 	        <div class="form-group"> -->
+<!-- 	          <input type="text" class="form-control" placeholder="Search"> -->
+<!-- 	        </div> -->
+<!-- 	      </form> -->
 <!-- 	    </div> -->
 	  </div>
 	</nav>
@@ -209,10 +230,11 @@
 							<thead>
 								<tr>
 									<th data-field="name" data-sortable="true">Nombre</th>
+									<th data-field="lastMatches" data-formatter="lastMatchesFormat" data-sortable="false" data-align="center">Ultimos Partidos</th>
 									<th data-field="points" data-sortable="true" data-align="right">Puntos</th>
 									<th data-field="wins" data-sortable="true" data-align="right">Victorias</th>
 									<th data-field="draws" data-sortable="true" data-align="right">Empates</th>
-									<th data-field="defeats" data-sortable="true" data-align="right">Derrotas</th>
+									<th data-field="loses" data-sortable="true" data-align="right">Derrotas</th>
 									<th data-field="matches" data-sortable="true" data-align="right">Partidos</th>
 									<th data-field="goalsFor" data-sortable="true" data-align="right">Goles F</th>
 									<th data-field="goalsAgainst" data-sortable="true" data-align="right">Goles C</th>
