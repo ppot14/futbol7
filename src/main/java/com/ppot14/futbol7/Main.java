@@ -145,6 +145,7 @@ public class Main {
 			formattedMatch.put("day", formatter.parse(match.get(0)));
 			formattedMatch.put("scoreBlues", match.get(8));
 			formattedMatch.put("scoreWhites", match.get(9));
+			formattedMatch.put("remarks", match.size()>17?match.get(17):"");
 			List<Map<String,String>> teams = new ArrayList<Map<String,String>>();
 			for(int i=1;i<8;i++){
 				Map<String,String> r = new HashMap<String, String>();
@@ -361,18 +362,20 @@ public class Main {
 	private List<Map<String, String>> getRanking() throws java.text.ParseException {
         
 		Map<String,Integer> points = new HashMap<String,Integer>();
+		Map<String,Integer> realPoints = new HashMap<String,Integer>();
 		Map<String,Integer> goalsFor = new HashMap<String,Integer>();
 		Map<String,Integer> goalsAgainst = new HashMap<String,Integer>();
 		Map<String,Integer> wins = new HashMap<String,Integer>();
 		Map<String,Integer> draws = new HashMap<String,Integer>();
 		Map<String,Integer> loses = new HashMap<String,Integer>();
 		Map<String,Integer> matches = new HashMap<String,Integer>();
-        players = getListOfPlayers(points, goalsFor, goalsAgainst, wins, draws, loses, matches);
+        players = getListOfPlayers(points, realPoints, goalsFor, goalsAgainst, wins, draws, loses, matches);
         logger.info(players.toString());
         List<Map<String,String>> data = new ArrayList<Map<String,String>>();
         for(String name : players){
         	Map<String, String> e = new HashMap<String, String>();
         	e.put("name", name);
+        	e.put("realPoints", realPoints.get(name).toString());
         	e.put("points", points.get(name).toString());
         	e.put("goalsFor", goalsFor.get(name).toString());
         	e.put("goalsAgainst", goalsAgainst.get(name).toString());
@@ -382,10 +385,10 @@ public class Main {
         	e.put("matches", matches.get(name).toString());
         	e.put("lastMatches", getLastMatches(name));
         	//*(matches.get(name)<(numMatches/3)?0:1.0F) in case of less than 1/3 of total match the avg is 0 or 99
-        	boolean valid = matches.get(name)>=(numMatches/3);
-        	e.put("pointsAVG", (valid?new Float(points.get(name)*1.0F/matches.get(name)):"").toString());
+        	boolean valid = matches.get(name)>=(numMatches*1.0/3);
+        	e.put("pointsAVG", (valid?new Float(realPoints.get(name)*1.0F/matches.get(name)):"").toString());
         	e.put("goalsForAVG", (valid?new Float(goalsFor.get(name)*1.0F/matches.get(name)):"").toString());
-        	e.put("goalsAgainstAVG", (valid?new Float(goalsAgainst.get(name)*1.0F/matches.get(name)):"").toString());
+        	e.put("goalsAgainstAVG", (valid?new Float(goalsAgainst.get(name)*1.0F/matches.get(name)):new Float(99.99F)).toString());
 			data.add(e);
         }
 		return data;
@@ -422,12 +425,13 @@ public class Main {
 	}
 
 	private Set<String> getListOfPlayers(Map<String,Integer> points,
-												Map<String,Integer> goalsFor,
-												Map<String,Integer> goalsAgainst,
-												Map<String,Integer> wins,
-												Map<String,Integer> draws,
-												Map<String,Integer> loses,
-												Map<String,Integer> numMatches) throws java.text.ParseException {
+										Map<String,Integer> realPoints,
+										Map<String,Integer> goalsFor,
+										Map<String,Integer> goalsAgainst,
+										Map<String,Integer> wins,
+										Map<String,Integer> draws,
+										Map<String,Integer> loses,
+										Map<String,Integer> numMatches) throws java.text.ParseException {
 		Set<String> names = new TreeSet<String>();
 	
 		for(List<String> row: matches){
@@ -443,9 +447,11 @@ public class Main {
 					int gFor = ((i<8)?goalsA:goalsB);
 					int gAgainst = ((i<8)?goalsB:goalsA);
 					int pointsM = ((gFor>gAgainst)?3:((gFor<gAgainst)?1:2));
+					int pointsN = ((gFor>gAgainst)?3:((gFor<gAgainst)?0:1));
 					goalsFor.put(player, (goalsFor.get(player)!=null?goalsFor.get(player):0) + gFor );
 					goalsAgainst.put(player, (goalsAgainst.get(player)!=null?goalsAgainst.get(player):0) + gAgainst );
 					points.put(player, (points.get(player)!=null?points.get(player):0) + pointsM );
+					realPoints.put(player, (realPoints.get(player)!=null?realPoints.get(player):0) + pointsN );
 					switch (pointsM) {
 		            case 3:  wins.put(player, (wins.get(player)!=null?wins.get(player):0) + 1 );
 		                     break;

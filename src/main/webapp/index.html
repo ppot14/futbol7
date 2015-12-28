@@ -5,6 +5,10 @@
   <head>
   
   	<meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <title>Futbol 7</title>
   
 	<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" />
 	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.9.1/bootstrap-table.min.css" />
@@ -162,10 +166,11 @@
 		    
 		    var updateResult = function(currentMatch){
 			    var newMatch = matches[currentMatch].data;
+			    var remarks = (matches[currentMatch].remarks.indexOf('RD') > -1) ?' (Número de goles desconocido, por defecto 2-0 o 0-0)':'';
 			    
 			    $('#table-results').bootstrapTable('load',newMatch);
 			    
-			    $('#table-results thead tr:first th div.th-inner').text('Jornada '+(currentMatch+1)+' ('+$.timeago(matches[currentMatch].day)+')');
+			    $('#table-results thead tr:first th div.th-inner').text('Jornada '+(currentMatch+1)+' ('+$.timeago(matches[currentMatch].day)+')'+remarks);
 			    $('#table-results thead tr:last th:first div.th-inner span').text(matches[currentMatch].scoreBlues);
 			    $('#table-results thead tr:last th:last div.th-inner span').text(matches[currentMatch].scoreWhites);
 			};
@@ -208,14 +213,48 @@
 <!-- 	      <ul id="menu-list" class="nav navbar-nav"> -->
 	      
 <!-- 	      </ul> -->
-<!-- 	      <form class="navbar-form navbar-left" role="search"> -->
-<!-- 	        <div class="form-group"> -->
-<!-- 	          <input type="text" class="form-control" placeholder="Search"> -->
-<!-- 	        </div> -->
-<!-- 	      </form> -->
 <!-- 	    </div> -->
+	    <div class="" id="">
+	      <form class="navbar-form navbar-right" role="search">
+	        <div class="form-group">
+	          <button type="button" class="btn btn-default" data-toggle="modal" data-target="#legend">
+				  <span class="glyphicon glyphicon-menu-hamburger" aria-hidden="true"></span>
+				</button>
+	        </div>
+	      </form>
+	    </div>
 	  </div>
 	</nav>
+	
+	<!-- Legend -->
+	<div class="modal fade" id="legend" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	  <div class="modal-dialog" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+	        <h4 class="modal-title" id="myModalLabel">Leyenda</h4>
+	      </div>
+	      <div class="modal-body">
+	        UP - Últimos partidos<br/>
+	        Pts - Puntos (3 puntos victoria, 2 empate, 1 derrota y  0 no jugados)<br/>
+	        Pts* - Puntos (3 puntos victoria, 1 empate, 0 derrota y no jugados)<br/>
+	        G - Partidos Ganados<br/>
+	        E - Partidos Empatados<br/>
+	        P - Partidos Perdidos<br/>
+	        J - Partidos Jugados<br/>
+	        GF - Goles a Favor<br/>
+	        GC - Goles en Contra<br/>
+	        <span style="text-decoration:overline">Pts</span> - Media de Puntos (con al menos 25% partidos jugados)<br/>
+	        <span style="text-decoration:overline">GF</span> - Media de Goles a Favor (con al menos 25% partidos jugados)<br/>
+	        <span style="text-decoration:overline">GC</span> - Media de Goles en Contra (con al menos 25% partidos jugados)
+	      </div>
+<!-- 	      <div class="modal-footer"> -->
+<!-- 	        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button> -->
+<!-- 	        <button type="button" class="btn btn-primary">Save changes</button> -->
+<!-- 	      </div> -->
+	    </div>
+	  </div>
+	</div>
 	
 	<div id="home-page" class="container-fluid" style="">
 		<div class="row">
@@ -230,17 +269,18 @@
 							<thead>
 								<tr>
 									<th data-field="name" data-sortable="true">Nombre</th>
-									<th data-field="lastMatches" data-formatter="lastMatchesFormat" data-sortable="false" data-align="center">Ultimos Partidos</th>
-									<th data-field="points" data-sortable="true" data-align="right">Puntos</th>
-									<th data-field="wins" data-sortable="true" data-align="right">Victorias</th>
-									<th data-field="draws" data-sortable="true" data-align="right">Empates</th>
-									<th data-field="loses" data-sortable="true" data-align="right">Derrotas</th>
-									<th data-field="matches" data-sortable="true" data-align="right">Partidos</th>
-									<th data-field="goalsFor" data-sortable="true" data-align="right">Goles F</th>
-									<th data-field="goalsAgainst" data-sortable="true" data-align="right">Goles C</th>
-									<th data-field="pointsAVG" data-sortable="true" data-align="right" data-formatter="decimal">Med. Ptos</th>
-									<th data-field="goalsForAVG" data-sortable="true" data-align="right" data-formatter="decimal">Med. Goles F.</th>
-									<th data-field="goalsAgainstAVG" data-sortable="true" data-align="right" data-formatter="decimal">Med. Goles C.</th>
+									<th data-field="lastMatches" data-formatter="lastMatchesFormat" data-sortable="false" data-align="center">UP</th>
+									<th data-field="points" data-sortable="true" data-align="right">Pts</th>
+									<th data-field="realPoints" data-sortable="true" data-align="right">Pts*</th>
+									<th data-field="wins" data-sortable="true" data-align="right">G</th>
+									<th data-field="draws" data-sortable="true" data-align="right">E</th>
+									<th data-field="loses" data-sortable="true" data-align="right">P</th>
+									<th data-field="matches" data-sortable="true" data-align="right">J</th>
+									<th data-field="goalsFor" data-sortable="true" data-align="right">GF</th>
+									<th data-field="goalsAgainst" data-sortable="true" data-align="right">GC</th>
+									<th data-field="pointsAVG" data-sortable="true" data-align="right" data-formatter="decimal"><span style="text-decoration:overline">Pts</span></th>
+									<th data-field="goalsForAVG" data-sortable="true" data-align="right" data-formatter="decimal"><span style="text-decoration:overline">GF</span></th>
+									<th data-field="goalsAgainstAVG" data-sortable="true" data-align="right" data-formatter="decimal"><span style="text-decoration:overline">GC</span></th>
 								</tr>
 							</thead>
 						</table>
@@ -262,11 +302,17 @@
 							<thead>
 								<tr>
 									<th data-field="name" data-sortable="true">Nombre</th>
-									<th data-field="points" data-sortable="true" data-align="right">Puntos</th>
-									<th data-field="matches" data-sortable="true" data-align="right">Partidos</th>
-									<th data-field="goalsFor" data-sortable="true" data-align="right">Goles</th>
-									<th data-field="pointsAVG" data-sortable="true" data-align="right" data-formatter="decimal">Med. Ptos</th>
-									<th data-field="goalsForAVG" data-sortable="true" data-align="right" data-formatter="decimal">Med. Goles</th>
+									<th data-field="points" data-sortable="true" data-align="right">Pts</th>
+									<th data-field="realPoints" data-sortable="true" data-align="right">Pts*</th>
+									<th data-field="wins" data-sortable="true" data-align="right">G</th>
+									<th data-field="draws" data-sortable="true" data-align="right">E</th>
+									<th data-field="loses" data-sortable="true" data-align="right">P</th>
+									<th data-field="matches" data-sortable="true" data-align="right">J</th>
+									<th data-field="goalsFor" data-sortable="true" data-align="right">GF</th>
+									<th data-field="goalsAgainst" data-sortable="true" data-align="right">GC</th>
+									<th data-field="pointsAVG" data-sortable="true" data-align="right" data-formatter="decimal"><span style="text-decoration:overline">Pts</span></th>
+									<th data-field="goalsForAVG" data-sortable="true" data-align="right" data-formatter="decimal"><span style="text-decoration:overline">GF</span></th>
+									<th data-field="goalsAgainstAVG" data-sortable="true" data-align="right" data-formatter="decimal"><span style="text-decoration:overline">GC</span></th>
 								</tr>
 							</thead>
 						</table>
@@ -285,11 +331,17 @@
 							<thead>
 								<tr>
 									<th data-field="name" data-sortable="true">Nombre</th>
-									<th data-field="points" data-sortable="true" data-align="right">Puntos</th>
-									<th data-field="matches" data-sortable="true" data-align="right">Partidos</th>
-									<th data-field="goalsFor" data-sortable="true" data-align="right">Goles</th>
-									<th data-field="pointsAVG" data-sortable="true" data-align="right" data-formatter="decimal">Med. Ptos</th>
-									<th data-field="goalsForAVG" data-sortable="true" data-align="right" data-formatter="decimal">Med. Goles</th>
+									<th data-field="points" data-sortable="true" data-align="right">Pts</th>
+									<th data-field="realPoints" data-sortable="true" data-align="right">Pts*</th>
+									<th data-field="wins" data-sortable="true" data-align="right">G</th>
+									<th data-field="draws" data-sortable="true" data-align="right">E</th>
+									<th data-field="loses" data-sortable="true" data-align="right">P</th>
+									<th data-field="matches" data-sortable="true" data-align="right">J</th>
+									<th data-field="goalsFor" data-sortable="true" data-align="right">GF</th>
+									<th data-field="goalsAgainst" data-sortable="true" data-align="right">GC</th>
+									<th data-field="pointsAVG" data-sortable="true" data-align="right" data-formatter="decimal"><span style="text-decoration:overline">Pts</span></th>
+									<th data-field="goalsForAVG" data-sortable="true" data-align="right" data-formatter="decimal"><span style="text-decoration:overline">GF</span></th>
+									<th data-field="goalsAgainstAVG" data-sortable="true" data-align="right" data-formatter="decimal"><span style="text-decoration:overline">GC</span></th>
 								</tr>
 							</thead>
 						</table>
@@ -313,7 +365,7 @@
 								<tr>
 									<th data-field="player1" data-sortable="true">Nombre</th>
 									<th data-field="player2" data-sortable="true">Nombre</th>
-									<th data-field="vs" data-sortable="true" data-align="right">Partidos</th>
+									<th data-field="vs" data-sortable="true" data-align="right">J</th>
 								</tr>
 							</thead>
 						</table>
@@ -334,7 +386,7 @@
 								<tr>
 									<th data-field="player1" data-sortable="true">Nombre</th>
 									<th data-field="player2" data-sortable="true">Nombre</th>
-									<th data-field="pair" data-sortable="true" data-align="right">Partidos</th>
+									<th data-field="pair" data-sortable="true" data-align="right">J</th>
 								</tr>
 							</thead>
 						</table>
