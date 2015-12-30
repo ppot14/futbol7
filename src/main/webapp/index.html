@@ -52,10 +52,10 @@
 	  
 
 	    function lastMatchesFormat(value) {
-	    	console.log('lastMatches: '+value);
 	    	var ret = '';
 	    	var len = value.length;
-	    	for (var i = len-5; i < len; i++) {
+	    	var numMatches = 5;
+	    	for (var i = len-numMatches; i < len; i++) {
 		        if(value[i]=='w') ret = ret + '<span class="label label-success label-lastmatch">V</span>';
 		        if(value[i]=='d') ret = ret + '<span class="label label-warning label-lastmatch">E</span>';
 		        if(value[i]=='l') ret = ret + '<span class="label label-danger label-lastmatch">D</span>';
@@ -84,45 +84,6 @@
 				   years: "%d años"
 				};
 		  
-		  $('#container').highcharts({
-		        chart: {
-		            type: 'line'
-		        },
-		        title: {
-		            text: 'Acumulación de Puntos',
-		            style: { "display": "none"}
-		        },
-		        xAxis: {
-		            type: 'datetime',
-		            dateTimeLabelFormats: {
-		                month: '%e. %b',
-		                year: '%b'
-		            },
-		            title: {
-		                text: 'Dia'
-		            }
-		        },
-		        yAxis: {
-		            title: {
-		                text: 'Puntos'
-		            },
-		            min: 0
-		        },
-// 		        tooltip: {
-// 		            headerFormat: '<b>{series.name}</b><br>',
-// 		            pointFormat: '{point.x:%e. %b}: {point.y:.2f} m'
-// 		        },
-
-// 		        plotOptions: {
-// 		            line: {
-// 		                step: false,
-// // 		                pointStart: 0
-// 		                connectNulls: true
-// 		            }
-// 		        },
-
-		        series: pointsSeries
-		    });
 		  
 		    $('#table-full').bootstrapTable({
 		        data: full,
@@ -193,12 +154,70 @@
 		    	updateResult(currentMatch);
 		    });
 
+		    var hash = window.location.hash.substr(1);
+		    if(hash==='admin'){
+		    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'realPoints');
+		    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'wins');
+		    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'draws');
+		    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'loses');
+		    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'matches');
+		    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'goalsFor');
+		    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'goalsAgainst');
+		    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'pointsAVG');
+		    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'goalsForAVG');
+		    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'goalsAgainstAVG');
+
+		    	$('#table-full').closest('.row').show();
+		    	$('#table-vs').closest('.row').show();
+		    	
+		    	$('#container').parent().parent().parent().parent().show();
+				  $('#container').highcharts({
+				        chart: {
+				            type: 'line'
+				        },
+				        title: {
+				            text: 'Acumulación de Puntos',
+				            style: { "display": "none"}
+				        },
+				        xAxis: {
+				            type: 'datetime',
+				            dateTimeLabelFormats: {
+				                month: '%e. %b',
+				                year: '%b'
+				            },
+				            title: {
+				                text: 'Dia'
+				            }
+				        },
+				        yAxis: {
+				            title: {
+				                text: 'Puntos'
+				            },
+				            min: 0
+				        },
+//		 		        tooltip: {
+//		 		            headerFormat: '<b>{series.name}</b><br>',
+//		 		            pointFormat: '{point.x:%e. %b}: {point.y:.2f} m'
+//		 		        },
+
+//		 		        plotOptions: {
+//		 		            line: {
+//		 		                step: false,
+		// // 		                pointStart: 0
+//		 		                connectNulls: true
+//		 		            }
+//		 		        },
+
+				        series: pointsSeries
+				    });
+		    }
+		    
 		});
   </script>
   
 	<nav class="navbar navbar-inverse" id="top-navbar">
 	  <div class="container-fluid">
-	    <div class="navbar-header">
+	    <div class="navbar-header" style="float: none;">
 <!-- 	      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse" aria-expanded="false"> -->
 <!-- 	        <span class="sr-only">Toggle navigation</span> -->
 <!-- 	        <span class="icon-bar"></span> -->
@@ -207,22 +226,25 @@
 <!-- 	      </button> -->
 	      <img alt="Pelota de futbol" src="resources/images/futbol.png" style="position:absolute"/>
 	      <a class="navbar-brand" href="#" style="margin-left: 65px">Futbol 7</a>
+<!-- 	      <form class="navbar-form navbar-right" role="search"> -->
+<!-- 	        <div class="form-group"> -->
+<!-- 	        </div> -->
+<!-- 	      </form> -->
+          <button type="button" class="btn btn-default pull-right" data-toggle="modal" data-target="#legend" style="margin-top: 8px;margin-right: 10px;">
+			  <span class="glyphicon glyphicon-menu-hamburger" aria-hidden="true"></span>
+			</button>
 	    </div>
+<!--          <button type="button" class="btn btn-default navbar-right" data-toggle="modal" data-target="#legend"> -->
+<!-- 		  <span class="glyphicon glyphicon-menu-hamburger" aria-hidden="true"></span> -->
+<!-- 		</button> -->
 	    
 <!-- 	    <div class="collapse navbar-collapse" id="navbar-collapse"> -->
 <!-- 	      <ul id="menu-list" class="nav navbar-nav"> -->
 	      
 <!-- 	      </ul> -->
 <!-- 	    </div> -->
-	    <div class="" id="">
-	      <form class="navbar-form navbar-right" role="search">
-	        <div class="form-group">
-	          <button type="button" class="btn btn-default" data-toggle="modal" data-target="#legend">
-				  <span class="glyphicon glyphicon-menu-hamburger" aria-hidden="true"></span>
-				</button>
-	        </div>
-	      </form>
-	    </div>
+<!-- 	    <div class="" id=""> -->
+<!-- 	    </div> -->
 	  </div>
 	</nav>
 	
@@ -257,7 +279,7 @@
 	</div>
 	
 	<div id="home-page" class="container-fluid" style="">
-		<div class="row">
+		<div class="row" style="display:none">
 			<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
 			
 				<div id="" class="panel panel-default">
@@ -265,22 +287,22 @@
 				    <h3 class="panel-title">Total</h3>
 				  </div>
 				  <div class="panel-body">
-						<table id="table-full" data-sort-name="points" data-sort-order="desc"  data-striped="true">
+						<table id="table-full" data-sort-name=points data-sort-order="desc"  data-striped="true">
 							<thead>
 								<tr>
 									<th data-field="name" data-sortable="true">Nombre</th>
 									<th data-field="lastMatches" data-formatter="lastMatchesFormat" data-sortable="false" data-align="center">UP</th>
 									<th data-field="points" data-sortable="true" data-align="right">Pts</th>
-									<th data-field="realPoints" data-sortable="true" data-align="right">Pts*</th>
-									<th data-field="wins" data-sortable="true" data-align="right">G</th>
-									<th data-field="draws" data-sortable="true" data-align="right">E</th>
-									<th data-field="loses" data-sortable="true" data-align="right">P</th>
-									<th data-field="matches" data-sortable="true" data-align="right">J</th>
-									<th data-field="goalsFor" data-sortable="true" data-align="right">GF</th>
-									<th data-field="goalsAgainst" data-sortable="true" data-align="right">GC</th>
-									<th data-field="pointsAVG" data-sortable="true" data-align="right" data-formatter="decimal"><span style="text-decoration:overline">Pts</span></th>
-									<th data-field="goalsForAVG" data-sortable="true" data-align="right" data-formatter="decimal"><span style="text-decoration:overline">GF</span></th>
-									<th data-field="goalsAgainstAVG" data-sortable="true" data-align="right" data-formatter="decimal"><span style="text-decoration:overline">GC</span></th>
+									<th data-field="realPoints" data-sortable="true" data-align="right" data-visible="false">Pts*</th>
+									<th data-field="wins" data-sortable="true" data-align="right" data-visible="false">G</th>
+									<th data-field="draws" data-sortable="true" data-align="right" data-visible="false">E</th>
+									<th data-field="loses" data-sortable="true" data-align="right" data-visible="false">P</th>
+									<th data-field="matches" data-sortable="true" data-align="right" data-visible="false">J</th>
+									<th data-field="goalsFor" data-sortable="true" data-align="right" data-visible="false">GF</th>
+									<th data-field="goalsAgainst" data-sortable="true" data-align="right" data-visible="false">GC</th>
+									<th data-field="pointsAVG" data-sortable="true" data-align="right" data-formatter="decimal" data-visible="false"><span style="text-decoration:overline">Pts</span></th>
+									<th data-field="goalsForAVG" data-sortable="true" data-align="right" data-formatter="decimal" data-visible="false"><span style="text-decoration:overline">GF</span></th>
+									<th data-field="goalsAgainstAVG" data-sortable="true" data-align="right" data-formatter="decimal" data-visible="false"><span style="text-decoration:overline">GC</span></th>
 								</tr>
 							</thead>
 						</table>
@@ -302,17 +324,18 @@
 							<thead>
 								<tr>
 									<th data-field="name" data-sortable="true">Nombre</th>
+									<th data-field="lastMatches" data-formatter="lastMatchesFormat" data-sortable="false" data-align="center">UP</th>
 									<th data-field="points" data-sortable="true" data-align="right">Pts</th>
-									<th data-field="realPoints" data-sortable="true" data-align="right">Pts*</th>
-									<th data-field="wins" data-sortable="true" data-align="right">G</th>
-									<th data-field="draws" data-sortable="true" data-align="right">E</th>
-									<th data-field="loses" data-sortable="true" data-align="right">P</th>
-									<th data-field="matches" data-sortable="true" data-align="right">J</th>
-									<th data-field="goalsFor" data-sortable="true" data-align="right">GF</th>
-									<th data-field="goalsAgainst" data-sortable="true" data-align="right">GC</th>
-									<th data-field="pointsAVG" data-sortable="true" data-align="right" data-formatter="decimal"><span style="text-decoration:overline">Pts</span></th>
-									<th data-field="goalsForAVG" data-sortable="true" data-align="right" data-formatter="decimal"><span style="text-decoration:overline">GF</span></th>
-									<th data-field="goalsAgainstAVG" data-sortable="true" data-align="right" data-formatter="decimal"><span style="text-decoration:overline">GC</span></th>
+									<th data-field="realPoints" data-sortable="true" data-align="right" data-visible="false">Pts*</th>
+									<th data-field="wins" data-sortable="true" data-align="right" data-visible="false">G</th>
+									<th data-field="draws" data-sortable="true" data-align="right" data-visible="false">E</th>
+									<th data-field="loses" data-sortable="true" data-align="right" data-visible="false">P</th>
+									<th data-field="matches" data-sortable="true" data-align="right" data-visible="false">J</th>
+									<th data-field="goalsFor" data-sortable="true" data-align="right" data-visible="false">GF</th>
+									<th data-field="goalsAgainst" data-sortable="true" data-align="right" data-visible="false">GC</th>
+									<th data-field="pointsAVG" data-sortable="true" data-align="right" data-formatter="decimal" data-visible="false"><span style="text-decoration:overline">Pts</span></th>
+									<th data-field="goalsForAVG" data-sortable="true" data-align="right" data-formatter="decimal" data-visible="false"><span style="text-decoration:overline">GF</span></th>
+									<th data-field="goalsAgainstAVG" data-sortable="true" data-align="right" data-formatter="decimal" data-visible="false"><span style="text-decoration:overline">GC</span></th>
 								</tr>
 							</thead>
 						</table>
@@ -331,17 +354,18 @@
 							<thead>
 								<tr>
 									<th data-field="name" data-sortable="true">Nombre</th>
+									<th data-field="lastMatches" data-formatter="lastMatchesFormat" data-sortable="false" data-align="center">UP</th>
 									<th data-field="points" data-sortable="true" data-align="right">Pts</th>
-									<th data-field="realPoints" data-sortable="true" data-align="right">Pts*</th>
-									<th data-field="wins" data-sortable="true" data-align="right">G</th>
-									<th data-field="draws" data-sortable="true" data-align="right">E</th>
-									<th data-field="loses" data-sortable="true" data-align="right">P</th>
-									<th data-field="matches" data-sortable="true" data-align="right">J</th>
-									<th data-field="goalsFor" data-sortable="true" data-align="right">GF</th>
-									<th data-field="goalsAgainst" data-sortable="true" data-align="right">GC</th>
-									<th data-field="pointsAVG" data-sortable="true" data-align="right" data-formatter="decimal"><span style="text-decoration:overline">Pts</span></th>
-									<th data-field="goalsForAVG" data-sortable="true" data-align="right" data-formatter="decimal"><span style="text-decoration:overline">GF</span></th>
-									<th data-field="goalsAgainstAVG" data-sortable="true" data-align="right" data-formatter="decimal"><span style="text-decoration:overline">GC</span></th>
+									<th data-field="realPoints" data-sortable="true" data-align="right" data-visible="false">Pts*</th>
+									<th data-field="wins" data-sortable="true" data-align="right" data-visible="false">G</th>
+									<th data-field="draws" data-sortable="true" data-align="right" data-visible="false">E</th>
+									<th data-field="loses" data-sortable="true" data-align="right" data-visible="false">P</th>
+									<th data-field="matches" data-sortable="true" data-align="right" data-visible="false">J</th>
+									<th data-field="goalsFor" data-sortable="true" data-align="right" data-visible="false">GF</th>
+									<th data-field="goalsAgainst" data-sortable="true" data-align="right" data-visible="false">GC</th>
+									<th data-field="pointsAVG" data-sortable="true" data-align="right" data-formatter="decimal" data-visible="false"><span style="text-decoration:overline">Pts</span></th>
+									<th data-field="goalsForAVG" data-sortable="true" data-align="right" data-formatter="decimal" data-visible="false"><span style="text-decoration:overline">GF</span></th>
+									<th data-field="goalsAgainstAVG" data-sortable="true" data-align="right" data-formatter="decimal" data-visible="false"><span style="text-decoration:overline">GC</span></th>
 								</tr>
 							</thead>
 						</table>
@@ -351,7 +375,7 @@
 			</div>
 		</div>
 		
-		<div class="row">
+		<div class="row" style="display:none">
 			<div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
 			
 				<div id="" class="panel panel-default">
@@ -425,7 +449,7 @@
 		</div>
 		
 		
-		<div class="row">
+		<div class="row" style="display:none">
 			<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
 			
 				<div id="" class="panel panel-default">
