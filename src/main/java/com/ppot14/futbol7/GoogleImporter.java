@@ -119,7 +119,7 @@ public class GoogleImporter {
         	if("Futbol7.csv".equals(f.getOriginalFilename())){
         		InputStream is = downloadFile(driveService, f);
         		if(is!=null){
-        			matches = Main.formatCSVdata(is);
+        			matches = APIUtil.formatCSVdata(is);
             		break;
         		}
         	}else if(spreadsheetGoogleDriveId.equals(f.getId())){
@@ -130,7 +130,7 @@ public class GoogleImporter {
 	      	        		new GenericUrl("https://docs.google.com/spreadsheets/export?id="+spreadsheetGoogleDriveId+"&exportFormat=csv")).execute();
 	        		InputStream is = resp.getContent();
 	        		if(is!=null){
-	        			matches = Main.formatCSVdata(is);
+	        			matches = APIUtil.formatCSVdata(is);
 	            		break;
 	        		}
 //        		}

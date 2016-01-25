@@ -27,50 +27,35 @@ import java.util.TreeSet;
 import java.util.logging.Logger;
 
 import org.apache.commons.net.ftp.FTPClient;
-import org.apache.commons.net.ftp.FTPClientConfig;
-import org.apache.commons.net.ftp.FTPFile;
 import org.apache.commons.net.ftp.FTPReply;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 
-public class Main {
+public class APIUtil {
+	
+	private static final Logger logger = Logger.getLogger(APIUtil.class.getName());
 	
 	private static List<String> PERMANENTS = null;
-	
-	private static final Logger logger = Logger.getLogger(Main.class.getName());
 
 	SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
 	
 	private static Map<String,Object> config = null;
 	
 	private List<Map<String,String>> fullRanking = null;
-	private List<Map<String,Object>> results = null;
 	private int numMatches = 0;
 	private List<List<String>> matches = null;
-	private List<Map<String,Object>> pointsSeries = null;
 	private Set<String> players = null;	
-
-	public static void main(String[] args) throws Exception {
-		
-		long startTime = System.currentTimeMillis();
-		
-		Main m = new Main();
-		m.init();
-		m.run();
-		
-		long endTime = System.currentTimeMillis();
-		long duration = (endTime - startTime);  
-		
-		logger.info("Futbol7 executed in "+duration/1000+"s");
+	
+	public APIUtil(){
+		this("config.json");
 	}
-
-	public void init() {
+	
+	public APIUtil(String propFileName){
 		
 		config = null;
-		String propFileName = "config.json";
         ObjectMapper mapper = new ObjectMapper();
-		InputStream inputStream = Main.class.getClassLoader().getResourceAsStream(propFileName);
+		InputStream inputStream = APIUtil.class.getClassLoader().getResourceAsStream(propFileName);
 
 		try {
 			if (inputStream != null) {
@@ -81,62 +66,80 @@ public class Main {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		
+		PERMANENTS = (List<String>) config.get("permanents");
+		logger.info("PERMANENTS: "+PERMANENTS);
+		
 	}
 	
-	public void run(){
+	public synchronized void run(boolean refresh){
     	
 		try{
 			
-			PERMANENTS = (List<String>) config.get("permanents");
+			if(matches==null || refresh){
 			
-			logger.info("PERMANENTS: "+PERMANENTS);
-			
-			InputStream inputStreamCSV = null;
-			try{
-				inputStreamCSV = GoogleImporter.importFromGoogleDrive(config);
-			}catch(SocketTimeoutException e){
-				logger.info("Error downloading from Google Drive: "+e.getMessage());
-			}finally{
-				if(inputStreamCSV==null){
-					logger.info("Importing CSV from local: "+"Futbol7.csv");
-					ClassLoader classLoader = Main.class.getClassLoader();
-					inputStreamCSV = classLoader.getResourceAsStream("Futbol7.csv");
+				InputStream inputStreamCSV = null;
+				try{
+					inputStreamCSV = GoogleImporter.importFromGoogleDrive(config);
+				}catch(SocketTimeoutException e){
+					logger.info("Error downloading from Google Drive: "+e.getMessage());
+				}finally{
+					if(inputStreamCSV==null){
+						logger.info("Importing CSV from local: "+"Futbol7.csv");
+						ClassLoader classLoader = APIUtil.class.getClassLoader();
+						inputStreamCSV = classLoader.getResourceAsStream("Futbol7.csv");
+					}
 				}
+				matches = formatCSVdata(inputStreamCSV);
+				numMatches = matches.size()-1;
+				matches.remove(0);
+				logger.info("Num of Matches: "+numMatches);
+				logger.info("Matches: "+matches);
+				
+				fullRanking = getRanking();
+			
+			}else{
+				logger.info("Ignoring run, matches already loaded");
 			}
-			matches = formatCSVdata(inputStreamCSV);
-			numMatches = matches.size()-1;
-			matches.remove(0);
-			logger.info("Num of Matches: "+numMatches);
-			logger.info("Matches: "+matches);
-			
-			fullRanking = getRanking();
-			
-			results = getResults();
-			
-			pointsSeries = getPointsSeries();
-
-			File project =  new File("");
-			
-			String jsonSrcFolder = project.getAbsolutePath()+"\\src\\main\\webapp\\resources\\json\\";
-			
-			logger.info("Project src json folder: "+jsonSrcFolder);
-					
-			writeToServer(writeJSONtoFile(jsonSrcFolder,"full.js",jsonToString(fullRanking)),"/resources/json");
-			writeToServer(writeJSONtoFile(jsonSrcFolder,"pair.js",jsonToString(getPair())),"/resources/json");
-			writeToServer(writeJSONtoFile(jsonSrcFolder,"permanents.js",jsonToString(getRankingPermanents())),"/resources/json");
-			writeToServer(writeJSONtoFile(jsonSrcFolder,"substitutes.js",jsonToString(getRankingSubstitutes())),"/resources/json");
-			writeToServer(writeJSONtoFile(jsonSrcFolder,"vs.js",jsonToString(getVS())),"/resources/json");
-			writeToServer(writeJSONtoFile(jsonSrcFolder,"pointsSeries.js",jsonToString(pointsSeries)),"/resources/json");
-			writeToServer(writeJSONtoFile(jsonSrcFolder,"matches.js",jsonToString(results)),"/resources/json");
-			
-			writeToServer(new File(project.getAbsolutePath()+"\\src\\main\\webapp\\index.html"),"");
         
 		}catch(Exception e){
 			e.printStackTrace();
 		}
 	}
+	
+	/**
+	 * @return the fullRanking
+	 */
+	public List<Map<String, String>> getFullRanking() {
+		return fullRanking;
+	}
 
-	private List<Map<String, Object>> getResults() throws ParseException {
+	public void writeToFileAndServer(){
+
+		File project =  new File("");
+		
+		String jsonSrcFolder = project.getAbsolutePath()+"\\src\\main\\webapp\\resources\\json\\";
+		
+		logger.info("Project src json folder: "+jsonSrcFolder);
+
+		try{
+			
+			writeToServer(writeJSONtoFile(jsonSrcFolder,"full.js",jsonToString(getFullRanking())),"/resources/json");
+			writeToServer(writeJSONtoFile(jsonSrcFolder,"pair.js",jsonToString(getPair())),"/resources/json");
+			writeToServer(writeJSONtoFile(jsonSrcFolder,"permanents.js",jsonToString(getRankingPermanents())),"/resources/json");
+			writeToServer(writeJSONtoFile(jsonSrcFolder,"substitutes.js",jsonToString(getRankingSubstitutes())),"/resources/json");
+			writeToServer(writeJSONtoFile(jsonSrcFolder,"vs.js",jsonToString(getVS())),"/resources/json");
+			writeToServer(writeJSONtoFile(jsonSrcFolder,"pointsSeries.js",jsonToString(getPointsSeries())),"/resources/json");
+			writeToServer(writeJSONtoFile(jsonSrcFolder,"matches.js",jsonToString(getResults())),"/resources/json");
+	        
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		writeToServer(new File(project.getAbsolutePath()+"\\src\\main\\webapp\\index.html"),"");
+		
+	}
+
+	public List<Map<String, Object>> getResults() throws ParseException {
 		List<Map<String, Object>> res = new ArrayList<Map<String,Object>>();
 		
 		for(List<String> match : matches){
@@ -160,7 +163,7 @@ public class Main {
 		return res;
 	}
 
-	private List<Map<String, Object>> getPointsSeries() throws ParseException {
+	public List<Map<String, Object>> getPointsSeries() throws ParseException {
 		Date today = new Date();
         List<Map<String,Object>> data = new ArrayList<Map<String,Object>>();
         for(String name : players){
@@ -274,7 +277,7 @@ public class Main {
 		    }
 	}
 
-	private List<Map<String,String>> getVS() throws java.text.ParseException {
+	public List<Map<String,String>> getVS() throws java.text.ParseException {
 		Map<Set<String>,Integer> vs = new HashMap<Set<String>,Integer>();
 		
 		for(List<String> row: matches){
@@ -298,7 +301,7 @@ public class Main {
 		
 	}
 	
-	private List<Map<String,String>> getPair() throws java.text.ParseException {
+	public List<Map<String,String>> getPair() throws java.text.ParseException {
 		Map<Set<String>,Integer> vs = new HashMap<Set<String>,Integer>();
 		
 		for(List<String> row: matches){
@@ -328,7 +331,7 @@ public class Main {
 		
 	}
 	
-	public String jsonToString(Object o) throws JsonGenerationException, JsonMappingException, IOException{
+	public static String jsonToString(Object o) throws JsonGenerationException, JsonMappingException, IOException{
         ObjectMapper mapper = new ObjectMapper();
         String jsonInString = mapper.writeValueAsString(o);
         return jsonInString;

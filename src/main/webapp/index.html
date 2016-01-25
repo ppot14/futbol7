@@ -7,6 +7,7 @@
   	<meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="Futbol 7 San Jerónimo">
     
     <title>Futbol 7</title>
   
@@ -22,13 +23,13 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-timeago/1.4.3/jquery.timeago.min.js"></script>
 	<script src="https://code.highcharts.com/highcharts.js"></script>
 <!-- 	<script src="https://code.highcharts.com/highcharts-more.js"></script> -->
-	<script src="resources/json/full.js"></script>
-	<script src="resources/json/permanents.js"></script>
-	<script src="resources/json/substitutes.js"></script>
-	<script src="resources/json/vs.js"></script>
-	<script src="resources/json/pair.js"></script>
-	<script src="resources/json/pointsSeries.js"></script>
-	<script src="resources/json/matches.js"></script>
+<!-- 	<script src="resources/json/full.js"></script> -->
+<!-- 	<script src="resources/json/permanents.js"></script> -->
+<!-- 	<script src="resources/json/substitutes.js"></script> -->
+<!-- 	<script src="resources/json/vs.js"></script> -->
+<!-- 	<script src="resources/json/pair.js"></script> -->
+<!-- 	<script src="resources/json/pointsSeries.js"></script> -->
+<!-- 	<script src="resources/json/matches.js"></script> -->
 	
 	<link rel="shortcut icon" href="resources/images/futbol.ico" />
 	
@@ -86,72 +87,76 @@
 		  
 		  
 		    $('#table-full').bootstrapTable({
-		        data: full,
+// 		        data: full,
 		        locale:'es-ES'
 		    });
 		  
 		    $('#table-permanents').bootstrapTable({
-		        data: permanents,
+// 		        data: permanents,
 		        locale:'es-ES'
 		    });
 		  
 		    $('#table-substitutes').bootstrapTable({
-		        data: substitutes,
+// 		        data: substitutes,
 		        locale:'es-ES'
 		    });
 		  
 		    $('#table-vs').bootstrapTable({
-		        data: vs,
+// 		        data: vs,
 		        locale:'es-ES'
 		    });
 		  
 		    $('#table-pair').bootstrapTable({
-		        data: pair,
+// 		        data: pair,
 		        locale:'es-ES'
 		    });
 		  
-		    var numMatches = matches.length;
-		    var currentMatch = numMatches-1;
-		    var lastMatch = matches[numMatches-1].data;
-		    
-		    $('#table-results').bootstrapTable({
-		        data: lastMatch,
-		        locale:'es-ES'
-		    });
-		    
-		    $('#table-results thead tr:first th div.th-inner').text('Jornada '+numMatches+' ('+$.timeago(matches[numMatches-1].day)+')');
-		    $('#table-results thead tr:last th:first div.th-inner span').text(matches[numMatches-1].scoreBlues);
-		    $('#table-results thead tr:last th:last div.th-inner span').text(matches[numMatches-1].scoreWhites);
-		    
-		    $('#next-match').addClass('disabled');
-		    
-		    var updateResult = function(currentMatch){
-			    var newMatch = matches[currentMatch].data;
-			    var remarks = (matches[currentMatch].remarks.indexOf('RD') > -1) ?' (Número de goles desconocido, por defecto 2-0 o 0-0)':'';
+		    //Matches AJAX request data
+		    $.getJSON('/futbol7/api/matches.json', function(matches) {
 			    
-			    $('#table-results').bootstrapTable('load',newMatch);
+			    var numMatches = matches.length;
+			    var currentMatch = numMatches-1;
+			    var lastMatch = matches[numMatches-1].data;
 			    
-			    $('#table-results thead tr:first th div.th-inner').text('Jornada '+(currentMatch+1)+' ('+$.timeago(matches[currentMatch].day)+')'+remarks);
-			    $('#table-results thead tr:last th:first div.th-inner span').text(matches[currentMatch].scoreBlues);
-			    $('#table-results thead tr:last th:last div.th-inner span').text(matches[currentMatch].scoreWhites);
-			};
-		    
-		    $('#next-match').click(function(){
-		    	currentMatch = currentMatch + 1;
-			    $('#previous-match').removeClass('disabled');
-		    	if(currentMatch==(numMatches-1)){
-				    $('#next-match').addClass('disabled');
-		    	}
-		    	updateResult(currentMatch);
-		    });
-		    
-		    $('#previous-match').click(function(){
-		    	currentMatch = currentMatch - 1;
-			    $('#next-match').removeClass('disabled');
-		    	if(currentMatch==0){
-				    $('#previous-match').addClass('disabled');
-		    	}
-		    	updateResult(currentMatch);
+			    $('#table-results').bootstrapTable({
+			        data: lastMatch,
+			        locale:'es-ES'
+			    });
+			    
+			    $('#table-results thead tr:first th div.th-inner').text('Jornada '+numMatches+' ('+$.timeago(matches[numMatches-1].day)+')');
+			    $('#table-results thead tr:last th:first div.th-inner span').text(matches[numMatches-1].scoreBlues);
+			    $('#table-results thead tr:last th:last div.th-inner span').text(matches[numMatches-1].scoreWhites);
+			    
+			    $('#next-match').addClass('disabled');
+			    
+			    var updateResult = function(currentMatch){
+				    var newMatch = matches[currentMatch].data;
+				    var remarks = (matches[currentMatch].remarks.indexOf('RD') > -1) ?' (Número de goles desconocido, por defecto 2-0 o 0-0)':'';
+				    
+				    $('#table-results').bootstrapTable('load',newMatch);
+				    
+				    $('#table-results thead tr:first th div.th-inner').text('Jornada '+(currentMatch+1)+' ('+$.timeago(matches[currentMatch].day)+')'+remarks);
+				    $('#table-results thead tr:last th:first div.th-inner span').text(matches[currentMatch].scoreBlues);
+				    $('#table-results thead tr:last th:last div.th-inner span').text(matches[currentMatch].scoreWhites);
+				};
+			    
+			    $('#next-match').click(function(){
+			    	currentMatch = currentMatch + 1;
+				    $('#previous-match').removeClass('disabled');
+			    	if(currentMatch==(numMatches-1)){
+					    $('#next-match').addClass('disabled');
+			    	}
+			    	updateResult(currentMatch);
+			    });
+			    
+			    $('#previous-match').click(function(){
+			    	currentMatch = currentMatch - 1;
+				    $('#next-match').removeClass('disabled');
+			    	if(currentMatch==0){
+					    $('#previous-match').addClass('disabled');
+			    	}
+			    	updateResult(currentMatch);
+			    });
 		    });
 
 		    var hash = window.location.hash.substr(1);
@@ -171,7 +176,10 @@
 		    	$('#table-vs').closest('.row').show();
 		    	
 		    	$('#container').parent().parent().parent().parent().show();
-				  $('#container').highcharts({
+		    	
+		    	$.getJSON('/futbol7/api/pointsSeries.json', function (pointsSeries) {
+		    	
+			    $('#container').highcharts({
 				        chart: {
 				            type: 'line'
 				        },
@@ -210,6 +218,8 @@
 
 				        series: pointsSeries
 				    });
+			    
+		    	});
 		    }
 		    
 		});
@@ -287,7 +297,7 @@
 				    <h3 class="panel-title">Total</h3>
 				  </div>
 				  <div class="panel-body">
-						<table id="table-full" data-sort-name=points data-sort-order="desc"  data-striped="true">
+						<table id="table-full" data-url="/futbol7/api/full.json" data-sort-name=points data-sort-order="desc"  data-striped="true">
 							<thead>
 								<tr>
 									<th data-field="name" data-sortable="true">Nombre</th>
@@ -320,7 +330,7 @@
 				    <h3 class="panel-title">Titulares</h3>
 				  </div>
 				  <div class="panel-body">
-						<table id="table-permanents" data-sort-name="points" data-sort-order="desc" data-striped="true">
+						<table id="table-permanents" data-url="/futbol7/api/permanents.json" data-sort-name="points" data-sort-order="desc" data-striped="true">
 							<thead>
 								<tr>
 									<th data-field="name" data-sortable="true">Nombre</th>
@@ -350,7 +360,7 @@
 				    <h3 class="panel-title">Suplentes</h3>
 				  </div>
 				  <div class="panel-body">
-						<table id="table-substitutes" data-sort-name="points" data-sort-order="desc" data-striped="true">
+						<table id="table-substitutes" data-url="/futbol7/api/substitutes.json" data-sort-name="points" data-sort-order="desc" data-striped="true">
 							<thead>
 								<tr>
 									<th data-field="name" data-sortable="true">Nombre</th>
@@ -383,7 +393,7 @@
 				    <h3 class="panel-title">Veces como adversarios</h3>
 				  </div>
 				  <div class="panel-body">
-						<table id="table-vs" data-sort-name="vs" data-sort-order="desc"
+						<table id="table-vs" data-url="/futbol7/api/vs.json" data-sort-name="vs" data-sort-order="desc"
                data-pagination="true">
 							<thead>
 								<tr>
@@ -404,7 +414,7 @@
 				    <h3 class="panel-title">Veces en el mismo equipo</h3>
 				  </div>
 				  <div class="panel-body">
-						<table id="table-pair" data-sort-name="pair" data-sort-order="desc"
+						<table id="table-pair" data-url="/futbol7/api/pair.json" data-sort-name="pair" data-sort-order="desc"
                data-pagination="true">
 							<thead>
 								<tr>
