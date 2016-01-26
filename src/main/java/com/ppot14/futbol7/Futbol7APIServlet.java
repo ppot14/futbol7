@@ -53,19 +53,19 @@ public class Futbol7APIServlet extends HttpServlet {
     	Object reply = null;
     	api.run(false);
     	try {
-			if(requestPath.contains("/futbol7/api/full.json")){
+			if(requestPath.contains("/api/full.json")){
 	    		reply = api.getFullRanking(); }
-			if(requestPath.contains("/futbol7/api/pair.json")){
+			if(requestPath.contains("/api/pair.json")){
 	    		reply = api.getPair(); }
-			if(requestPath.contains("/futbol7/api/permanents.json")){
+			if(requestPath.contains("/api/permanents.json")){
 	    		reply = api.getRankingPermanents(); }
-			if(requestPath.contains("/futbol7/api/substitutes.json")){
+			if(requestPath.contains("/api/substitutes.json")){
 	    		reply = api.getRankingSubstitutes(); }
-			if(requestPath.contains("/futbol7/api/vs.json")){
+			if(requestPath.contains("/api/vs.json")){
 	    		reply = api.getVS(); }
-			if(requestPath.contains("/futbol7/api/pointsSeries.json")){
+			if(requestPath.contains("/api/pointsSeries.json")){
 	    		reply = api.getPointsSeries();}
-			if(requestPath.contains("/futbol7/api/matches.json")){
+			if(requestPath.contains("/api/matches.json")){
     	    		reply = api.getResults(); }
 		} catch (ParseException e) {
 			logger.severe(e.getMessage());

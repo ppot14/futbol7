@@ -46,6 +46,14 @@
   
   <script>
 
+
+	  function getParameterByName(name) {
+	      name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+	      var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+	          results = regex.exec(location.search);
+	      return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+	  }
+  
 	  function decimal(value, row) {
 	
 	      return parseFloat(Math.round(value * 100) / 100).toFixed(2);
@@ -84,35 +92,40 @@
 				   year: "un año",
 				   years: "%d años"
 				};
-		  
-		  
-		    $('#table-full').bootstrapTable({
-// 		        data: full,
-		        locale:'es-ES'
+
+		    $.getJSON(window.location.pathname+'api/full.json', function(full) {
+			    $('#table-full').bootstrapTable({
+			        data: full,
+			        locale:'es-ES'
+			    });
 		    });
-		  
-		    $('#table-permanents').bootstrapTable({
-// 		        data: permanents,
-		        locale:'es-ES'
+		    $.getJSON(window.location.pathname+'api/permanents.json', function(permanents) {
+			    $('#table-permanents').bootstrapTable({
+			        data: permanents,
+			        locale:'es-ES'
+			    });
 		    });
-		  
-		    $('#table-substitutes').bootstrapTable({
-// 		        data: substitutes,
-		        locale:'es-ES'
+		    $.getJSON(window.location.pathname+'api/substitutes.json', function(substitutes) {
+			    $('#table-substitutes').bootstrapTable({
+			        data: substitutes,
+			        locale:'es-ES'
+			    });
 		    });
-		  
-		    $('#table-vs').bootstrapTable({
-// 		        data: vs,
-		        locale:'es-ES'
+		    $.getJSON(window.location.pathname+'api/vs.json', function(vs) {
+			    $('#table-vs').bootstrapTable({
+			        data: vs,
+			        locale:'es-ES'
+			    });
 		    });
-		  
-		    $('#table-pair').bootstrapTable({
-// 		        data: pair,
-		        locale:'es-ES'
+		    $.getJSON(window.location.pathname+'api/pair.json', function(pair) {
+			    $('#table-pair').bootstrapTable({
+			        data: pair,
+			        locale:'es-ES'
+			    });
 		    });
 		  
 		    //Matches AJAX request data
-		    $.getJSON('/futbol7/api/matches.json', function(matches) {
+		    $.getJSON(window.location.pathname+'api/matches.json', function(matches) {
 			    
 			    var numMatches = matches.length;
 			    var currentMatch = numMatches-1;
@@ -159,8 +172,9 @@
 			    });
 		    });
 
-		    var hash = window.location.hash.substr(1);
-		    if(hash==='admin'){
+		    var isAdmin = getParameterByName('admin');
+		    if(isAdmin==='true'){ $('#plus-info').show(); }
+		    $('#plus-info').click(function(){
 		    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'realPoints');
 		    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'wins');
 		    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'draws');
@@ -177,7 +191,7 @@
 		    	
 		    	$('#container').parent().parent().parent().parent().show();
 		    	
-		    	$.getJSON('/futbol7/api/pointsSeries.json', function (pointsSeries) {
+		    	$.getJSON(window.location.pathname+'api/pointsSeries.json', function (pointsSeries) {
 		    	
 			    $('#container').highcharts({
 				        chart: {
@@ -220,7 +234,7 @@
 				    });
 			    
 		    	});
-		    }
+	    	});
 		    
 		});
   </script>
@@ -242,6 +256,9 @@
 <!-- 	      </form> -->
           <button type="button" class="btn btn-default pull-right" data-toggle="modal" data-target="#legend" style="margin-top: 8px;margin-right: 10px;">
 			  <span class="glyphicon glyphicon-menu-hamburger" aria-hidden="true"></span>
+			</button>
+          <button id="plus-info" type="button" class="btn btn-default pull-right" style="margin-top: 8px; margin-right: 10px; display:none;">
+			  <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
 			</button>
 	    </div>
 <!--          <button type="button" class="btn btn-default navbar-right" data-toggle="modal" data-target="#legend"> -->
@@ -297,7 +314,7 @@
 				    <h3 class="panel-title">Total</h3>
 				  </div>
 				  <div class="panel-body">
-						<table id="table-full" data-url="/futbol7/api/full.json" data-sort-name=points data-sort-order="desc"  data-striped="true">
+						<table id="table-full" data-sort-name=points data-sort-order="desc"  data-striped="true">
 							<thead>
 								<tr>
 									<th data-field="name" data-sortable="true">Nombre</th>
@@ -330,7 +347,7 @@
 				    <h3 class="panel-title">Titulares</h3>
 				  </div>
 				  <div class="panel-body">
-						<table id="table-permanents" data-url="/futbol7/api/permanents.json" data-sort-name="points" data-sort-order="desc" data-striped="true">
+						<table id="table-permanents" data-sort-name="points" data-sort-order="desc" data-striped="true">
 							<thead>
 								<tr>
 									<th data-field="name" data-sortable="true">Nombre</th>
@@ -360,7 +377,7 @@
 				    <h3 class="panel-title">Suplentes</h3>
 				  </div>
 				  <div class="panel-body">
-						<table id="table-substitutes" data-url="/futbol7/api/substitutes.json" data-sort-name="points" data-sort-order="desc" data-striped="true">
+						<table id="table-substitutes" data-sort-name="points" data-sort-order="desc" data-striped="true">
 							<thead>
 								<tr>
 									<th data-field="name" data-sortable="true">Nombre</th>
@@ -393,7 +410,7 @@
 				    <h3 class="panel-title">Veces como adversarios</h3>
 				  </div>
 				  <div class="panel-body">
-						<table id="table-vs" data-url="/futbol7/api/vs.json" data-sort-name="vs" data-sort-order="desc"
+						<table id="table-vs" data-sort-name="vs" data-sort-order="desc"
                data-pagination="true">
 							<thead>
 								<tr>
@@ -414,7 +431,7 @@
 				    <h3 class="panel-title">Veces en el mismo equipo</h3>
 				  </div>
 				  <div class="panel-body">
-						<table id="table-pair" data-url="/futbol7/api/pair.json" data-sort-name="pair" data-sort-order="desc"
+						<table id="table-pair"data-sort-name="pair" data-sort-order="desc"
                data-pagination="true">
 							<thead>
 								<tr>
