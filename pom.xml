@@ -20,6 +20,12 @@
 		</dependency>
 		
 		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<version>3.13</version>
+		</dependency>
+		
+		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
 			<version>3.1.0</version>
@@ -40,7 +46,7 @@
 	    <dependency>
 	      <groupId>com.google.apis</groupId>
 	      <artifactId>google-api-services-drive</artifactId>
-	      <version>v2-rev195-1.21.0</version>
+	      <version>v3-rev7-1.21.0</version>
 	    </dependency>
 		
 		<dependency>

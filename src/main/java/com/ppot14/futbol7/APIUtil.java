@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -28,6 +29,11 @@ import java.util.logging.Logger;
 
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPReply;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -38,7 +44,7 @@ public class APIUtil {
 	
 	private static List<String> PERMANENTS = null;
 
-	SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+	SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy");
 	
 	private static Map<String,Object> config = null;
 	
@@ -72,39 +78,50 @@ public class APIUtil {
 		
 	}
 	
-	public synchronized void run(boolean refresh){
+	public static Map<String, Object> getConfig() {
+		return config;
+	}
+
+	public synchronized boolean processData(boolean refresh){
     	
 		try{
 			
 			if(matches==null || refresh){
 			
-				InputStream inputStreamCSV = null;
+				InputStream inputStream = null;
 				try{
-					inputStreamCSV = GoogleImporter.importFromGoogleDrive(config);
+					inputStream = GoogleImporter.importFromGoogleDrive(config,null);
 				}catch(SocketTimeoutException e){
-					logger.info("Error downloading from Google Drive: "+e.getMessage());
-				}finally{
-					if(inputStreamCSV==null){
-						logger.info("Importing CSV from local: "+"Futbol7.csv");
-						ClassLoader classLoader = APIUtil.class.getClassLoader();
-						inputStreamCSV = classLoader.getResourceAsStream("Futbol7.csv");
-					}
+					logger.severe("Error downloading from Google Drive: "+e.getMessage());
+					return false;
 				}
-				matches = formatCSVdata(inputStreamCSV);
+//				finally{
+//					if(inputStream==null){
+//						logger.info("Importing CSV from local: "+"Futbol7.csv");
+//						ClassLoader classLoader = APIUtil.class.getClassLoader();
+//						inputStream = classLoader.getResourceAsStream("Futbol7.csv");
+//					}
+//				}
+				matches = formatPOIdata(inputStream);
+//				matches = formatODSdata(inputStream);
 				numMatches = matches.size()-1;
 				matches.remove(0);
 				logger.info("Num of Matches: "+numMatches);
 				logger.info("Matches: "+matches);
 				
 				fullRanking = getRanking();
+				
+				return true;
 			
 			}else{
-				logger.info("Ignoring run, matches already loaded");
+				logger.info("Process data skipped, matches already loaded");
 			}
         
 		}catch(Exception e){
 			e.printStackTrace();
 		}
+		
+		return false;
 	}
 	
 	/**
@@ -143,6 +160,7 @@ public class APIUtil {
 		List<Map<String, Object>> res = new ArrayList<Map<String,Object>>();
 		
 		for(List<String> match : matches){
+			if(match==null || match.size()<13) break;
 			Map<String, Object> formattedMatch = new HashMap<String, Object>();
 			
 			formattedMatch.put("day", formatter.parse(match.get(0)));
@@ -170,6 +188,7 @@ public class APIUtil {
         	List<List<Object>> playerData = new ArrayList<List<Object>>();
         	int points = 0;
         	for(List<String> row : matches){
+    			if(row==null || row.size()<13) break;
         		if(row.contains(name)){
 	        		int i=0;
 	        		int gA=0,gB=0;
@@ -177,8 +196,8 @@ public class APIUtil {
 	        		String colour=null;
 	        		for(String cell : row){
 	        			if(i==0){date=cell;}
-	        			if(i==8){gA=Integer.parseInt(cell);}
-	        			if(i==9){gB=Integer.parseInt(cell);}
+	        			if(i==8){gA=Math.round(Float.parseFloat(cell));}
+	        			if(i==9){gB=Math.round(Float.parseFloat(cell));}
 	            		if(cell.equals(name)){
 	            			if(i<9){colour="a";}
 	            			if(i>8){colour="b";}
@@ -281,6 +300,7 @@ public class APIUtil {
 		Map<Set<String>,Integer> vs = new HashMap<Set<String>,Integer>();
 		
 		for(List<String> row: matches){
+			if(row==null || row.size()<13) break;
 			for(int i=1;i<8;i++){
 				for(int j=10;j<17;j++){
 					Set<String> pair = new HashSet<String>(Arrays.asList(row.get(i), row.get(j)));
@@ -305,6 +325,7 @@ public class APIUtil {
 		Map<Set<String>,Integer> vs = new HashMap<Set<String>,Integer>();
 		
 		for(List<String> row: matches){
+			if(row==null || row.size()<13) break;
 			for(int i=1;i<8;i++){
 				for(int j=(i+1);j<8;j++){
 					Set<String> pair = new HashSet<String>(Arrays.asList(row.get(i), row.get(j)));
@@ -401,10 +422,11 @@ public class APIUtil {
 		String ret = "";
 		for(List<String> row: matches){
 			if(row.contains("Fecha")) continue;
+			if(row==null || row.size()<13) break;
 			if(row.contains(name)){
 				int i = row.indexOf(name);
-				int gFor = ((i<8)?Integer.parseInt(row.get(8)):Integer.parseInt(row.get(9)));
-				int gAgainst = ((i<8)?Integer.parseInt(row.get(9)):Integer.parseInt(row.get(8)));
+				int gFor = ((i<8)?Math.round(Float.parseFloat(row.get(8))):Math.round(Float.parseFloat(row.get(9))));
+				int gAgainst = ((i<8)?Math.round(Float.parseFloat(row.get(9))):Math.round(Float.parseFloat(row.get(8))));
 				if(gFor>gAgainst) ret += "w";
 				if(gFor<gAgainst) ret += "l";
 				if(gFor==gAgainst) ret += "d";
@@ -427,6 +449,25 @@ public class APIUtil {
 		return table;
 	}
 
+	public static List<List<String>> formatPOIdata(InputStream is) throws IOException {
+		Workbook wb = new XSSFWorkbook(is);
+		List<List<String>> table = new ArrayList<List<String>>();
+		Sheet sh = wb.getSheetAt(0);
+		Iterator<Row> itRows = sh.rowIterator();
+		while (itRows.hasNext()) {
+			Row r = itRows.next();
+			if(r.getLastCellNum()<13) break;
+			Iterator<Cell> itCells = r.cellIterator();
+			List<String> row = new ArrayList<String>();
+			while (itCells.hasNext()) {
+				row.add(itCells.next().toString());
+			}
+			table.add(row);
+		}
+		wb.close();
+		return table;
+	}
+
 	private Set<String> getListOfPlayers(Map<String,Integer> points,
 										Map<String,Integer> realPoints,
 										Map<String,Integer> goalsFor,
@@ -439,10 +480,11 @@ public class APIUtil {
 	
 		for(List<String> row: matches){
 			if(row.contains("Fecha")) continue;
+			if(row==null || row.size()<13) break;
 //			SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
 //			Date date = formatter.parse(row.get(0));
-			Integer goalsA = Integer.parseInt(row.get(8));
-			Integer goalsB = Integer.parseInt(row.get(9));
+			Integer goalsA = Math.round(Float.parseFloat(row.get(8)));
+			Integer goalsB = Math.round(Float.parseFloat(row.get(9)));
 			for(int i=0;i<row.size();i++){
 				String player = row.get(i);
 				if(i!=0&&i!=8&&i!=9&&i!=17){

@@ -1,5 +1,7 @@
 package com.ppot14.futbol7;
 
+import java.io.InputStream;
+import java.net.SocketTimeoutException;
 import java.util.logging.Logger;
 
 public class Main {
@@ -11,9 +13,16 @@ public class Main {
 		
 		long startTime = System.currentTimeMillis();
 		
-		APIUtil m = new APIUtil();
-		m.run(true);
-		m.writeToFileAndServer();
+		APIUtil m = new APIUtil("config.json");
+//		m.processData(true);
+//		m.writeToFileAndServer();
+		
+
+		try{
+			GoogleImporter.testing(m.getConfig());
+		}catch(SocketTimeoutException e){
+			logger.severe("Error testing Google Drive: "+e.getMessage());
+		}
 		
 		long endTime = System.currentTimeMillis();
 		long duration = (endTime - startTime);  

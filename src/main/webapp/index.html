@@ -31,7 +31,7 @@
 <!-- 	<script src="resources/json/pointsSeries.js"></script> -->
 <!-- 	<script src="resources/json/matches.js"></script> -->
 	
-	<link rel="shortcut icon" href="resources/images/futbol.ico" />
+	<link rel="shortcut icon" href="resources/images/logo.ico" />
 	
 	<style>
 	.label-lastmatch{
@@ -125,7 +125,7 @@
 		    });
 		  
 		    //Matches AJAX request data
-		    $.getJSON(window.location.pathname+'api/matches.json', function(matches) {
+		    var matchesFunction = function(matches) {
 			    
 			    var numMatches = matches.length;
 			    var currentMatch = numMatches-1;
@@ -170,10 +170,12 @@
 			    	}
 			    	updateResult(currentMatch);
 			    });
-		    });
+		    }
+		    $.getJSON(window.location.pathname+'api/matches.json', matchesFunction);
 
 		    var isAdmin = getParameterByName('admin');
 		    if(isAdmin==='true'){ $('#plus-info').show(); }
+		    var chart;
 		    $('#plus-info').click(function(){
 		    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'realPoints');
 		    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'wins');
@@ -193,8 +195,9 @@
 		    	
 		    	$.getJSON(window.location.pathname+'api/pointsSeries.json', function (pointsSeries) {
 		    	
-			    $('#container').highcharts({
+		    	chart = new Highcharts.Chart({
 				        chart: {
+				        	renderTo: 'container',
 				            type: 'line'
 				        },
 				        title: {
@@ -236,6 +239,35 @@
 		    	});
 	    	});
 		    
+		    $('#refresh').click(function(){
+		    	$.getJSON(window.location.pathname+'api/refresh.json', function (data) {
+		    		if(data=='true' || data==true){
+					    $('#table-full').bootstrapTable('refresh', {
+					    	url: window.location.pathname+'api/full.json'
+					    });
+					    $('#table-permanents').bootstrapTable('refresh', {
+					    	url: window.location.pathname+'api/permanents.json'
+					    });
+					    $('#table-substitutes').bootstrapTable('refresh', {
+					    	url: window.location.pathname+'api/substitutes.json'
+					    });
+					    $('#table-vs').bootstrapTable('refresh', {
+					    	url: window.location.pathname+'api/vs.json'
+					    });
+					    $('#table-pair').bootstrapTable('refresh', {
+					    	url: window.location.pathname+'api/pair.json'
+					    });
+					    $.getJSON(window.location.pathname+'api/matches.json', matchesFunction);
+				    	$.getJSON(window.location.pathname+'api/pointsSeries.json', function (pointsSeries) {
+				    		if(chart){
+				    			chart.series = pointsSeries;
+				    			chart.redraw();
+				    		}
+				    	});
+		    		}
+		    	});
+		    });
+		    
 		});
   </script>
   
@@ -248,8 +280,8 @@
 <!-- 	        <span class="icon-bar"></span> -->
 <!-- 	        <span class="icon-bar"></span> -->
 <!-- 	      </button> -->
-	      <img alt="Pelota de futbol" src="resources/images/futbol.png" style="position:absolute"/>
-	      <a class="navbar-brand" href="#" style="margin-left: 65px">Futbol 7</a>
+	      <img alt="Pelota de futbol" src="resources/images/logo50.png" style="position:absolute"/>
+	      <a class="navbar-brand" href="#" style="margin-left: 85px">Futbol 7</a>
 <!-- 	      <form class="navbar-form navbar-right" role="search"> -->
 <!-- 	        <div class="form-group"> -->
 <!-- 	        </div> -->
@@ -259,6 +291,9 @@
 			</button>
           <button id="plus-info" type="button" class="btn btn-default pull-right" style="margin-top: 8px; margin-right: 10px; display:none;">
 			  <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+			</button>
+          <button id="refresh" type="button" class="btn btn-default pull-right" style="margin-top: 8px; margin-right: 10px;">
+			  <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
 			</button>
 	    </div>
 <!--          <button type="button" class="btn btn-default navbar-right" data-toggle="modal" data-target="#legend"> -->

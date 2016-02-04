@@ -2,7 +2,6 @@ package com.ppot14.futbol7;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,12 +12,7 @@ import java.util.logging.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
-import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
-import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
-import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpResponse;
@@ -31,13 +25,9 @@ import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
 import com.google.gdata.client.spreadsheet.FeedURLFactory;
-import com.google.gdata.client.spreadsheet.SpreadsheetQuery;
 import com.google.gdata.client.spreadsheet.SpreadsheetService;
-import com.google.gdata.data.spreadsheet.SpreadsheetEntry;
-import com.google.gdata.data.spreadsheet.SpreadsheetFeed;
 import com.google.gdata.data.spreadsheet.WorksheetEntry;
 import com.google.gdata.data.spreadsheet.WorksheetFeed;
-import com.google.gdata.util.ServiceException;
 
 
 public class GoogleImporter {
@@ -46,12 +36,12 @@ public class GoogleImporter {
 	
 	private static final String APPLICATION_NAME = "futbol7";
 	
-	private static final java.io.File DATA_STORE_DIR = new java.io.File(
-	        System.getProperty("user.home"), ".credentials/drive-java-futbol7");
+//	private static final java.io.File DATA_STORE_DIR = new java.io.File(
+//	        System.getProperty("user.home"), ".credentials/drive-java-futbol7");
 	
 	private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
 	
-	private static final List<String> SCOPES = Arrays.asList(DriveScopes.DRIVE_METADATA_READONLY);
+	private static final List<String> SCOPES = Arrays.asList(DriveScopes.DRIVE,DriveScopes.DRIVE_READONLY,DriveScopes.DRIVE_FILE);
 	
 //	private static final String REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob";
 	
@@ -59,16 +49,16 @@ public class GoogleImporter {
 	
 	private static HttpTransport HTTP_TRANSPORT;
 	
-	private static FileDataStoreFactory DATA_STORE_FACTORY;
+//	private static FileDataStoreFactory DATA_STORE_FACTORY;
 	
 	private static java.io.File p12;
 	
-	private static GoogleClientSecrets clientSecrets;
+//	private static GoogleClientSecrets clientSecrets;
 	
 	static {
 	  try {
 			HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-			DATA_STORE_FACTORY = new FileDataStoreFactory(DATA_STORE_DIR);
+//			DATA_STORE_FACTORY = new FileDataStoreFactory(DATA_STORE_DIR);
 	  } catch (Throwable t) {
 	      t.printStackTrace();
 	  }
@@ -76,24 +66,24 @@ public class GoogleImporter {
 
 	public static java.io.File testing(Map<String,Object> config) throws Exception{
 		
-		String apiProjectJson = (String) config.get("api-project-json");
+//		String apiProjectJson = (String) config.get("api-project-json");
 		String apiProjectP12 = (String) config.get("api-project-p12");
-		String clientSecretJson = (String) config.get("client-secret-json");
+//		String clientSecretJson = (String) config.get("client-secret-json");
 		String spreadsheetGoogleDriveId = (String) config.get("spreadsheet-google-drive-id");
 		
 		ClassLoader classLoader = GoogleImporter.class.getClassLoader();
 		//API-Project-77b28b0ca141.json
 		//client_secret_517911210517.apps.googleusercontent.com.json
-		InputStream inAPIProjectJson = classLoader.getResourceAsStream(apiProjectJson);
+//		InputStream inAPIProjectJson = classLoader.getResourceAsStream(apiProjectJson);
 		URL url = classLoader.getResource(apiProjectP12);
 		p12 = new java.io.File(url.toURI());
-		InputStream inClientSecretJson = classLoader.getResourceAsStream(clientSecretJson);		
-		clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(inClientSecretJson));	
-		ObjectMapper mapper = new ObjectMapper();
-		Map<String,Object> inAPIProject = mapper.readValue(inAPIProjectJson, Map.class);
-		SERVICE_ACCOUNT_EMAIL = (String) inAPIProject.get("client_email");
-		String clientId = ((GoogleClientSecrets.Details) clientSecrets.get("web")).getClientId() ;
-		logger.info("clientId: "+clientId);
+//		InputStream inClientSecretJson = classLoader.getResourceAsStream(clientSecretJson);		
+//		clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(inClientSecretJson));	
+//		ObjectMapper mapper = new ObjectMapper();
+//		Map<String,Object> inAPIProject = mapper.readValue(inAPIProjectJson, Map.class);
+		SERVICE_ACCOUNT_EMAIL = (String) config.get("client_email");
+//		String clientId = ((GoogleClientSecrets.Details) clientSecrets.get("web")).getClientId() ;
+//		logger.info("clientId: "+clientId);
 		logger.info("serviceAccountEmail: "+SERVICE_ACCOUNT_EMAIL);
         
         Credential credential = getGoogleCredential(true);
@@ -104,18 +94,22 @@ public class GoogleImporter {
                 .build();
         List<File> result = new ArrayList<File>();
         
-        File spreadSheetMatchesFromGoogleDrive = driveService.files().get(spreadsheetGoogleDriveId).execute();
-        if(spreadSheetMatchesFromGoogleDrive!=null){
-          logger.info(spreadSheetMatchesFromGoogleDrive.getTitle());
-          logger.info(spreadSheetMatchesFromGoogleDrive.getId());
+        try{
+	        File spreadSheetMatchesFromGoogleDrive = driveService.files().get(spreadsheetGoogleDriveId).execute();
+	        if(spreadSheetMatchesFromGoogleDrive!=null){
+	          logger.info(spreadSheetMatchesFromGoogleDrive.getName());
+	          logger.info(spreadSheetMatchesFromGoogleDrive.getId());
+	        }
+        }catch(Exception e){
+    		logger.severe("Error getting file: "+spreadsheetGoogleDriveId);
         }
 
         FileList files = driveService.files().list().execute();
-        result.addAll(files.getItems());
+        result.addAll(files.getFiles());
         List<List<String>> matches = null;
         for(File f : result){
-        	Map<String,String> exportLinks = f.getExportLinks();
-        	logger.info("File "+f.getTitle()+" exportLinks: "+exportLinks);
+        	Map<String,String> appProps = f.getProperties();
+        	logger.info("File '"+f.getName()+"', AppProperties: "+appProps);
         	if("Futbol7.csv".equals(f.getOriginalFilename())){
         		InputStream is = downloadFile(driveService, f);
         		if(is!=null){
@@ -124,16 +118,12 @@ public class GoogleImporter {
         		}
         	}else if(spreadsheetGoogleDriveId.equals(f.getId())){
             	logger.info("Downloading: "+spreadsheetGoogleDriveId);
-//        		if(exportLinks!=null){
-//	        		String downloadUrl = exportLinks.get("text/csv");
-	        		HttpResponse resp = driveService.getRequestFactory().buildGetRequest(
-	      	        		new GenericUrl("https://docs.google.com/spreadsheets/export?id="+spreadsheetGoogleDriveId+"&exportFormat=csv")).execute();
-	        		InputStream is = resp.getContent();
+//            		https://developers.google.com/drive/v3/web/manage-downloads
+            		InputStream is = driveService.files().export(spreadsheetGoogleDriveId, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet").executeAsInputStream();
 	        		if(is!=null){
-	        			matches = APIUtil.formatCSVdata(is);
+	        			matches = APIUtil.formatPOIdata(is);
 	            		break;
 	        		}
-//        		}
         	}
         }
         logger.info("Matches from google drive csv: "+matches);
@@ -166,22 +156,22 @@ public class GoogleImporter {
 		return null;
 	}
 	
-public static InputStream importFromGoogleDrive(Map<String,Object> config) throws Exception{
+	public static InputStream importFromGoogleDrive(Map<String,Object> config, String format) throws Exception{
 		
-		String apiProjectJson = (String) config.get("api-project-json");
+//		String apiProjectJson = (String) config.get("api-project-json");
 		String apiProjectP12 = (String) config.get("api-project-p12");
-		String clientSecretJson = (String) config.get("client-secret-json");
+//		String clientSecretJson = (String) config.get("client-secret-json");
 		String spreadsheetGoogleDriveId = (String) config.get("spreadsheet-google-drive-id");
 		
 		ClassLoader classLoader = GoogleImporter.class.getClassLoader();
-		InputStream inAPIProjectJson = classLoader.getResourceAsStream(apiProjectJson);
+//		InputStream inAPIProjectJson = classLoader.getResourceAsStream(apiProjectJson);
 		URL url = classLoader.getResource(apiProjectP12);
 		p12 = new java.io.File(url.toURI());
-		InputStream inClientSecretJson = classLoader.getResourceAsStream(clientSecretJson);		
-		clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(inClientSecretJson));	
+//		InputStream inClientSecretJson = classLoader.getResourceAsStream(clientSecretJson);		
+//		clientSecrets = GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(inClientSecretJson));	
 		ObjectMapper mapper = new ObjectMapper();
-		Map<String,Object> inAPIProject = mapper.readValue(inAPIProjectJson, Map.class);
-		SERVICE_ACCOUNT_EMAIL = (String) inAPIProject.get("client_email");
+//		Map<String,Object> inAPIProject = mapper.readValue(inAPIProjectJson, Map.class);
+		SERVICE_ACCOUNT_EMAIL = (String) config.get("client_email");
 		logger.info("serviceAccountEmail: "+SERVICE_ACCOUNT_EMAIL);
         
         Credential credential = getGoogleCredential(true);
@@ -193,12 +183,11 @@ public static InputStream importFromGoogleDrive(Map<String,Object> config) throw
         
         File spreadSheetMatchesFromGoogleDrive = driveService.files().get(spreadsheetGoogleDriveId).execute();
         if(spreadSheetMatchesFromGoogleDrive!=null){
-          logger.info("Downloading: "+spreadSheetMatchesFromGoogleDrive.getTitle()+" from Google Drive");
+          logger.info("Downloading: "+spreadSheetMatchesFromGoogleDrive.getName()+" from Google Drive");
         }
 
-		HttpResponse resp = driveService.getRequestFactory().buildGetRequest(
-        		new GenericUrl("https://docs.google.com/spreadsheets/export?id="+spreadsheetGoogleDriveId+"&exportFormat=csv")).execute();
-		return resp.getContent();
+//		https://developers.google.com/drive/v3/web/manage-downloads	
+        return driveService.files().export(spreadsheetGoogleDriveId, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet").executeAsInputStream();
 
 	}
 
@@ -218,21 +207,23 @@ public static InputStream importFromGoogleDrive(Map<String,Object> config) throw
 			
 			return credentialBuilder;
 			
-		}else{
-		
-			GoogleAuthorizationCodeFlow flow =
-	            new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES)
-	                .setDataStoreFactory(DATA_STORE_FACTORY)
-	                .setAccessType("offline")
-	                .setApprovalPrompt("force")
-	                .build();
-			
-	        Credential credentialAuthorizationCodeInstalledApp = new AuthorizationCodeInstalledApp(
-	            flow, new LocalServerReceiver()).authorize("user");
-			
-			return credentialAuthorizationCodeInstalledApp;
-        
 		}
+//		else{
+//		
+//			GoogleAuthorizationCodeFlow flow =
+//	            new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES)
+//	                .setDataStoreFactory(DATA_STORE_FACTORY)
+//	                .setAccessType("offline")
+//	                .setApprovalPrompt("force")
+//	                .build();
+//			
+//	        Credential credentialAuthorizationCodeInstalledApp = new AuthorizationCodeInstalledApp(
+//	            flow, new LocalServerReceiver()).authorize("user");
+//			
+//			return credentialAuthorizationCodeInstalledApp;
+//        
+//		}
+		return null;
 	}
 
 
@@ -240,10 +231,10 @@ public static InputStream importFromGoogleDrive(Map<String,Object> config) throw
 	private static InputStream downloadFile(Drive service, File file) {
   	  	InputStream ret = null;
   	  
-	    if (file.getDownloadUrl() != null && file.getDownloadUrl().length() > 0) {
+	    if (file.getWebContentLink() != null && file.getWebContentLink().length() > 0) {
 	      try {
 	        HttpResponse resp = service.getRequestFactory().buildGetRequest(
-	        		new GenericUrl(file.getDownloadUrl()))
+	        		new GenericUrl(file.getWebContentLink()))
 	                	.execute();
 	        ret = resp.getContent();
 	      } catch (IOException e) {

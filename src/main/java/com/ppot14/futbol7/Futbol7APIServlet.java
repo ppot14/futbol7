@@ -51,8 +51,10 @@ public class Futbol7APIServlet extends HttpServlet {
     	logger.info("Futbol7APIServlet doGet RequestURI: "+requestPath+", New session: "+session.isNew()+", Session: "+session.getId());
     	ObjectMapper mapper = new ObjectMapper();
     	Object reply = null;
-    	api.run(false);
+    	boolean processed = api.processData(requestPath.contains("/api/refresh.json"));
     	try {
+			if(requestPath.contains("/api/refresh.json")){
+				reply = processed; }
 			if(requestPath.contains("/api/full.json")){
 	    		reply = api.getFullRanking(); }
 			if(requestPath.contains("/api/pair.json")){
@@ -66,9 +68,10 @@ public class Futbol7APIServlet extends HttpServlet {
 			if(requestPath.contains("/api/pointsSeries.json")){
 	    		reply = api.getPointsSeries();}
 			if(requestPath.contains("/api/matches.json")){
-    	    		reply = api.getResults(); }
+    	    	reply = api.getResults(); }
 		} catch (ParseException e) {
 			logger.severe(e.getMessage());
+			e.printStackTrace();
 		}
 
 		response.setContentType("application/json");
