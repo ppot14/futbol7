@@ -95,37 +95,39 @@
 
 		    $.getJSON(window.location.pathname+'api/full.json', function(full) {
 			    $('#table-full').bootstrapTable({
-			        data: full,
+			        data: full['2015-2016'],
 			        locale:'es-ES'
 			    });
 		    });
 		    $.getJSON(window.location.pathname+'api/permanents.json', function(permanents) {
 			    $('#table-permanents').bootstrapTable({
-			        data: permanents,
+			        data: permanents['2015-2016'],
 			        locale:'es-ES'
 			    });
 		    });
 		    $.getJSON(window.location.pathname+'api/substitutes.json', function(substitutes) {
 			    $('#table-substitutes').bootstrapTable({
-			        data: substitutes,
+			        data: substitutes['2015-2016'],
 			        locale:'es-ES'
 			    });
 		    });
 		    $.getJSON(window.location.pathname+'api/vs.json', function(vs) {
 			    $('#table-vs').bootstrapTable({
-			        data: vs,
+			        data: vs['2015-2016'],
 			        locale:'es-ES'
 			    });
 		    });
 		    $.getJSON(window.location.pathname+'api/pair.json', function(pair) {
 			    $('#table-pair').bootstrapTable({
-			        data: pair,
+			        data: pair['2015-2016'],
 			        locale:'es-ES'
 			    });
 		    });
 		  
 		    //Matches AJAX request data
 		    var matchesFunction = function(matches) {
+		    	
+		    	matches = matches['2015-2016'];
 			    
 			    var numMatches = matches.length;
 			    var currentMatch = numMatches-1;
@@ -233,7 +235,7 @@
 //		 		            }
 //		 		        },
 
-				        series: pointsSeries
+				        series: pointsSeries['2015-2016']
 				    });
 			    
 		    	});
@@ -295,6 +297,10 @@
           <button id="refresh" type="button" class="btn btn-default pull-right" style="margin-top: 8px; margin-right: 10px;">
 			  <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
 			</button>
+		  <select class="form-control pull-right" style="width: 200px; margin-top: 8px; margin-right: 10px;">
+		  		<option value="2015-2016" selected>Temporada 2015/2016</option>
+		  		<option value="default">Proximamente otras temporadas</option>
+		  </select>
 	    </div>
 <!--          <button type="button" class="btn btn-default navbar-right" data-toggle="modal" data-target="#legend"> -->
 <!-- 		  <span class="glyphicon glyphicon-menu-hamburger" aria-hidden="true"></span> -->
@@ -346,7 +352,7 @@
 			
 				<div id="" class="panel panel-default">
 				  <div class="panel-heading">
-				    <h3 class="panel-title">Total</h3>
+				    <h3 class="panel-title">Clasificación Completa</h3>
 				  </div>
 				  <div class="panel-body">
 						<table id="table-full" data-sort-name=points data-sort-order="desc"  data-striped="true">
