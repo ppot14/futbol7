@@ -139,8 +139,8 @@
 			    });
 			    
 			    $('#table-results thead tr:first th div.th-inner').text('Jornada '+numMatches+' ('+$.timeago(matches[numMatches-1].day)+')');
-			    $('#table-results thead tr:last th:first div.th-inner span').text(matches[numMatches-1].scoreBlues);
-			    $('#table-results thead tr:last th:last div.th-inner span').text(matches[numMatches-1].scoreWhites);
+			    $('#table-results thead tr:last th:first div.th-inner span').text(parseInt(matches[numMatches-1].scoreBlues));
+			    $('#table-results thead tr:last th:last div.th-inner span').text(parseInt(matches[numMatches-1].scoreWhites));
 			    
 			    $('#next-match').addClass('disabled');
 			    
@@ -151,8 +151,8 @@
 				    $('#table-results').bootstrapTable('load',newMatch);
 				    
 				    $('#table-results thead tr:first th div.th-inner').text('Jornada '+(currentMatch+1)+' ('+$.timeago(matches[currentMatch].day)+')'+remarks);
-				    $('#table-results thead tr:last th:first div.th-inner span').text(matches[currentMatch].scoreBlues);
-				    $('#table-results thead tr:last th:last div.th-inner span').text(matches[currentMatch].scoreWhites);
+				    $('#table-results thead tr:last th:first div.th-inner span').text(parseInt(matches[currentMatch].scoreBlues));
+				    $('#table-results thead tr:last th:last div.th-inner span').text(parseInt(matches[currentMatch].scoreWhites));
 				};
 			    
 			    $('#next-match').click(function(){
@@ -174,6 +174,44 @@
 			    });
 		    }
 		    $.getJSON(window.location.pathname+'api/matches.json', matchesFunction);
+		    
+		    var playersFunction = function(players) {
+		    	var num = players['2015-2016'].length;
+		    	$('#player-one,#player-two').empty();
+		    	for(var i=0; i<num; i++) {
+		    	    $('#player-one,#player-two').append($('<option/>').val(players['2015-2016'][i]).text(players['2015-2016'][i]));
+		    	};
+		    }
+
+		    $.getJSON(window.location.pathname+'api/players.json', playersFunction);
+		    
+		    $('#player-one,#player-two').change(function() {
+		    	var playerOne = $( "#player-one option:selected" ).text();
+		    	var playerTwo = $( "#player-two option:selected" ).text();
+		    	$.post(
+		    			window.location.pathname+'api/comparison.json', 
+		    			JSON.stringify({season: '2015-2016', 
+		    							playerOne: playerOne,
+		    							playerTwo: playerTwo}), 
+		    			function( data ) {
+		    				$('#table-comparison tbody').empty();
+		    				if(playerOne==playerTwo){
+		    					$('#table-comparison tbody').append('<tr><td colspan="2">¿Comparando el mismo jugador? Eres carajote</td></tr>');
+		    					return;
+		    				}
+		    				$('#table-comparison tbody').append('<tr><td colspan="2">Como rivales:</td></tr>');
+		    				$('#table-comparison tbody').append('<tr class="success"><td colspan="2">'+playerOne+' ha ganado <b>'+data.againstWin+'</b> partidos contra '+playerTwo+'</td></tr>');
+		    				$('#table-comparison tbody').append('<tr class="warning"><td colspan="2">'+playerOne+' ha empatado <b>'+data.againstDraw+'</b> partidos contra '+playerTwo+'</td></tr>');
+		    				$('#table-comparison tbody').append('<tr class="danger"><td colspan="2">'+playerOne+' ha perdido <b>'+data.againstLose+'</b> partidos contra '+playerTwo+'</td></tr>');
+		    				$('#table-comparison tbody').append('<tr class="info"><td colspan="2">'+playerOne+' ha jugado <b>'+(data.againstWin+data.againstDraw+data.againstLose)+'</b> partidos contra '+playerTwo+'</td></tr>');
+		    				$('#table-comparison tbody').append('<tr><td colspan="2">En el mismo equipo:</td></tr>');
+		    				$('#table-comparison tbody').append('<tr class="success"><td colspan="2">'+playerOne+' y '+playerTwo+' han ganado <b>'+data.sameWin+'</b></td></tr>');
+		    				$('#table-comparison tbody').append('<tr class="warning"><td colspan="2">'+playerOne+' y '+playerTwo+' han empatado <b>'+data.sameDraw+'</b></td></tr>');
+		    				$('#table-comparison tbody').append('<tr class="danger"><td colspan="2">'+playerOne+' y '+playerTwo+' han perdido <b>'+data.sameLose+'</b></td></tr>');
+		    				$('#table-comparison tbody').append('<tr class="info"><td colspan="2">'+playerOne+' y '+playerTwo+' han jugado <b>'+(data.sameWin+data.sameDraw+data.sameLose)+'</b></td></tr>');
+		    			}
+		    	);
+		    });
 
 		    var isAdmin = getParameterByName('admin');
 		    if(isAdmin==='true'){ $('#plus-info').show(); }
@@ -192,6 +230,7 @@
 
 		    	$('#table-full').closest('.row').show();
 		    	$('#table-vs').closest('.row').show();
+		    	$('#table-comparison').closest('.row').show();
 		    	
 		    	$('#container').parent().parent().parent().parent().show();
 		    	
@@ -266,6 +305,7 @@
 				    			chart.redraw();
 				    		}
 				    	});
+					    $.getJSON(window.location.pathname+'api/players.json', playersFunction);
 		    		}
 		    	});
 		    });
@@ -297,7 +337,7 @@
           <button id="refresh" type="button" class="btn btn-default pull-right" style="margin-top: 8px; margin-right: 10px;">
 			  <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
 			</button>
-		  <select class="form-control pull-right" style="width: 200px; margin-top: 8px; margin-right: 10px;">
+		  <select class="form-control pull-right" style="width: 200px; margin-top: 8px; margin-right: 10px; display:none">
 		  		<option value="2015-2016" selected>Temporada 2015/2016</option>
 		  		<option value="default">Proximamente otras temporadas</option>
 		  </select>
@@ -516,6 +556,29 @@
 			</div>
 		</div>
 		
+		<div class="row" style="display:none">
+			<div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
+			
+				<div id="" class="panel panel-default">
+				  <div class="panel-heading">
+				    <h3 class="panel-title">Comparación</h3>
+				  </div>
+				  <div class="panel-body">
+				  		<table id="table-comparison" class="table table-hover table-bordered">
+							<thead>
+								<tr>
+									<th><select id="player-one" name="player-one" class="form-control"></select></th>
+									<th><select id="player-two" name="player-one" class="form-control"></select></th>
+								</tr>
+							</thead>
+							<tbody>
+							</tbody>
+						</table>
+				  </div>
+				</div>
+				
+			</div>
+		</div>
 		
 		<div class="row" style="display:none">
 			<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">

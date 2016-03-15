@@ -1,5 +1,6 @@
 package com.ppot14.futbol7;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 
 import javax.servlet.ServletConfig;
@@ -9,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import java.text.ParseException;
@@ -50,6 +52,7 @@ public class Futbol7APIServlet extends HttpServlet {
 		final String requestPath = request.getRequestURI();
     	logger.info("Futbol7APIServlet doGet RequestURI: "+requestPath+", New session: "+session.isNew()+", Session: "+session.getId());
     	ObjectMapper mapper = new ObjectMapper();
+    	
     	Object reply = null;
     	boolean processed = api.processData(requestPath.contains("/api/refresh.json"));
     	try {
@@ -69,6 +72,8 @@ public class Futbol7APIServlet extends HttpServlet {
 	    		reply = api.getPointsSeries();}
 			if(requestPath.contains("/api/matches.json")){
     	    	reply = api.getResults(); }
+			if(requestPath.contains("/api/players.json")){
+    	    	reply = api.getPlayers(); }
 		} catch (ParseException e) {
 			logger.severe(e.getMessage());
 			e.printStackTrace();
@@ -84,6 +89,52 @@ public class Futbol7APIServlet extends HttpServlet {
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     	logger.info("Futbol7APIServlet doPost");
+		final String requestPath = request.getRequestURI();
+    	ObjectMapper mapper = new ObjectMapper();
+		final String requestBody = getBody(request);
+		logger.info("requestBody: "+requestBody);
+		JsonNode jsonNode = mapper.readTree(requestBody);
+    	Object reply = null;
+    	
+		if(requestPath.contains("/api/comparison.json")){
+	    	reply = api.getComparison(jsonNode); }
+
+		response.setContentType("application/json");
+		response.setStatus(200);
+		mapper.writeValue(response.getOutputStream(), reply);
 	}
 
+    protected String getBody(final HttpServletRequest request) throws IOException {
+
+		final StringBuilder stringBuilder = new StringBuilder();
+		BufferedReader bufferedReader = null;
+		
+		try {
+		        
+		    bufferedReader = request.getReader();
+		    char[] charBuffer = new char[128];
+		    int bytesRead = -1;
+		        
+		    while ((bytesRead = bufferedReader.read(charBuffer)) > 0) {
+				stringBuilder.append(charBuffer, 0, bytesRead);
+		    }
+		
+		} catch (IOException ex) {
+			
+			logger.log(Level.SEVERE, "Error getting body from the request", ex);
+		    throw ex;
+		
+		} finally {
+		
+		    if (bufferedReader != null) {
+				try {
+				    bufferedReader.close();
+				} catch (IOException ex) {
+				    throw ex;
+				}
+		    }
+		}
+	
+		return java.net.URLDecoder.decode(stringBuilder.toString(), "UTF-8");
+    }	
 }

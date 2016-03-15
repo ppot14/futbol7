@@ -37,6 +37,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 
@@ -579,6 +580,88 @@ public class APIUtil {
 			}
 		}
 		return names;
+	}
+
+	public Map<String, Set<String>> getPlayers() {		
+		return players;
+	}
+
+	public Map<String,Integer> getComparison(JsonNode jsonNode) {
+		
+		Map<String,Integer> res = new HashMap<String,Integer>();
+		res.put("sameWin", 0);
+		res.put("sameDraw", 0);
+		res.put("sameLose", 0);
+		res.put("againstWin", 0);
+		res.put("againstDraw", 0);
+		res.put("againstLose", 0);
+		
+		String season = jsonNode.findValue("season").asText();
+		String playerOne = jsonNode.findValue("playerOne").asText();
+		String playerTwo = jsonNode.findValue("playerTwo").asText();
+		
+		for(List<String> row: rawMatches.get(season)){
+			
+			boolean p1w=false, p1b=false, p2w=false, p2b=false;
+			if(row==null || row.size()<13) break;
+			for(int i=1;i<8;i++){
+				if(playerOne.equals(row.get(i))){
+					p1b=true;
+				}else if(playerTwo.equals(row.get(i))){
+					p2b=true;
+				}
+			}
+			int dif = Math.round( Float.parseFloat(row.get(8))-Float.parseFloat(row.get(9)) );//>1 Blue win
+			for(int j=10;j<17;j++){
+				if(playerOne.equals(row.get(j))){
+					p1w=true;
+				}else if(playerTwo.equals(row.get(j))){
+					p2w=true;
+				}
+			}
+			
+			if(p1b==true && p2b==true){
+				if(dif>0){
+					res.put("sameWin", res.get("sameWin")+1);
+				}else if(dif<0){
+					res.put("sameLose", res.get("sameLose")+1);
+				}else{
+					res.put("sameDraw", res.get("sameDraw")+1);
+				}
+			}
+			
+			if(p1w==true && p2w==true){
+				if(dif>0){
+					res.put("sameLose", res.get("sameLose")+1);
+				}else if(dif<0){
+					res.put("sameWin", res.get("sameWin")+1);
+				}else{
+					res.put("sameDraw", res.get("sameDraw")+1);
+				}
+			}
+			
+			if(p1w==true && p2b==true){
+				if(dif>0){
+					res.put("againstLose", res.get("againstLose")+1);
+				}else if(dif<0){
+					res.put("againstWin", res.get("againstWin")+1);
+				}else{
+					res.put("againstDraw", res.get("againstDraw")+1);
+				}
+			}
+			
+			if(p1b==true && p2w==true){
+				if(dif>0){
+					res.put("againstWin", res.get("againstWin")+1);
+				}else if(dif<0){
+					res.put("againstLose", res.get("againstLose")+1);
+				}else{
+					res.put("againstDraw", res.get("againstDraw")+1);
+				}
+			}
+		}
+		
+		return res;
 	}
 
 	
