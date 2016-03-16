@@ -1,0 +1,14 @@
+{
+	"permanents":{
+		"default":["Player One","Player Two"...],
+		"2015-2016":["Player One","Player Two"...]
+		},
+	"api-project-p12":"SERVICE_ACCOUNT_CERT_WITH_RIGHTS_TO_ACCESS_THE_SPREADSHEET.p12",
+	"client_email":"xxx@api-project-9999999999999.iam.gserviceaccount.com",
+	"spreadsheet-google-drive-id":"SPREADSHEET_ID_SOMETHING_LIKE_THIS: 11111_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-11111",
+	"sftp-host":"deprecated",
+	"sftp-port":21,
+	"sftp-username":"deprecated",
+	"sftp-password":"deprecated",
+	"sftp-directory":"/deprecated"
+}
