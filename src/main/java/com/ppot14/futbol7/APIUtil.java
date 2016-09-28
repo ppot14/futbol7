@@ -85,6 +85,12 @@ public class APIUtil {
 		return config;
 	}
 
+	public Object getOptions() {
+		Map<String, Object> options = new HashMap<String,Object>();
+		options.put("permanents", PERMANENTS);
+		return options;
+	}
+
 	public synchronized boolean processData(boolean refresh){
     	
 		try{
@@ -167,7 +173,7 @@ public class APIUtil {
 		for(Entry<String, List<List<String>>> seasonMatches: rawMatches.entrySet()){
 			List<Map<String, Object>> res1 = new ArrayList<Map<String,Object>>();
 			for(List<String> match : seasonMatches.getValue()){
-				if(match==null || match.size()<13) break;
+				if(isRowEmpty(match)) break;
 				Map<String, Object> formattedMatch = new HashMap<String, Object>();
 				
 				formattedMatch.put("day", formatter.parse(match.get(0)));
@@ -201,7 +207,7 @@ public class APIUtil {
     			int points = 0;
             	List<List<Object>> playerData = new ArrayList<List<Object>>();
     			for(List<String> row : seasonMatches.getValue()){
-	    			if(row==null || row.size()<13) break;
+	    			if(isRowEmpty(row)) break;
 	        		if(row.contains(name)){
 		        		int i=0;
 		        		int gA=0,gB=0;
@@ -324,7 +330,7 @@ public class APIUtil {
 			Map<Set<String>,Integer> vs = new HashMap<Set<String>,Integer>();
 			
 			for(List<String> row: seasonMatches.getValue()){
-				if(row==null || row.size()<13) break;
+				if(isRowEmpty(row)) break;
 				for(int i=1;i<8;i++){
 					for(int j=10;j<17;j++){
 						Set<String> pair = new HashSet<String>(Arrays.asList(row.get(i), row.get(j)));
@@ -354,7 +360,7 @@ public class APIUtil {
 			Map<Set<String>,Integer> vs = new HashMap<Set<String>,Integer>();
 			
 			for(List<String> row: seasonMatches.getValue()){
-				if(row==null || row.size()<13) break;
+				if(isRowEmpty(row)) break;
 				for(int i=1;i<8;i++){
 					for(int j=(i+1);j<8;j++){
 						Set<String> pair = new HashSet<String>(Arrays.asList(row.get(i), row.get(j)));
@@ -456,8 +462,8 @@ public class APIUtil {
 	        	e.put("loses", loses.get(seasonName).containsKey(name)?loses.get(seasonName).get(name).toString():"0");
 	        	e.put("matches", matches.get(seasonName).get(name).toString());
 	        	e.put("lastMatches", getLastMatches(name,seasonName));
-	        	//*(matches.get(name)<(numMatches/3)?0:1.0F) in case of less than 1/3 of total match the avg is 0 or 99
-	        	boolean valid = matches.get(seasonName).get(name)>=(numMatches.get(seasonName)*1.0/3);
+	        	//*(matches.get(name)<(numMatches/3)?0:1.0F) in case of less than 1/4 of total match the avg is 0 or 99
+	        	boolean valid = matches.get(seasonName).get(name)>=(numMatches.get(seasonName)*1.0/4);
 	        	e.put("pointsAVG", (valid?new Float(realPoints.get(seasonName).get(name)*1.0F/matches.get(seasonName).get(name)):"").toString());
 	        	e.put("goalsForAVG", (valid?new Float(goalsFor.get(seasonName).get(name)*1.0F/matches.get(seasonName).get(name)):"").toString());
 	        	e.put("goalsAgainstAVG", (valid?new Float(goalsAgainst.get(seasonName).get(name)*1.0F/matches.get(seasonName).get(name)):new Float(99.99F)).toString());
@@ -471,7 +477,7 @@ public class APIUtil {
 		String ret = "";
 		for(List<String> row: rawMatches.get(seasonName)){
 			if(row.contains("Fecha")) continue;
-			if(row==null || row.size()<13) break;
+			if(isRowEmpty(row)) break;
 			if(row.contains(name)){
 				int i = row.indexOf(name);
 				int gFor = ((i<8)?Math.round(Float.parseFloat(row.get(8))):Math.round(Float.parseFloat(row.get(9))));
@@ -542,7 +548,7 @@ public class APIUtil {
 		numMatches.put(seasonName, new HashMap<String,Integer>());
 		for(List<String> row: rawMatches.get(seasonName)){
 			if(row.contains("Fecha")) continue;
-			if(row==null || row.size()<13) break;
+			if(isRowEmpty(row)) break;
 //			SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
 //			Date date = formatter.parse(row.get(0));
 			Integer goalsA = Math.round(Float.parseFloat(row.get(8)));
@@ -603,7 +609,7 @@ public class APIUtil {
 		for(List<String> row: rawMatches.get(season)){
 			
 			boolean p1w=false, p1b=false, p2w=false, p2b=false;
-			if(row==null || row.size()<13) break;
+			if(isRowEmpty(row)) break;
 			for(int i=1;i<8;i++){
 				if(playerOne.equals(row.get(i))){
 					p1b=true;
@@ -664,5 +670,7 @@ public class APIUtil {
 		return res;
 	}
 
-	
+	private static boolean isRowEmpty(List<String> row){
+		return (row==null || row.isEmpty() || row.size()<13 || "".equals(row.get(0)));
+	}
 }

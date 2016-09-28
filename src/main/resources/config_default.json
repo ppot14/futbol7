@@ -1,7 +1,7 @@
 {
 	"permanents":{
-		"default":["Player One","Player Two"...],
-		"2015-2016":["Player One","Player Two"...]
+		"default":["Player One","Player Two","Player Three"],
+		"2015-2016":["Player One","Player Two","Player Three"]
 		},
 	"api-project-p12":"SERVICE_ACCOUNT_CERT_WITH_RIGHTS_TO_ACCESS_THE_SPREADSHEET.p12",
 	"client_email":"xxx@api-project-9999999999999.iam.gserviceaccount.com",

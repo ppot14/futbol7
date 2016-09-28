@@ -1,20 +1,41 @@
 <!DOCTYPE html>
 
-<html>
+<html prefix="og: http://ogp.me/ns#">
 
   <head>
   
-  	<meta charset="UTF-8">
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-	<meta name="description" content="Futbol 7 San Jerónimo">
+	<meta name="description" content="Futbol 7 San Jerónimo, página de la hermandad de las eternas promesas que dieronse a la cerveza">
+	<meta content="futbol7, san jeronimo" name="keywords"/>
+	
+	<meta property="og:title" content="Futbol 7 San Jerónimo" />
+	<meta property="og:type" content="website" />
+	<meta property="og:description" content="Futbol 7 San Jerónimo, página de la hermandad de las eternas promesas que dieronse a la cerveza... y Sí, el de arriba a la izquierda es Carlos Marchena y jugó con nosotros" />
+	<meta property="og:locale" content="es_ES" />
+	<meta property="og:url" content="http://futbol7.pro" />
+	<meta property="og:image" content="http://futbol7.pro/resources/images/marchena.jpg" />
+	<meta property="og:image:type" content="image/jpeg" />
+	<meta property="og:image:width" content="1600" />
+	<meta property="og:image:height" content="1200" />
     
-    <title>Futbol 7</title>
+    <title>Futbol 7 San Jerónimo</title>
   
 	<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" />
 	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.9.1/bootstrap-table.min.css" />
 	<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" />
 	
+	<script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+	  ga('create', 'UA-45198141-3', 'auto');
+	  ga('send', 'pageview');
+
+	</script>
 	
 	<script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
@@ -30,6 +51,7 @@
 <!-- 	<script src="resources/json/pair.js"></script> -->
 <!-- 	<script src="resources/json/pointsSeries.js"></script> -->
 <!-- 	<script src="resources/json/matches.js"></script> -->
+	<script src="resources/scripts/main.js"></script>
 	
 	<link rel="shortcut icon" href="resources/images/logo.ico" />
 	
@@ -46,271 +68,6 @@
   
   <script>
 
-
-	  function getParameterByName(name) {
-	      name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
-	      var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
-	          results = regex.exec(location.search);
-	      return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
-	  }
-  
-	  function decimal(value, row) {
-	
-	      return parseFloat(Math.round(value * 100) / 100).toFixed(2);
-	  }
-	  
-
-	    function lastMatchesFormat(value) {
-	    	var ret = '';
-	    	var len = value.length;
-	    	var numMatches = 5;
-	    	for (var i = len-numMatches; i < len; i++) {
-		        if(value[i]=='w') ret = ret + '<span class="label label-success label-lastmatch">V</span>';
-		        if(value[i]=='d') ret = ret + '<span class="label label-warning label-lastmatch">E</span>';
-		        if(value[i]=='l') ret = ret + '<span class="label label-danger label-lastmatch">D</span>';
-		        if(value[i]=='-') ret = ret + '<span class="label label-default label-lastmatch">-</span>';
-	    	}
-	        return ret;
-	    }
-  
-	  $(function () {
-		  
-		  $.timeago.settings.strings = {
-				   prefixAgo: "hace",
-				   prefixFromNow: "dentro de",
-				   suffixAgo: "",
-				   suffixFromNow: "",
-				   seconds: "menos de un minuto",
-				   minute: "un minuto",
-				   minutes: "unos %d minutos",
-				   hour: "una hora",
-				   hours: "%d horas",
-				   day: "un día",
-				   days: "%d días",
-				   month: "un mes",
-				   months: "%d meses",
-				   year: "un año",
-				   years: "%d años"
-				};
-
-		    $.getJSON(window.location.pathname+'api/full.json', function(full) {
-			    $('#table-full').bootstrapTable({
-			        data: full['2015-2016'],
-			        locale:'es-ES'
-			    });
-		    });
-		    $.getJSON(window.location.pathname+'api/permanents.json', function(permanents) {
-			    $('#table-permanents').bootstrapTable({
-			        data: permanents['2015-2016'],
-			        locale:'es-ES'
-			    });
-		    });
-		    $.getJSON(window.location.pathname+'api/substitutes.json', function(substitutes) {
-			    $('#table-substitutes').bootstrapTable({
-			        data: substitutes['2015-2016'],
-			        locale:'es-ES'
-			    });
-		    });
-		    $.getJSON(window.location.pathname+'api/vs.json', function(vs) {
-			    $('#table-vs').bootstrapTable({
-			        data: vs['2015-2016'],
-			        locale:'es-ES'
-			    });
-		    });
-		    $.getJSON(window.location.pathname+'api/pair.json', function(pair) {
-			    $('#table-pair').bootstrapTable({
-			        data: pair['2015-2016'],
-			        locale:'es-ES'
-			    });
-		    });
-		  
-		    //Matches AJAX request data
-		    var matchesFunction = function(matches) {
-		    	
-		    	matches = matches['2015-2016'];
-			    
-			    var numMatches = matches.length;
-			    var currentMatch = numMatches-1;
-			    var lastMatch = matches[numMatches-1].data;
-			    
-			    $('#table-results').bootstrapTable({
-			        data: lastMatch,
-			        locale:'es-ES'
-			    });
-			    
-			    $('#table-results thead tr:first th div.th-inner').text('Jornada '+numMatches+' ('+$.timeago(matches[numMatches-1].day)+')');
-			    $('#table-results thead tr:last th:first div.th-inner span').text(parseInt(matches[numMatches-1].scoreBlues));
-			    $('#table-results thead tr:last th:last div.th-inner span').text(parseInt(matches[numMatches-1].scoreWhites));
-			    
-			    $('#next-match').addClass('disabled');
-			    
-			    var updateResult = function(currentMatch){
-				    var newMatch = matches[currentMatch].data;
-				    var remarks = (matches[currentMatch].remarks.indexOf('RD') > -1) ?' (Número de goles desconocido, por defecto 2-0 o 0-0)':'';
-				    
-				    $('#table-results').bootstrapTable('load',newMatch);
-				    
-				    $('#table-results thead tr:first th div.th-inner').text('Jornada '+(currentMatch+1)+' ('+$.timeago(matches[currentMatch].day)+')'+remarks);
-				    $('#table-results thead tr:last th:first div.th-inner span').text(parseInt(matches[currentMatch].scoreBlues));
-				    $('#table-results thead tr:last th:last div.th-inner span').text(parseInt(matches[currentMatch].scoreWhites));
-				};
-			    
-			    $('#next-match').click(function(){
-			    	currentMatch = currentMatch + 1;
-				    $('#previous-match').removeClass('disabled');
-			    	if(currentMatch==(numMatches-1)){
-					    $('#next-match').addClass('disabled');
-			    	}
-			    	updateResult(currentMatch);
-			    });
-			    
-			    $('#previous-match').click(function(){
-			    	currentMatch = currentMatch - 1;
-				    $('#next-match').removeClass('disabled');
-			    	if(currentMatch==0){
-					    $('#previous-match').addClass('disabled');
-			    	}
-			    	updateResult(currentMatch);
-			    });
-		    }
-		    $.getJSON(window.location.pathname+'api/matches.json', matchesFunction);
-		    
-		    var playersFunction = function(players) {
-		    	var num = players['2015-2016'].length;
-		    	$('#player-one,#player-two').empty();
-		    	for(var i=0; i<num; i++) {
-		    	    $('#player-one,#player-two').append($('<option/>').val(players['2015-2016'][i]).text(players['2015-2016'][i]));
-		    	};
-		    }
-
-		    $.getJSON(window.location.pathname+'api/players.json', playersFunction);
-		    
-		    $('#player-one,#player-two').change(function() {
-		    	var playerOne = $( "#player-one option:selected" ).text();
-		    	var playerTwo = $( "#player-two option:selected" ).text();
-		    	$.post(
-		    			window.location.pathname+'api/comparison.json', 
-		    			JSON.stringify({season: '2015-2016', 
-		    							playerOne: playerOne,
-		    							playerTwo: playerTwo}), 
-		    			function( data ) {
-		    				$('#table-comparison tbody').empty();
-		    				if(playerOne==playerTwo){
-		    					$('#table-comparison tbody').append('<tr><td colspan="2">¿Comparando el mismo jugador? Eres carajote</td></tr>');
-		    					return;
-		    				}
-		    				$('#table-comparison tbody').append('<tr><td colspan="2">Como rivales:</td></tr>');
-		    				$('#table-comparison tbody').append('<tr class="success"><td colspan="2">'+playerOne+' ha ganado <b>'+data.againstWin+'</b> partidos contra '+playerTwo+'</td></tr>');
-		    				$('#table-comparison tbody').append('<tr class="warning"><td colspan="2">'+playerOne+' ha empatado <b>'+data.againstDraw+'</b> partidos contra '+playerTwo+'</td></tr>');
-		    				$('#table-comparison tbody').append('<tr class="danger"><td colspan="2">'+playerOne+' ha perdido <b>'+data.againstLose+'</b> partidos contra '+playerTwo+'</td></tr>');
-		    				$('#table-comparison tbody').append('<tr class="info"><td colspan="2">'+playerOne+' ha jugado <b>'+(data.againstWin+data.againstDraw+data.againstLose)+'</b> partidos contra '+playerTwo+'</td></tr>');
-		    				$('#table-comparison tbody').append('<tr><td colspan="2">En el mismo equipo:</td></tr>');
-		    				$('#table-comparison tbody').append('<tr class="success"><td colspan="2">'+playerOne+' y '+playerTwo+' han ganado <b>'+data.sameWin+'</b></td></tr>');
-		    				$('#table-comparison tbody').append('<tr class="warning"><td colspan="2">'+playerOne+' y '+playerTwo+' han empatado <b>'+data.sameDraw+'</b></td></tr>');
-		    				$('#table-comparison tbody').append('<tr class="danger"><td colspan="2">'+playerOne+' y '+playerTwo+' han perdido <b>'+data.sameLose+'</b></td></tr>');
-		    				$('#table-comparison tbody').append('<tr class="info"><td colspan="2">'+playerOne+' y '+playerTwo+' han jugado <b>'+(data.sameWin+data.sameDraw+data.sameLose)+'</b></td></tr>');
-		    			}
-		    	);
-		    });
-
-		    var isAdmin = getParameterByName('admin');
-		    if(isAdmin==='true'){ $('#plus-info').show(); }
-		    var chart;
-		    $('#plus-info').click(function(){
-		    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'realPoints');
-		    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'wins');
-		    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'draws');
-		    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'loses');
-		    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'matches');
-		    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'goalsFor');
-		    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'goalsAgainst');
-		    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'pointsAVG');
-		    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'goalsForAVG');
-		    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'goalsAgainstAVG');
-
-		    	$('#table-full').closest('.row').show();
-		    	$('#table-vs').closest('.row').show();
-		    	$('#table-comparison').closest('.row').show();
-		    	
-		    	$('#container').parent().parent().parent().parent().show();
-		    	
-		    	$.getJSON(window.location.pathname+'api/pointsSeries.json', function (pointsSeries) {
-		    	
-		    	chart = new Highcharts.Chart({
-				        chart: {
-				        	renderTo: 'container',
-				            type: 'line'
-				        },
-				        title: {
-				            text: 'Acumulación de Puntos',
-				            style: { "display": "none"}
-				        },
-				        xAxis: {
-				            type: 'datetime',
-				            dateTimeLabelFormats: {
-				                month: '%e. %b',
-				                year: '%b'
-				            },
-				            title: {
-				                text: 'Dia'
-				            }
-				        },
-				        yAxis: {
-				            title: {
-				                text: 'Puntos'
-				            },
-				            min: 0
-				        },
-//		 		        tooltip: {
-//		 		            headerFormat: '<b>{series.name}</b><br>',
-//		 		            pointFormat: '{point.x:%e. %b}: {point.y:.2f} m'
-//		 		        },
-
-//		 		        plotOptions: {
-//		 		            line: {
-//		 		                step: false,
-		// // 		                pointStart: 0
-//		 		                connectNulls: true
-//		 		            }
-//		 		        },
-
-				        series: pointsSeries['2015-2016']
-				    });
-			    
-		    	});
-	    	});
-		    
-		    $('#refresh').click(function(){
-		    	$.getJSON(window.location.pathname+'api/refresh.json', function (data) {
-		    		if(data=='true' || data==true){
-					    $('#table-full').bootstrapTable('refresh', {
-					    	url: window.location.pathname+'api/full.json'
-					    });
-					    $('#table-permanents').bootstrapTable('refresh', {
-					    	url: window.location.pathname+'api/permanents.json'
-					    });
-					    $('#table-substitutes').bootstrapTable('refresh', {
-					    	url: window.location.pathname+'api/substitutes.json'
-					    });
-					    $('#table-vs').bootstrapTable('refresh', {
-					    	url: window.location.pathname+'api/vs.json'
-					    });
-					    $('#table-pair').bootstrapTable('refresh', {
-					    	url: window.location.pathname+'api/pair.json'
-					    });
-					    $.getJSON(window.location.pathname+'api/matches.json', matchesFunction);
-				    	$.getJSON(window.location.pathname+'api/pointsSeries.json', function (pointsSeries) {
-				    		if(chart){
-				    			chart.series = pointsSeries;
-				    			chart.redraw();
-				    		}
-				    	});
-					    $.getJSON(window.location.pathname+'api/players.json', playersFunction);
-		    		}
-		    	});
-		    });
-		    
-		});
   </script>
   
 	<nav class="navbar navbar-inverse" id="top-navbar">
@@ -337,9 +94,7 @@
           <button id="refresh" type="button" class="btn btn-default pull-right" style="margin-top: 8px; margin-right: 10px;">
 			  <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
 			</button>
-		  <select class="form-control pull-right" style="width: 200px; margin-top: 8px; margin-right: 10px; display:none">
-		  		<option value="2015-2016" selected>Temporada 2015/2016</option>
-		  		<option value="default">Proximamente otras temporadas</option>
+		  <select id="season-selector" class="form-control pull-right" style="width: 200px; margin-top: 8px; margin-right: 10px;">
 		  </select>
 	    </div>
 <!--          <button type="button" class="btn btn-default navbar-right" data-toggle="modal" data-target="#legend"> -->

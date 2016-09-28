@@ -74,6 +74,8 @@ public class Futbol7APIServlet extends HttpServlet {
     	    	reply = api.getResults(); }
 			if(requestPath.contains("/api/players.json")){
     	    	reply = api.getPlayers(); }
+			if(requestPath.contains("/api/options.json")){
+    	    	reply = api.getOptions(); }
 		} catch (ParseException e) {
 			logger.severe(e.getMessage());
 			e.printStackTrace();
