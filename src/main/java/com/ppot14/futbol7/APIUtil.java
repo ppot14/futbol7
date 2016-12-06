@@ -115,7 +115,13 @@ public class APIUtil {
 //				matches = formatODSdata(inputStream);
 				for(String s: rawMatches.keySet()){
 					rawMatches.get(s).remove(0);
-					numMatches.put(s, rawMatches.get(s).size()-1);
+					Iterator<List<String>> i = rawMatches.get(s).iterator();
+					while (i.hasNext()) {
+					   if(isRowEmpty(i.next())){
+						   i.remove();
+					   }
+					}
+					numMatches.put(s, rawMatches.get(s).size());
 				}
 				logger.info("Num of Matches: "+numMatches);
 				logger.info("Matches: "+rawMatches);
