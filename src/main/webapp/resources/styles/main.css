@@ -1,0 +1,33 @@
+#player-picture{
+	margin-top: 8px;
+    margin-right: 10px;
+    height: 34px;
+}
+#player-name{
+    color: white;
+    margin-right: 30px;
+    vertical-align: -webkit-baseline-middle;
+}
+.punctuation-row .panel-group{
+	margin-bottom: 0px;
+}
+li.player-goals{
+	padding-left: 0px;
+	list-style: none;
+}
+ul.blue-scorers,
+ul.white-scorers{
+	padding-left: 0px;
+}
+ul.blue-scorers li{
+	text-align: right;
+}
+ul.white-scorers li{
+	text-align: left;
+}
+.slider-handle{
+	cursor: w-resize;
+}
+.slider{
+	margin-bottom:10px
+}

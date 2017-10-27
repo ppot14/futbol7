@@ -17,14 +17,16 @@
 	<meta property="og:url" content="http://futbol7.pro" />
 	<meta property="og:image" content="http://futbol7.pro/resources/images/marchena.jpg" />
 	<meta property="og:image:type" content="image/jpeg" />
-	<meta property="og:image:width" content="1600" />
-	<meta property="og:image:height" content="1200" />
+	<meta property="og:image:width" content="1439" />
+	<meta property="og:image:height" content="920" />
     
     <title>Futbol 7 San Jerónimo</title>
   
 	<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" />
 	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.9.1/bootstrap-table.min.css" />
 	<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" />
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.9.0/css/bootstrap-slider.min.css" />
+	<link rel="stylesheet" type="text/css" href="resources/styles/main.css" />
 	
 	<script>
 	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -41,6 +43,7 @@
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.9.1/bootstrap-table.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.9.1/locale/bootstrap-table-es-ES.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.9.0/bootstrap-slider.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-timeago/1.4.3/jquery.timeago.min.js"></script>
 	<script src="https://code.highcharts.com/highcharts.js"></script>
 <!-- 	<script src="https://code.highcharts.com/highcharts-more.js"></script> -->
@@ -52,6 +55,7 @@
 <!-- 	<script src="resources/json/pointsSeries.js"></script> -->
 <!-- 	<script src="resources/json/matches.js"></script> -->
 	<script src="resources/scripts/main.js"></script>
+	<script src="resources/scripts/login.js"></script>
 	
 	<link rel="shortcut icon" href="resources/images/logo.ico" />
 	
@@ -85,6 +89,15 @@
 <!-- 	        <div class="form-group"> -->
 <!-- 	        </div> -->
 <!-- 	      </form> -->
+          <button id="login-button" type="button" class="btn btn-default pull-right" style="margin-top: 8px; margin-right: 10px;">
+			  <span id="icon-loginout" class="glyphicon glyphicon-user" aria-hidden="true"></span>
+			</button>
+			<ul class="nav navbar-nav navbar-right">
+		        <li>
+					<img id="player-picture" style="display:none"/>
+					<span id="player-name" style="display:none"></span> 
+				</li>
+		    </ul>
           <button type="button" class="btn btn-default pull-right" data-toggle="modal" data-target="#legend" style="margin-top: 8px;margin-right: 10px;">
 			  <span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
 			</button>
@@ -96,6 +109,12 @@
 			</button>
 		  <select id="season-selector" class="form-control pull-right" style="width: 200px; margin-top: 8px; margin-right: 10px;">
 		  </select>
+          <button id="last-match-winner-button" type="button" class="btn btn-success pull-right" data-toggle="modal" data-target="#last-match-winner" style="margin-top: 8px; margin-right: 10px">
+			  <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+			</button>
+          <button id="notification-score-button" type="button" class="btn btn-warning pull-right" data-toggle="modal" data-target="#polling" style="margin-top: 8px; margin-right: 10px; display:none">
+			  <span class="glyphicon glyphicon-envelope" aria-hidden="true"></span>
+			</button>
 	    </div>
 <!--          <button type="button" class="btn btn-default navbar-right" data-toggle="modal" data-target="#legend"> -->
 <!-- 		  <span class="glyphicon glyphicon-menu-hamburger" aria-hidden="true"></span> -->
@@ -140,6 +159,63 @@
 	    </div>
 	  </div>
 	</div>
+	
+	<!-- Last Match Winner -->
+	<div class="modal fade" id="last-match-winner" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	  <div class="modal-dialog modal-lg" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+	        <h4 class="modal-title" id="myModalLabel">Puntuaciones y comentarios del partido de <span class="last-match-date"></span></h4>
+	      </div>
+	      <div class="modal-body">
+	      	<div class="row">
+	      		<div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+	      			<h3>Azules <span class="pull-right blue-score"></span></h3>
+					<ul class="blue-scorers"></ul>      		
+	      		</div>
+	      		<div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+	      			<h3 style="text-align: right;"><span class="pull-left white-score"></span> Blancos</h3>
+					<ul class="white-scorers"></ul>
+	      		</div>
+	      	</div>
+	      </div>
+	    </div>
+	  </div>
+	</div>	
+	
+	<!-- Polling -->
+	<div class="modal fade" id="polling" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	  <div class="modal-dialog modal-lg" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+	        <h4 class="modal-title" id="myModalLabel">Votación para el partido de <span class="last-match-date"></span></h4>
+	      </div>
+	      <div class="modal-body">
+	      	<div class="row">
+	      		<div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+	      			<h3>Azules <span class="pull-right blue-score"></span></h3>
+					<ul class="blue-scorers"></ul>     		
+	      		</div>
+	      		<div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+	      			<h3 style="text-align: right;"><span class="pull-left white-score"></span> Blancos</h3>
+					<ul class="white-scorers"></ul>
+	      		</div>
+	      	</div>
+	      	<div class="row">
+		      	<form class="form-horizontal" id="polling-form">
+					<div class="form-group">
+					    <div class="col-md-offset-4 col-lg-offset-4 col-md-4 col-lg-4">
+					      <button type="submit" class="btn btn-danger btn-lg btn-block">Votar</button>
+					    </div>
+					</div>
+				</form>
+	      	</div>
+	      </div>
+	    </div>
+	  </div>
+	</div>	
 	
 	<div id="home-page" class="container-fluid" style="">
 		<div class="row" style="display:none">
@@ -229,6 +305,22 @@
 									<th data-field="pointsAVG" data-sortable="true" data-align="right" data-formatter="decimal" data-visible="false"><span style="text-decoration:overline">Pts</span></th>
 									<th data-field="goalsForAVG" data-sortable="true" data-align="right" data-formatter="decimal" data-visible="false"><span style="text-decoration:overline">GF</span></th>
 									<th data-field="goalsAgainstAVG" data-sortable="true" data-align="right" data-formatter="decimal" data-visible="false"><span style="text-decoration:overline">GC</span></th>
+								</tr>
+							</thead>
+						</table>
+					</div>
+				</div>
+			
+				<div id="" class="panel panel-default">
+				  <div class="panel-heading">
+				    <h3 class="panel-title">Goleadores</h3>
+				  </div>
+				  <div class="panel-body">
+						<table id="table-scorers" data-sort-name="scores" data-sort-order="desc" data-striped="true">
+							<thead>
+								<tr>
+									<th data-field="name" data-sortable="true">Nombre</th>
+									<th data-field="scores" data-sortable="true" data-align="right">Goles</th>
 								</tr>
 							</thead>
 						</table>

@@ -29,7 +29,7 @@ public class Futbol7APIServlet extends HttpServlet {
      * Default constructor. 
      */
     public Futbol7APIServlet() {
-    	logger.info("Futbol7APIServlet created");
+    	logger.fine("Futbol7APIServlet created");
     }
     
     /**
@@ -37,7 +37,7 @@ public class Futbol7APIServlet extends HttpServlet {
      */
     @Override
     public void init(final ServletConfig config) throws ServletException {
-    	logger.info("Futbol7APIServlet init");
+    	logger.fine("Futbol7APIServlet init");
     	
     	String configurationFile = config.getServletContext().getInitParameter("configurationFile");
     	
@@ -50,7 +50,7 @@ public class Futbol7APIServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		HttpSession session = request.getSession();
 		final String requestPath = request.getRequestURI();
-    	logger.info("Futbol7APIServlet doGet RequestURI: "+requestPath+", New session: "+session.isNew()+", Session: "+session.getId());
+    	logger.info("Futbol7APIServlet doGet RequestURI: "+requestPath);
     	ObjectMapper mapper = new ObjectMapper();
     	
     	Object reply = null;
@@ -76,6 +76,8 @@ public class Futbol7APIServlet extends HttpServlet {
     	    	reply = api.getPlayers(); }
 			if(requestPath.contains("/api/options.json")){
     	    	reply = api.getOptions(); }
+			if(requestPath.contains("/api/scorers.json")){
+	    		reply = api.getFullScorers(); }
 		} catch (ParseException e) {
 			logger.severe(e.getMessage());
 			e.printStackTrace();
@@ -100,6 +102,17 @@ public class Futbol7APIServlet extends HttpServlet {
     	
 		if(requestPath.contains("/api/comparison.json")){
 	    	reply = api.getComparison(jsonNode); }
+		if(requestPath.contains("/api/player.json")){
+			reply = DBConnector.getPlayer(jsonNode);
+		}if(requestPath.contains("/api/player-has-voted.json")){
+			reply = DBConnector.hasVoted(jsonNode);
+		}if(requestPath.contains("/api/last-match-result.json")){
+			reply = APIUtil.getLastMatchResult(jsonNode);
+		}if(requestPath.contains("/api/match-scorers.json")){
+			reply = APIUtil.getMatchScorers(jsonNode);
+		}if(requestPath.contains("/api/save-polling.json")){
+			reply = APIUtil.savePolling(jsonNode);
+		}
 
 		response.setContentType("application/json");
 		response.setStatus(200);

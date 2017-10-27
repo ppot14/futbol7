@@ -135,6 +135,9 @@ $(function () {
 	    });
 	    $.getJSON(window.location.pathname+'api/matches.json', matchesFunction);
 	    $.getJSON(window.location.pathname+'api/players.json', playersFunction);
+	    $.getJSON(window.location.pathname+'api/scorers.json', function(scorers) {
+			$('#table-scorers').bootstrapTable('load', scorers[season]);
+	    });
     	
     };
     
@@ -185,7 +188,7 @@ $(function () {
   		options = data;
   		var select = $("#season-selector");
   		for (var prop in options.permanents) {
-  			if(prop=='2016-2017'){//TODO change seasons
+  			if(prop=='2017-2018'){//TODO change seasons
   				select.prepend($("<option />").val(prop).text("Temporada "+prop));
   			}
   		}
@@ -223,6 +226,12 @@ $(function () {
 	    $.getJSON(window.location.pathname+'api/pair.json', function(pair) {
 		    $('#table-pair').bootstrapTable({
 		        data: pair[season],
+		        locale:'es-ES'
+		    });
+	    });
+	    $.getJSON(window.location.pathname+'api/scorers.json', function(scorers) {
+		    $('#table-scorers').bootstrapTable({
+		        data: scorers[season],
 		        locale:'es-ES'
 		    });
 	    });
@@ -309,6 +318,9 @@ $(function () {
 		    		}
 		    	});
 			    $.getJSON(window.location.pathname+'api/players.json', playersFunction);
+			    $('#table-scorers').bootstrapTable('refresh', {
+			    	url: window.location.pathname+'api/scorers.json'
+			    });
     		}
     	});
     });
