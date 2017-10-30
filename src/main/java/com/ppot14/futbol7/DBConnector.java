@@ -51,7 +51,6 @@ public class DBConnector {
 				configCollection.insertOne(new Document((Map<String, Object>) mapper.convertValue(jsonNode, Map.class)));
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
@@ -66,7 +65,6 @@ public class DBConnector {
 				playersPictures.put(document.getString("nameweb"), ((Document)((Document)document.get("picture")).get("data")).getString("url"));
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return playersPictures;
@@ -86,7 +84,6 @@ public class DBConnector {
 				return (Document) result.first();
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
@@ -103,7 +100,6 @@ public class DBConnector {
 				return (Document) result.first();
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
@@ -119,7 +115,6 @@ public class DBConnector {
 				return (Document) result.first();
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
@@ -131,7 +126,6 @@ public class DBConnector {
 			configCollection = getCollection("Scores");
 			configCollection.insertOne(data);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -149,7 +143,6 @@ public class DBConnector {
 			UpdateResult res = configCollection.updateOne(filter, new Document("$push", new Document("scores", s)));
 			if(res.getModifiedCount()==1){ return true; }
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return false;

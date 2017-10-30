@@ -48,7 +48,7 @@ public class Futbol7APIServlet extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		HttpSession session = request.getSession();
+//		HttpSession session = request.getSession();
 		final String requestPath = request.getRequestURI();
     	logger.info("Futbol7APIServlet doGet RequestURI: "+requestPath);
     	ObjectMapper mapper = new ObjectMapper();
@@ -58,26 +58,29 @@ public class Futbol7APIServlet extends HttpServlet {
     	try {
 			if(requestPath.contains("/api/refresh.json")){
 				reply = processed; }
-			if(requestPath.contains("/api/full.json")){
+			else if(requestPath.contains("/api/full.json")){
 	    		reply = api.getFullRanking(); }
-			if(requestPath.contains("/api/pair.json")){
+			else if(requestPath.contains("/api/pair.json")){
 	    		reply = api.getPair(); }
-			if(requestPath.contains("/api/permanents.json")){
+			else if(requestPath.contains("/api/permanents.json")){
 	    		reply = api.getRankingPermanents(); }
-			if(requestPath.contains("/api/substitutes.json")){
+			else if(requestPath.contains("/api/substitutes.json")){
 	    		reply = api.getRankingSubstitutes(); }
-			if(requestPath.contains("/api/vs.json")){
+			else if(requestPath.contains("/api/vs.json")){
 	    		reply = api.getVS(); }
-			if(requestPath.contains("/api/pointsSeries.json")){
+			else if(requestPath.contains("/api/pointsSeries.json")){
 	    		reply = api.getPointsSeries();}
-			if(requestPath.contains("/api/matches.json")){
+			else if(requestPath.contains("/api/matches.json")){
     	    	reply = api.getResults(); }
-			if(requestPath.contains("/api/players.json")){
+			else if(requestPath.contains("/api/players.json")){
     	    	reply = api.getPlayers(); }
-			if(requestPath.contains("/api/options.json")){
+			else if(requestPath.contains("/api/options.json")){
     	    	reply = api.getOptions(); }
-			if(requestPath.contains("/api/scorers.json")){
+			else if(requestPath.contains("/api/scorers.json")){
 	    		reply = api.getFullScorers(); }
+			else{
+				logger.warning("GET Request path not found: "+requestPath);
+			}
 		} catch (ParseException e) {
 			logger.severe(e.getMessage());
 			e.printStackTrace();
@@ -101,17 +104,19 @@ public class Futbol7APIServlet extends HttpServlet {
     	Object reply = null;
     	
 		if(requestPath.contains("/api/comparison.json")){
-	    	reply = api.getComparison(jsonNode); }
-		if(requestPath.contains("/api/player.json")){
+	    	reply = api.getComparison(jsonNode);
+		}else if(requestPath.contains("/api/player.json")){
 			reply = DBConnector.getPlayer(jsonNode);
-		}if(requestPath.contains("/api/player-has-voted.json")){
+		}else if(requestPath.contains("/api/player-has-voted.json")){
 			reply = DBConnector.hasVoted(jsonNode);
-		}if(requestPath.contains("/api/last-match-result.json")){
+		}else if(requestPath.contains("/api/last-match-result.json")){
 			reply = APIUtil.getLastMatchResult(jsonNode);
-		}if(requestPath.contains("/api/match-scorers.json")){
+		}else if(requestPath.contains("/api/match-scorers.json")){
 			reply = APIUtil.getMatchScorers(jsonNode);
-		}if(requestPath.contains("/api/save-polling.json")){
+		}else if(requestPath.contains("/api/save-polling.json")){
 			reply = APIUtil.savePolling(jsonNode);
+		}else{
+			logger.warning("POST Request path not found: "+requestPath);
 		}
 
 		response.setContentType("application/json");

@@ -791,57 +791,63 @@ public class APIUtil {
 
 		Map<String,Map<String,Object>> result2 = new TreeMap<String,Map<String,Object>>();
 
-		Long dateL = jsonNode.get("match").get("day").asLong();
-		String date = formatter2.format(new Date(dateL));
-		String date2 = formatter.format(new Date(dateL));
-		String season = jsonNode.get("season").asText();
-		Document votes = DBConnector.getVotes(season, date);
-		Map<String,String> playersPictures = DBConnector.getPlayersPictures();
-		List<Document> scores = (List<Document>) votes.get("scores");
-		for(Document score : scores){
-			String voter = score.getString("voter");
-			String voted = score.getString("voted");
-			Integer scoreI = score.getInteger("score");
-			String comment = score.getString("comment");
-			Map<String,Object> punctuation = new HashMap<String,Object>();
-			punctuation.put("voter", voter);
-			punctuation.put("score", scoreI);
-			punctuation.put("comment", comment);
-			if(result2.containsKey(voted)){
-				((List<Integer>)result2.get(voted).get("avgList")).add(scoreI);
-				double newavg = ((List<Integer>)result2.get(voted).get("avgList")).stream().mapToDouble(new ToDoubleFunction<Integer>() {
-					@Override
-					public double applyAsDouble(Integer value) {
-						return value;
+		try{
+			Long dateL = jsonNode.get("match").get("day").asLong();
+			String date = formatter2.format(new Date(dateL));
+			String date2 = formatter.format(new Date(dateL));
+			String season = jsonNode.get("season").asText();
+			Document votes = DBConnector.getVotes(season, date);
+			if(votes==null){ return null; }
+			Map<String,String> playersPictures = DBConnector.getPlayersPictures();
+			List<Document> scores = (List<Document>) votes.get("scores");
+			for(Document score : scores){
+				String voter = score.getString("voter");
+				String voted = score.getString("voted");
+				Integer scoreI = score.getInteger("score");
+				String comment = score.getString("comment");
+				Map<String,Object> punctuation = new HashMap<String,Object>();
+				punctuation.put("voter", voter);
+				punctuation.put("score", scoreI);
+				punctuation.put("comment", comment);
+				if(result2.containsKey(voted)){
+					((List<Integer>)result2.get(voted).get("avgList")).add(scoreI);
+					double newavg = ((List<Integer>)result2.get(voted).get("avgList")).stream().mapToDouble(new ToDoubleFunction<Integer>() {
+						@Override
+						public double applyAsDouble(Integer value) {
+							return value;
+						}
+					}).average().getAsDouble();
+					result2.get(voted).put("avg",newavg);
+					((List<Map<String,Object>>)result2.get(voted).get("punctuations")).add(punctuation);
+				}else{
+					List<Map<String,Object>> punctuations = new  ArrayList<Map<String,Object>>();
+					punctuations.add(punctuation);
+					List<Integer> avgList = new ArrayList<Integer>();
+					avgList.add(scoreI);
+					Map<String,Object> punctuationData = new HashMap<String,Object>();
+					punctuationData.put("punctuations", punctuations);
+					punctuationData.put("avgList", avgList);
+					punctuationData.put("avg", (double)scoreI);
+					if(playersPictures.containsKey(voted)){ punctuationData.put("image", playersPictures.get(voted)); }
+					if(fullScorersByDate!=null && fullScorersByDate.get(season)!=null && 
+						fullScorersByDate.get(season).get(date2)!=null){
+						punctuationData.put("scores",fullScorersByDate.get(season).get(date2).get(voted));
 					}
-				}).average().getAsDouble();
-				result2.get(voted).put("avg",newavg);
-				((List<Map<String,Object>>)result2.get(voted).get("punctuations")).add(punctuation);
-			}else{
-				List<Map<String,Object>> punctuations = new  ArrayList<Map<String,Object>>();
-				punctuations.add(punctuation);
-				List<Integer> avgList = new ArrayList<Integer>();
-				avgList.add(scoreI);
-				Map<String,Object> punctuationData = new HashMap<String,Object>();
-				punctuationData.put("punctuations", punctuations);
-				punctuationData.put("avgList", avgList);
-				punctuationData.put("avg", (double)scoreI);
-				if(playersPictures.containsKey(voted)){ punctuationData.put("image", playersPictures.get(voted)); }
-				if(fullScorersByDate!=null && fullScorersByDate.get(season)!=null && 
-					fullScorersByDate.get(season).get(date2)!=null){
-					punctuationData.put("scores",fullScorersByDate.get(season).get(date2).get(voted));
+					result2.put(voted,punctuationData);
 				}
-				result2.put(voted,punctuationData);
 			}
+			result.addAll(result2.entrySet());
+			Collections.sort(result,new Comparator<Map.Entry<String,Map<String,Object>>>(){
+				@Override
+				public int compare(Map.Entry<String, Map<String,Object>> o1, Map.Entry<String, Map<String,Object>> o2) {
+					return (int) ( (Double)(o2.getValue()).get("avg") - (Double)(o1.getValue()).get("avg") );
+				}
+				
+			});
+		}catch (Exception e) {
+			e.printStackTrace();
+			return Document.parse("{error, getLastMatchResult: '"+e.getMessage()+"'}");
 		}
-		result.addAll(result2.entrySet());
-		Collections.sort(result,new Comparator<Map.Entry<String,Map<String,Object>>>(){
-			@Override
-			public int compare(Map.Entry<String, Map<String,Object>> o1, Map.Entry<String, Map<String,Object>> o2) {
-				return (int) ( (Double)(o2.getValue()).get("avg") - (Double)(o1.getValue()).get("avg") );
-			}
-			
-		});
 		return result;
 	}
 
@@ -849,38 +855,43 @@ public class APIUtil {
 		Long dateL = jsonNode.get("match").get("day").asLong();
 		String date2 = formatter.format(new Date(dateL));
 		String season = jsonNode.get("season").asText();
-		return fullScorersByDate.get(season).get(date2);
+		return fullScorersByDate.get(season)!=null?fullScorersByDate.get(season).get(date2):null;
 	}
 
 	public static Object savePolling(JsonNode jsonNode) {
 
-		Long dateL = jsonNode.get("date").asLong();
-		String date = formatter2.format(new Date(dateL));
-		String season = jsonNode.get("season").asText();
-		ArrayNode scores = (ArrayNode) jsonNode.get("scores");
-		if(scores==null || scores.size()!=13){
-			return null;
-		}
-		Document votes = DBConnector.getVotes(season, date);
-		if(votes==null){
-			Document d = Document.parse(jsonNode.toString());
-			d.put("date", date);
-			DBConnector.createScore(d);
-		}else{
-			for(JsonNode p : scores){
-				String voter = p.get("voter").asText();
-				String voted = p.get("voted").asText();
-				Integer score = p.get("score").asInt();
-				String comment = p.get("comment").asText();
-				Document hasVoted = DBConnector.hasVotedPlayer(voter, voted, dateL, season);
-				if(hasVoted==null){
-					if(!DBConnector.addPunctuation(voter, voted, score, comment, dateL, season)){
-						logger.warning("Error trying to insert into DB: "+voter+" votes "+voted+" for match "+date+" "+season);
+		try{
+			Long dateL = jsonNode.get("date").asLong();
+			String date = formatter2.format(new Date(dateL));
+			String season = jsonNode.get("season").asText();
+			ArrayNode scores = (ArrayNode) jsonNode.get("scores");
+			if(scores==null || scores.size()!=13){
+				return null;
+			}
+			Document votes = DBConnector.getVotes(season, date);
+			if(votes==null){
+				Document d = Document.parse(jsonNode.toString());
+				d.put("date", date);
+				DBConnector.createScore(d);
+			}else{
+				for(JsonNode p : scores){
+					String voter = p.get("voter").asText();
+					String voted = p.get("voted").asText();
+					Integer score = p.get("score").asInt();
+					String comment = p.get("comment").asText();
+					Document hasVoted = DBConnector.hasVotedPlayer(voter, voted, dateL, season);
+					if(hasVoted==null){
+						if(!DBConnector.addPunctuation(voter, voted, score, comment, dateL, season)){
+							logger.warning("Error trying to insert into DB: "+voter+" votes "+voted+" for match "+date+" "+season);
+						}
+					}else{
+						logger.warning(voter+" already voted "+voted+" for match "+date+" "+season);
 					}
-				}else{
-					logger.warning(voter+" already voted "+voted+" for match "+date+" "+season);
 				}
 			}
+		}catch (Exception e) {
+			e.printStackTrace();
+			return Document.parse("{error, savePolling: '"+e.getMessage()+"'}");
 		}
 		return null;
 	}

@@ -1,7 +1,7 @@
 var nameweb;
 
 function statusChangeCallback(response) {
-	console.log("statusChangeCallback(response) "+JSON.stringify(response));
+//	console.log("statusChangeCallback(response) "+JSON.stringify(response));
 	if(response.status && response.status == 'connected'){
 		FB.api("/me",
 				{fields: "picture,email,name"},
@@ -313,15 +313,18 @@ $(function () {
 		  
 		  updateListTeamScorers(selectedSeasonMatches[lastMatchResult]);
 		  
+		  var request = JSON.stringify({season: $("#season-selector").val(), match: selectedSeasonMatches[lastMatchResult]});
 		  $.post(
 	  			window.location.pathname+'api/last-match-result.json', 
-	  			JSON.stringify({season: $("#season-selector").val(), match: selectedSeasonMatches[lastMatchResult]}), 
+	  			request, 
 	  			function( data1 ) {
 	  				if(data1 && Array.isArray(data1)){
 	  					$('.punctuation-row').remove();
 	  					for(var i=0; i<data1.length; i++){
 	  						addPlayerToResult(i, data1[i]);
 	  					}
+	  				}else{
+	  					console.warn('There is no match results for the last match: '+request);
 	  				}
 	  			}
 	  	  );
