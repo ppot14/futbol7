@@ -8,7 +8,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -50,7 +49,7 @@ public class Futbol7APIServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 //		HttpSession session = request.getSession();
 		final String requestPath = request.getRequestURI();
-    	logger.info("Futbol7APIServlet doGet RequestURI: "+requestPath);
+    	logger.info("RequestURI: "+requestPath);
     	ObjectMapper mapper = new ObjectMapper();
     	
     	Object reply = null;
@@ -79,7 +78,7 @@ public class Futbol7APIServlet extends HttpServlet {
 			else if(requestPath.contains("/api/scorers.json")){
 	    		reply = api.getFullScorers(); }
 			else{
-				logger.warning("GET Request path not found: "+requestPath);
+				logger.warning("Request path not found: "+requestPath);
 			}
 		} catch (ParseException e) {
 			logger.severe(e.getMessage());
@@ -95,28 +94,33 @@ public class Futbol7APIServlet extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-    	logger.info("Futbol7APIServlet doPost");
 		final String requestPath = request.getRequestURI();
+    	logger.info("RequestURI: "+requestPath);
     	ObjectMapper mapper = new ObjectMapper();
 		final String requestBody = getBody(request);
-		logger.info("requestBody: "+requestBody);
+		logger.fine("requestBody: "+requestBody);
 		JsonNode jsonNode = mapper.readTree(requestBody);
     	Object reply = null;
-    	
-		if(requestPath.contains("/api/comparison.json")){
-	    	reply = api.getComparison(jsonNode);
-		}else if(requestPath.contains("/api/player.json")){
-			reply = DBConnector.getPlayer(jsonNode);
-		}else if(requestPath.contains("/api/player-has-voted.json")){
-			reply = DBConnector.hasVoted(jsonNode);
-		}else if(requestPath.contains("/api/last-match-result.json")){
-			reply = APIUtil.getLastMatchResult(jsonNode);
-		}else if(requestPath.contains("/api/match-scorers.json")){
-			reply = APIUtil.getMatchScorers(jsonNode);
-		}else if(requestPath.contains("/api/save-polling.json")){
-			reply = APIUtil.savePolling(jsonNode);
-		}else{
-			logger.warning("POST Request path not found: "+requestPath);
+
+    	try {
+			if(requestPath.contains("/api/comparison.json")){
+		    	reply = api.getComparison(jsonNode);
+			}else if(requestPath.contains("/api/player.json")){
+				reply = DBConnector.getPlayer(jsonNode);
+			}else if(requestPath.contains("/api/player-has-voted.json")){
+				reply = DBConnector.hasVoted(jsonNode);
+			}else if(requestPath.contains("/api/last-match-result.json")){
+				reply = APIUtil.getLastMatchResult(jsonNode);
+			}else if(requestPath.contains("/api/match-scorers.json")){
+				reply = APIUtil.getMatchScorers(jsonNode);
+			}else if(requestPath.contains("/api/save-polling.json")){
+				reply = APIUtil.savePolling(jsonNode);
+			}else{
+				logger.warning("Request path not found: "+requestPath);
+			}
+		} catch (Exception e) {
+			logger.severe(e.getMessage());
+			e.printStackTrace();
 		}
 
 		response.setContentType("application/json");

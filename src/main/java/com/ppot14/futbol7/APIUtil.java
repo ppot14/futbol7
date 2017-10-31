@@ -797,7 +797,7 @@ public class APIUtil {
 			String date2 = formatter.format(new Date(dateL));
 			String season = jsonNode.get("season").asText();
 			Document votes = DBConnector.getVotes(season, date);
-			if(votes==null){ return null; }
+			if(votes==null){ logger.warning("getVotes didn't return any result for season "+season+", date "+date); return null; }
 			Map<String,String> playersPictures = DBConnector.getPlayersPictures();
 			List<Document> scores = (List<Document>) votes.get("scores");
 			for(Document score : scores){

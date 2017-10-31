@@ -144,7 +144,7 @@ $(function () {
     var createChart = function(pointsSeries){
     	chart = new Highcharts.Chart({
 	        chart: {
-	        	renderTo: 'container',
+	        	renderTo: 'container-graph',
 	            type: 'line'
 	        },
 	        title: {
@@ -283,7 +283,7 @@ $(function () {
     	$('#table-vs').closest('.row').show();
     	$('#table-comparison').closest('.row').show();
     	
-    	$('#container').parent().parent().parent().parent().show();
+    	$('#container-graph').parent().parent().parent().parent().show();
     	
     	$.getJSON(window.location.pathname+'api/pointsSeries.json', function (pointsSeries) {
     	

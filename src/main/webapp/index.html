@@ -58,13 +58,6 @@
 	<script src="resources/scripts/login.js"></script>
 	
 	<link rel="shortcut icon" href="resources/images/logo.ico" />
-	
-	<style>
-	.label-lastmatch{
-	    display: inline-block;
-    	width: 20px;
-    }
-	</style>
 
   </head>
 
@@ -76,56 +69,54 @@
   
 	<nav class="navbar navbar-inverse" id="top-navbar">
 	  <div class="container-fluid">
-	    <div class="navbar-header" style="float: none;">
+	    <div class="navbar-header">
 <!-- 	      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse" aria-expanded="false"> -->
 <!-- 	        <span class="sr-only">Toggle navigation</span> -->
 <!-- 	        <span class="icon-bar"></span> -->
 <!-- 	        <span class="icon-bar"></span> -->
 <!-- 	        <span class="icon-bar"></span> -->
 <!-- 	      </button> -->
-	      <img alt="Pelota de futbol" src="resources/images/logo50.png" style="position:absolute"/>
-	      <a class="navbar-brand" href="#" style="margin-left: 85px">Futbol 7</a>
+	      <img id="logo" alt="Pelota de futbol" src="resources/images/logo50.png"/>
+	      <a id="web-name" class="navbar-brand" href="#">Futbol 7</a>
 <!-- 	      <form class="navbar-form navbar-right" role="search"> -->
 <!-- 	        <div class="form-group"> -->
 <!-- 	        </div> -->
 <!-- 	      </form> -->
-          <button id="login-button" type="button" class="btn btn-default pull-right" style="margin-top: 8px; margin-right: 10px;">
-			  <span id="icon-loginout" class="glyphicon glyphicon-user" aria-hidden="true"></span>
-			</button>
-			<ul class="nav navbar-nav navbar-right">
-		        <li>
-					<img id="player-picture" style="display:none"/>
-					<span id="player-name" style="display:none"></span> 
-				</li>
-		    </ul>
-          <button type="button" class="btn btn-default pull-right" data-toggle="modal" data-target="#legend" style="margin-top: 8px;margin-right: 10px;">
-			  <span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
-			</button>
-          <button id="plus-info" type="button" class="btn btn-default pull-right" style="margin-top: 8px; margin-right: 10px; display:none;">
-			  <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-			</button>
-          <button id="refresh" type="button" class="btn btn-default pull-right" style="margin-top: 8px; margin-right: 10px;">
-			  <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
-			</button>
-		  <select id="season-selector" class="form-control pull-right" style="width: 200px; margin-top: 8px; margin-right: 10px;">
-		  </select>
-          <button id="last-match-winner-button" type="button" class="btn btn-success pull-right" data-toggle="modal" data-target="#last-match-winner" style="margin-top: 8px; margin-right: 10px">
-			  <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
-			</button>
-          <button id="notification-score-button" type="button" class="btn btn-warning pull-right" data-toggle="modal" data-target="#polling" style="margin-top: 8px; margin-right: 10px; display:none">
-			  <span class="glyphicon glyphicon-envelope" aria-hidden="true"></span>
-			</button>
+		  <form class="navbar-form navbar-right">
+  			 <div class="form-group">
+	            <button id="login-button" type="button" class="btn btn-default navbar-right">
+				  <span id="icon-loginout" class="glyphicon glyphicon-user" aria-hidden="true"></span>
+				</button>
+<!-- 				<ul class="nav navbar-nav navbar-right"> -->
+<!-- 			        <li> -->
+						<img id="player-picture" class="navbar-right" style="display:none"/>
+						<p id="player-name" class="navbar-text navbar-right" style="display:none"></p> 
+<!-- 					</li> -->
+<!-- 			    </ul> -->
+	            <button type="button" class="btn btn-default navbar-right" data-toggle="modal" data-target="#legend">
+				  <span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
+				</button>
+	            <button id="plus-info" type="button" class="btn btn-default navbar-right" style="display:none;">
+				  <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+				</button>
+	            <button id="refresh" type="button" class="btn btn-default navbar-right">
+				  <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
+				</button>
+		  		<select id="season-selector" class="form-control navbar-right"></select>
+	            <button id="last-match-winner-button" type="button" class="btn btn-success navbar-right" data-toggle="modal" data-target="#last-match-winner">
+				  <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+				</button>
+	            <button id="notification-score-button" type="button" class="btn btn-warning navbar-right" data-toggle="modal" data-target="#polling" style="display:none">
+				  <span class="glyphicon glyphicon-envelope" aria-hidden="true"></span>
+				</button>
+		     </div>
+		  </form>
 	    </div>
-<!--          <button type="button" class="btn btn-default navbar-right" data-toggle="modal" data-target="#legend"> -->
-<!-- 		  <span class="glyphicon glyphicon-menu-hamburger" aria-hidden="true"></span> -->
-<!-- 		</button> -->
 	    
 <!-- 	    <div class="collapse navbar-collapse" id="navbar-collapse"> -->
 <!-- 	      <ul id="menu-list" class="nav navbar-nav"> -->
 	      
 <!-- 	      </ul> -->
-<!-- 	    </div> -->
-<!-- 	    <div class="" id=""> -->
 <!-- 	    </div> -->
 	  </div>
 	</nav>
@@ -217,7 +208,7 @@
 	  </div>
 	</div>	
 	
-	<div id="home-page" class="container-fluid" style="">
+	<div id="home-page" class="container-fluid">
 		<div class="row" style="display:none">
 			<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
 			
@@ -435,7 +426,7 @@
 				    <h3 class="panel-title">Evolución de Puntos</h3>
 				  </div>
 				  <div class="panel-body">
-				  		<div id="container" style="min-width: 310px; height: 600px; margin: 0 auto"></div>
+				  		<div id="container-graph" style="min-width: 310px; height: 600px; margin: 0 auto"></div>
 					</div>
 				</div>
 			

@@ -23,13 +23,13 @@ function statusChangeCallback(response) {
 						    				$( "tr:contains('"+data.nameweb+"')" ).addClass( "info" );
 						    				
 						    				//verify if match played and no score and current date<last match date + 5
-	//					    				console.log("Played? "+JSON.stringify(selectedSeasonMatches[currentMatch].data).includes(nameweb));
-	//					    				console.log("Valid period to vote? "+(selectedSeasonMatches[currentMatch].day+5*24*60*60*1000>new Date().getTime()));
-	//					    				console.log("Now is after Match? "+(selectedSeasonMatches[currentMatch].day<new Date().getTime()));
+						    				console.log("Played? "+JSON.stringify(selectedSeasonMatches[currentMatch].data).includes(nameweb));
+						    				console.log("Valid period to vote? "+(selectedSeasonMatches[currentMatch].day+5*24*60*60*1000>new Date().getTime()));
+						    				console.log("Now is after Match? "+(selectedSeasonMatches[currentMatch].day+23*60*60*1000<new Date().getTime()));
 						    				
 						    				if(JSON.stringify(selectedSeasonMatches[currentMatch].data).includes(nameweb) && //Has played
 						    						(selectedSeasonMatches[currentMatch].day+5*24*60*60*1000>new Date().getTime()) && //Expired 5 days to vote
-						    						(selectedSeasonMatches[currentMatch].day<new Date().getTime())){//No vote before the match
+						    						(selectedSeasonMatches[currentMatch].day+23*60*60*1000<new Date().getTime())){//No vote before the match, vote after 23h of the match day
 						    					//Has scored?
 										      	$.post(
 										    			window.location.pathname+'api/player-has-voted.json', 
@@ -42,6 +42,8 @@ function statusChangeCallback(response) {
 										    			}
 										    	);
 						    				}
+					    				}else{
+					    					console.warn("Unknown exception getting user data: "+data);
 					    				}
 					    			}
 					    	);
@@ -77,6 +79,8 @@ function updateListTeamScorers(match){
   							
   						}
   					}
+  				}else{
+					console.warn("Unknown exception updating team scorers: "+data1);
   				}
   			}
   	  );
@@ -231,6 +235,8 @@ function createPollingForm(){
 	  				}else{
 	  					if(data2.error){
 	  						console.error(data2.error);
+	  					}else{
+	  						console.warn("Unknown exception saving polling: "+data2);
 	  					}
 	  				}
 	  			}

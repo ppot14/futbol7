@@ -1,13 +1,54 @@
+.navbar-header{
+	float: none;
+}
+img#logo{
+	position: absolute;
+}
+a#web-name.navbar-brand{
+	margin-left: 85px;
+    color: white;
+}
+select#season-selector{
+	width: 200px
+}
 #player-picture{
-	margin-top: 8px;
-    margin-right: 10px;
+/* 	margin-top: 8px; */
+/*     margin-right: 10px; */
     height: 34px;
 }
 #player-name{
-    color: white;
-    margin-right: 30px;
-    vertical-align: -webkit-baseline-middle;
+    color: white;    
+    line-height: 34px;
+    margin: 0px;
 }
+.navbar-form button,
+.navbar-form select,
+.navbar-form img,
+.navbar-form p{
+	margin-right: 0px !important;
+	margin-left: 10px !important;
+}
+@media (max-width: 767px) { 
+	.navbar-form {
+		margin-top: 50px;
+	    margin-right: 0px;
+	    margin-left: 0px;
+	    margin-bottom: 0px;
+    	border: none;
+	}
+	.navbar-form p, 
+	.navbar-form select{
+	    display: inline-block;
+	}
+	.navbar-form button,
+	.navbar-form select,
+	.navbar-form img,
+	.navbar-form p{    
+		margin-bottom: 5px;
+    	margin-top: 5px;
+	}
+}
+
 .punctuation-row .panel-group{
 	margin-bottom: 0px;
 }
@@ -30,4 +71,8 @@ ul.white-scorers li{
 }
 .slider{
 	margin-bottom:10px
+}
+.label-lastmatch{
+    display: inline-block;
+   	width: 20px;
 }

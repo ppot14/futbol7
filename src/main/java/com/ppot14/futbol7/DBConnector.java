@@ -21,7 +21,10 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.result.UpdateResult;
 
+import java.util.logging.*;
+
 public class DBConnector {
+	private static final Logger logger = Logger.getLogger(DBConnector.class.getName());
 	private static final String LOCAL_DB_SERVER = "127.0.0.1";
 	private static MongoClient mongo;
 	private static String dbServer = LOCAL_DB_SERVER;
@@ -45,10 +48,12 @@ public class DBConnector {
 			Bson filter = and(eq("name", name),eq("id",id));
 			FindIterable<Document> result = configCollection.find(filter);
 			if(result!=null && result.first()!=null){
+				logger.info("player exists: "+result.first());
 				return (Document) result.first();
 			}else{
 				ObjectMapper mapper = new ObjectMapper();
 				configCollection.insertOne(new Document((Map<String, Object>) mapper.convertValue(jsonNode, Map.class)));
+				logger.info("new player: "+jsonNode);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -81,7 +86,10 @@ public class DBConnector {
 			Bson filter = and(eq("scores.voter",name),eq("date",date),eq("season",season));
 			FindIterable<Document> result = configCollection.find(filter);
 			if(result!=null && result.first()!=null){
+				logger.info("player did vote: "+result.first());
 				return (Document) result.first();
+			}else{
+				logger.info("player didn't vote: "+jsonNode);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
