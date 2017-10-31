@@ -1,57 +1,92 @@
 var nameweb;
 
-function statusChangeCallback(response) {
-//	console.log("statusChangeCallback(response) "+JSON.stringify(response));
+function facebookStatusChangeCallback(response) {
 	if(response.status && response.status == 'connected'){
 		FB.api("/me",
 				{fields: "picture,email,name"},
-			    function (response) {
-				      if (response && !response.error) {
-				    	  $('#player-name').text(response.name);
-				    	  $('#player-picture').attr("src",response.picture.data.url);
-				    	  $('#icon-loginout').removeClass("glyphicon-user").addClass("glyphicon-log-out");
-				    	  $('#player-name').fadeIn();
-				    	  $('#player-picture').fadeIn();
-				    	  
-					      	$.post(
-					    			window.location.pathname+'api/player.json', 
-					    			JSON.stringify(response), 
-					    			function( data ) {
-					    				if(data){
-						    				nameweb = data.nameweb;
-						    				$( "td:contains('"+data.nameweb+"')" ).css( "font-weight", "bold" );
-						    				$( "tr:contains('"+data.nameweb+"')" ).addClass( "info" );
-						    				
-						    				//verify if match played and no score and current date<last match date + 5
-						    				console.log("Played? "+JSON.stringify(selectedSeasonMatches[currentMatch].data).includes(nameweb));
-						    				console.log("Valid period to vote? "+(selectedSeasonMatches[currentMatch].day+5*24*60*60*1000>new Date().getTime()));
-						    				console.log("Now is after Match? "+(selectedSeasonMatches[currentMatch].day+23*60*60*1000<new Date().getTime()));
-						    				
-						    				if(JSON.stringify(selectedSeasonMatches[currentMatch].data).includes(nameweb) && //Has played
-						    						(selectedSeasonMatches[currentMatch].day+5*24*60*60*1000>new Date().getTime()) && //Expired 5 days to vote
-						    						(selectedSeasonMatches[currentMatch].day+23*60*60*1000<new Date().getTime())){//No vote before the match, vote after 23h of the match day
-						    					//Has scored?
-										      	$.post(
-										    			window.location.pathname+'api/player-has-voted.json', 
-										    			JSON.stringify({name:nameweb,date:selectedSeasonMatches[currentMatch].day,season:$("#season-selector").val()}), 
-										    			function( data ) {
-	//									    				console.log("Played has voted? "+JSON.stringify(data));
-										    				if(!data){
-										    					$('#notification-score-button').slideDown();
-										    				}
-										    			}
-										    	);
-						    				}
-					    				}else{
-					    					console.warn("Unknown exception getting user data: "+data);
-					    				}
-					    			}
-					    	);
-				      }
-		});
-	} else {
-		
+				function(response) {
+					loggedIn(response,'facebook');
+				});
 	}
+}
+
+function googleStatusChangeCallback(){
+	var response = {name: auth2.currentUser.get().getBasicProfile().getName(),
+				id: auth2.currentUser.get().getBasicProfile().getId(),
+				picture: auth2.currentUser.get().getBasicProfile().getImageUrl()};
+	loggedIn(response,'google');
+}
+
+function loggedOut(){
+  	$('#notification-score-button').slideUp();
+  	$('#logout-button').slideUp(function (){ $('#login-button').slideDown() });
+  	$('#player-name').slideUp();
+  	$('#player-picture').slideUp();
+  	$( "td:contains('"+nameweb+"')" ).css( "font-weight", "normal" );
+	$( "tr:contains('"+nameweb+"')" ).removeClass( "info" );
+	nameweb = null;
+}
+
+function loggedIn(response,loginType) {
+    if (response && !response.error) {
+    	
+    	var data = {};
+		if(loginType=='facebook'){
+			data.facebook = response;
+			data.id = response.id;
+			data.name = response.name;
+			data.picture = response.picture.data.url;
+		}else if(loginType=='google'){
+			data.google = response;
+			data.id = response.id;
+			data.name = response.name;
+			data.picture = response.picture;
+		}
+		
+  	  $('#player-name').text(data.name);
+  	  $('#player-picture').attr("src",data.picture);
+  	  $('#login-button').slideUp(function() {$('#logout-button').slideDown();});
+  	  $('#player-name').slideDown();
+  	  $('#player-picture').slideDown();
+	  $('#login-selector').modal('hide');
+  	  
+	  $.post(
+			window.location.pathname+'api/player.json', 
+			JSON.stringify(data), 
+			function( data ) {
+				if(data && data.nameweb){
+    				nameweb = data.nameweb;
+    				$( "td:contains('"+data.nameweb+"')" ).css( "font-weight", "bold" );
+    				$( "tr:contains('"+data.nameweb+"')" ).addClass( "info" );
+    				
+    				//verify if match played and no score and current date<last match date + 5
+    				console.log("Played? "+JSON.stringify(selectedSeasonMatches[currentMatch].data).includes(nameweb));
+    				console.log("Valid period to vote? "+(selectedSeasonMatches[currentMatch].day+5*24*60*60*1000>new Date().getTime()));
+    				console.log("Now is after Match? "+(selectedSeasonMatches[currentMatch].day+23*60*60*1000<new Date().getTime()));
+    				
+    				if(JSON.stringify(selectedSeasonMatches[currentMatch].data).includes(nameweb) && //Has played
+    						(selectedSeasonMatches[currentMatch].day+5*24*60*60*1000>new Date().getTime()) && //Expired 5 days to vote
+    						(selectedSeasonMatches[currentMatch].day+23*60*60*1000<new Date().getTime())){//No vote before the match, vote after 23h of the match day
+    					//Has scored?
+				      	$.post(
+				    			window.location.pathname+'api/player-has-voted.json', 
+				    			JSON.stringify({name:nameweb,date:selectedSeasonMatches[currentMatch].day,season:$("#season-selector").val()}), 
+				    			function( data ) {
+//									    				console.log("Played has voted? "+JSON.stringify(data));
+				    				if(!data){
+				    					$('#notification-score-button').slideDown();
+				    				}
+				    			}
+				    	);
+    				}
+				}else if(data && data.newuser){
+					console.info("New user created: "+data.newuser);
+				}else{
+					console.warn("Unknown user: "+JSON.stringify(data));
+				}
+			}
+	    );
+    }
 }
 
 function updateListTeamScorers(match){
@@ -231,7 +266,7 @@ function createPollingForm(){
 	  					$('#notification-score-button').slideUp();
 	  					$('<button type="button" class="btn btn-info pull-right" style="margin-top: 8px; margin-right: 10px">Votación realizada. Resultados disponibles: '+
 	  							new Date(selectedSeasonMatches[currentMatch].day+5*24*60*60*1000)+	
-	  					'</button>').appendTo('#top-navbar .container-fluid .navbar-header').delay(10000).fadeOut();
+	  					'</button>').appendTo('#top-navbar .container-fluid .navbar-header').delay(10000).slideUp();
 	  				}else{
 	  					if(data2.error){
 	  						console.error(data2.error);
@@ -256,15 +291,8 @@ $(function () {
       });
       FB.AppEvents.logPageView(); 
       FB.getLoginStatus(function(response) {
-//    	  if (response.status !== 'connected') {
-//    		  FB.login(function(response){
-	  				statusChangeCallback(response);
-//	  			});
-//    	  }
+    	  	facebookStatusChangeCallback(response);
       });
-//      FB.Event.subscribe('auth.statusChange', function(response) {
-//    	  statusChangeCallback(response);
-//      });
   };
 
   (function(d, s, id){
@@ -275,25 +303,50 @@ $(function () {
      fjs.parentNode.insertBefore(js, fjs);
    }(document, 'script', 'facebook-jssdk'));
   
-	$('#login-button').click(function(){
-		if( $('#icon-loginout').hasClass("glyphicon-log-out") ){
+  gapi.load('auth2', function(){
+      // Retrieve the singleton for the GoogleAuth library and set up the client.
+      auth2 = gapi.auth2.init({
+        client_id: '517911210517-uupk9pfrbcsnce7qblohvpmog4hc6bfu.apps.googleusercontent.com',
+        cookiepolicy: 'single_host_origin',
+        // Request scopes in addition to 'profile' and 'email'
+        //scope: 'additional_scope'
+      });
+      if(auth2.isSignedIn.get()){
+		googleStatusChangeCallback();
+      }
+    });
+  
+	$('#facebook-login-button').click(function(){
+		FB.login(function(response){
+			facebookStatusChangeCallback(response);
+		});
+	});
+	$('#google-login-button').click(function(){
+		auth2.signIn().then(function () {
+			googleStatusChangeCallback();
+	    });
+	});
+	
+
+	$('#logout-button').click(function(){
+		try{
 			FB.logout(function(response) {
-				  if (response.status !== 'connected') {
-	  				  	$('#notification-score-button').slideUp();
-	  				  	$('#icon-loginout').removeClass("glyphicon-log-out").addClass("glyphicon-user");
-			    	  	$('#player-name').fadeOut();
-			    	  	$('#player-picture').fadeOut();
-			    	  	$( "td:contains('"+nameweb+"')" ).css( "font-weight", "normal" );
-	    				$( "tr:contains('"+nameweb+"')" ).removeClass( "info" );
-	    				nameweb = null;
-				  }
+			  if (response.status !== 'connected') {
+				  loggedOut();
+			  }
 			});
-		}else{
-			FB.login(function(response){
-				statusChangeCallback(response);
-			});
+		}catch (e) {
+			console.info('Facebook logout ignored: '+e.message);
+		}
+		try{
+			auth2.signOut().then(function () {
+				loggedOut();
+		    });
+		}catch (e) {
+			console.info('Google logout ignored: '+e.message);
 		}
 	});
+	
 	//Polling Overlay
 	$('#polling').on('show.bs.modal', function (event) {
 //		console.log('currentMatch: '+JSON.stringify(selectedSeasonMatches[currentMatch]));

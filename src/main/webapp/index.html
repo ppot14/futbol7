@@ -19,12 +19,14 @@
 	<meta property="og:image:type" content="image/jpeg" />
 	<meta property="og:image:width" content="1439" />
 	<meta property="og:image:height" content="920" />
+	
+<!-- 	<meta name="google-signin-client_id" content="517911210517-uupk9pfrbcsnce7qblohvpmog4hc6bfu.apps.googleusercontent.com"> -->
     
     <title>Futbol 7 San Jerónimo</title>
   
 	<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" />
 	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.9.1/bootstrap-table.min.css" />
-	<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" />
+	<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
 	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.9.0/css/bootstrap-slider.min.css" />
 	<link rel="stylesheet" type="text/css" href="resources/styles/main.css" />
 	
@@ -39,6 +41,7 @@
 
 	</script>
 	
+	<script src="https://apis.google.com/js/platform.js"></script>
 	<script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.9.1/bootstrap-table.min.js"></script>
@@ -84,8 +87,11 @@
 <!-- 	      </form> -->
 		  <form class="navbar-form navbar-right">
   			 <div class="form-group">
-	            <button id="login-button" type="button" class="btn btn-default navbar-right">
-				  <span id="icon-loginout" class="glyphicon glyphicon-user" aria-hidden="true"></span>
+	            <button id="login-button" type="button" class="btn btn-default navbar-right" data-toggle="modal" data-target="#login-selector">
+				  <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+				</button>
+	            <button id="logout-button" type="button" class="btn btn-default navbar-right" style="display:none">
+				  <span class="glyphicon glyphicon-log-out" aria-hidden="true"></span>
 				</button>
 <!-- 				<ul class="nav navbar-nav navbar-right"> -->
 <!-- 			        <li> -->
@@ -147,6 +153,32 @@
 <!-- 	        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button> -->
 <!-- 	        <button type="button" class="btn btn-primary">Save changes</button> -->
 <!-- 	      </div> -->
+	    </div>
+	  </div>
+	</div>
+	
+	<!-- Login -->
+	<div class="modal fade" id="login-selector" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	  <div class="modal-dialog" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+	        <h4 class="modal-title" id="myModalLabel">Acceso</h4>
+	      </div>
+	      <div class="modal-body">
+	      	<div class="well">
+<!-- 	      		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">   -->
+		            <button id="facebook-login-button" type="button" class="btn btn-primary btn-lg btn-block" >
+					  <i class="fa fa-facebook-official pull-left" aria-hidden="true"></i> Acceso con Facebook
+					</button>   		
+<!-- 	      		</div> -->
+<!-- 	      		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">   -->
+		            <button id="google-login-button" type="button" class="btn btn-danger btn-lg btn-block">
+					  <i class="fa fa-google-plus-official pull-left" aria-hidden="true"></i> Acceso con Gmail
+					</button>   		
+<!-- 	      		</div> -->
+	      	</div>
+	      </div>
 	    </div>
 	  </div>
 	</div>

@@ -858,7 +858,7 @@ public class APIUtil {
 		return fullScorersByDate.get(season)!=null?fullScorersByDate.get(season).get(date2):null;
 	}
 
-	public static Object savePolling(JsonNode jsonNode) {
+	public static synchronized Object savePolling(JsonNode jsonNode) {
 
 		try{
 			Long dateL = jsonNode.get("date").asLong();
@@ -866,6 +866,7 @@ public class APIUtil {
 			String season = jsonNode.get("season").asText();
 			ArrayNode scores = (ArrayNode) jsonNode.get("scores");
 			if(scores==null || scores.size()!=13){
+				logger.warning("No scores saving polling for match "+date+" "+season);
 				return null;
 			}
 			Document votes = DBConnector.getVotes(season, date);

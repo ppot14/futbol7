@@ -54,6 +54,7 @@ public class DBConnector {
 				ObjectMapper mapper = new ObjectMapper();
 				configCollection.insertOne(new Document((Map<String, Object>) mapper.convertValue(jsonNode, Map.class)));
 				logger.info("new player: "+jsonNode);
+				return new Document("newuser",true);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
