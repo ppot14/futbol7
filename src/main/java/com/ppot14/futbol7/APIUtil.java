@@ -45,6 +45,7 @@ import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.ArrayNode;
+import org.codehaus.jackson.node.ObjectNode;
 
 public class APIUtil {
 	
@@ -54,6 +55,7 @@ public class APIUtil {
 
 	private static SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy");
 	private static SimpleDateFormat formatter2 = new SimpleDateFormat("dd/MM/yyyy");
+	private static SimpleDateFormat formatter3 = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 	
 	private static Map<String,Object> config = null;
 	
@@ -786,7 +788,7 @@ public class APIUtil {
 		return (row==null || row.isEmpty() || row.size()<13 || "".equals(row.get(0)));
 	}
 
-	public static Object getLastMatchResult(JsonNode jsonNode) {
+	public Object getLastMatchResult(JsonNode jsonNode) {
 		List<Map.Entry<String,Map<String,Object>>> result = new ArrayList<Map.Entry<String,Map<String,Object>>>();
 
 		Map<String,Map<String,Object>> result2 = new TreeMap<String,Map<String,Object>>();
@@ -851,14 +853,14 @@ public class APIUtil {
 		return result;
 	}
 
-	public static Object getMatchScorers(JsonNode jsonNode) {
+	public Object getMatchScorers(JsonNode jsonNode) {
 		Long dateL = jsonNode.get("match").get("day").asLong();
 		String date2 = formatter.format(new Date(dateL));
 		String season = jsonNode.get("season").asText();
 		return fullScorersByDate.get(season)!=null?fullScorersByDate.get(season).get(date2):null;
 	}
 
-	public static synchronized Object savePolling(JsonNode jsonNode) {
+	public synchronized Object savePolling(JsonNode jsonNode) {
 
 		try{
 			Long dateL = jsonNode.get("date").asLong();
@@ -896,4 +898,17 @@ public class APIUtil {
 		}
 		return null;
 	}
+	
+	public Object getPlayer(JsonNode jsonNode){
+		((ObjectNode)jsonNode).put("created", new Date().getTime());
+		return DBConnector.getPlayer(jsonNode);
+	}
+	
+	public Object hasVoted(JsonNode jsonNode){
+		return DBConnector.hasVoted(jsonNode);
+	}
+	
+	public Object getPlayersPictures() {		
+		return DBConnector.getPlayersPictures();
+	}	
 }

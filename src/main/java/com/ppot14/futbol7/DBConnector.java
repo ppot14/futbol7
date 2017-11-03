@@ -15,6 +15,7 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.node.ObjectNode;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.FindIterable;
@@ -68,7 +69,7 @@ public class DBConnector {
 			MongoCollection<Document> configCollection;
 			configCollection = getCollection("Players");
 			for (Document document : configCollection.find()) {
-				playersPictures.put(document.getString("nameweb"), ((Document)((Document)document.get("picture")).get("data")).getString("url"));
+				playersPictures.put(document.getString("nameweb")!=null?document.getString("nameweb"):document.getString("name"), document.getString("picture"));
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

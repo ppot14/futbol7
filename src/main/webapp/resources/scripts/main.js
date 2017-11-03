@@ -48,6 +48,7 @@ $(function () {
 		   year: "un año",
 		   years: "%d años"
 	};
+	$.timeago.settings.allowFuture= true;
     
     var playersFunction = function(players) {
     	var num = players[$("#season-selector").val()].length;
@@ -66,6 +67,19 @@ $(function () {
 	    currentMatch = numMatches-1;
 	    var lastMatch = selectedSeasonMatches[numMatches-1].data;
 	    var remarks = (selectedSeasonMatches[numMatches-1].remarks.indexOf('RD') > -1) ?' (Número de goles desconocido, por defecto 1-0 o 0-0)':'';
+
+		//Receive players pictures
+		$.getJSON(window.location.pathname+'api/playersPictures.json', function(data) {
+	    	if(data){ playersPictures = data }
+	    	else{ console.warn('Pictures from players not received')};
+	    });	    
+    	
+    	if((selectedSeasonMatches[currentMatch].day+5*24*60*60*1000<new Date().getTime()) &&
+    			(selectedSeasonMatches[currentMatch].day+(8*24-2)*60*60*1000>new Date().getTime())){
+    		setTimeout(function(){
+        		$('#last-match-winner-button').removeClass('btn-default').addClass('btn-success');
+    		},3000);
+    	}	    
 	    
 	    $('#table-results').bootstrapTable({
 	        data: lastMatch,
@@ -279,11 +293,9 @@ $(function () {
     	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'goalsForAVG');
     	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'goalsAgainstAVG');
 
-    	$('#table-full').closest('.row').show();
-    	$('#table-vs').closest('.row').show();
-    	$('#table-comparison').closest('.row').show();
-    	
-    	$('#container-graph').parent().parent().parent().parent().show();
+    	$('#row1').show();
+    	$('#row3').show();
+    	$('#row4').show();
     	
     	$.getJSON(window.location.pathname+'api/pointsSeries.json', function (pointsSeries) {
     	

@@ -1,3 +1,7 @@
+textarea.form-control {
+    overflow: hidden;
+}
+
 .navbar-header{
 	float: none;
 }
@@ -52,6 +56,9 @@ select#season-selector{
 .punctuation-row .panel-group{
 	margin-bottom: 0px;
 }
+.player-goals i.fa-futbol-o{
+	margin-right: 5px;
+}
 li.player-goals{
 	padding-left: 0px;
 	list-style: none;
@@ -75,4 +82,27 @@ ul.white-scorers li{
 .label-lastmatch{
     display: inline-block;
    	width: 20px;
+}
+#polling .form-horizontal .form-group {
+    margin-right: 15px;
+    margin-left: 15px;
+}
+.player-punctuation-number{
+    font-size: 16px;
+    font-weight: 900;
+}
+.player-score{
+    font-weight: 900;
+}
+
+.polling-form-group .flag-white,
+.polling-form-group .flag-blue{
+	position: absolute;
+	left: 10px;
+}
+@media (min-width: 768px) { 
+	.polling-form-group .flag-white,
+	.polling-form-group .flag-blue{
+		display: none;
+	}
 }

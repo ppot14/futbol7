@@ -47,7 +47,7 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.9.1/bootstrap-table.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.9.1/locale/bootstrap-table-es-ES.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.9.0/bootstrap-slider.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-timeago/1.4.3/jquery.timeago.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-timeago/1.6.1/jquery.timeago.min.js"></script>
 	<script src="https://code.highcharts.com/highcharts.js"></script>
 <!-- 	<script src="https://code.highcharts.com/highcharts-more.js"></script> -->
 <!-- 	<script src="resources/json/full.js"></script> -->
@@ -95,7 +95,7 @@
 				</button>
 <!-- 				<ul class="nav navbar-nav navbar-right"> -->
 <!-- 			        <li> -->
-						<img id="player-picture" class="navbar-right" style="display:none"/>
+						<img id="player-picture" class="navbar-right img-rounded" style="display:none"/>
 						<p id="player-name" class="navbar-text navbar-right" style="display:none"></p> 
 <!-- 					</li> -->
 <!-- 			    </ul> -->
@@ -109,10 +109,10 @@
 				  <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
 				</button>
 		  		<select id="season-selector" class="form-control navbar-right"></select>
-	            <button id="last-match-winner-button" type="button" class="btn btn-success navbar-right" data-toggle="modal" data-target="#last-match-winner">
-				  <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+	            <button id="last-match-winner-button" type="button" class="btn btn-default navbar-right" data-toggle="modal" data-target="#last-match-winner">
+				  <i class="fa fa-shield" aria-hidden="true"></i>
 				</button>
-	            <button id="notification-score-button" type="button" class="btn btn-warning navbar-right" data-toggle="modal" data-target="#polling" style="display:none">
+	            <button id="notification-score-button" type="button" class="btn btn-danger navbar-right" data-toggle="modal" data-target="#polling" style="display:none">
 				  <span class="glyphicon glyphicon-envelope" aria-hidden="true"></span>
 				</button>
 		     </div>
@@ -213,7 +213,7 @@
 	    <div class="modal-content">
 	      <div class="modal-header">
 	        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-	        <h4 class="modal-title" id="myModalLabel">Votación para el partido de <span class="last-match-date"></span></h4>
+	        <h4 class="modal-title" id="myModalLabel">Votación para el partido de <span class="last-match-date"></span>. La votación acaba <span class="polling-close-date text-dange"></span></h4>
 	      </div>
 	      <div class="modal-body">
 	      	<div class="row">
@@ -241,7 +241,7 @@
 	</div>	
 	
 	<div id="home-page" class="container-fluid">
-		<div class="row" style="display:none">
+		<div id="row1" class="row" style="display:none">
 			<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
 			
 				<div id="" class="panel panel-default">
@@ -274,7 +274,7 @@
 			</div>
 		</div>
 			
-		<div class="row">
+		<div id="row2" class="row">
 			<div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
 			
 				<div id="" class="panel panel-default">
@@ -303,6 +303,31 @@
 						</table>
 					</div>
 				</div>
+			
+				<div id="" class="panel panel-default">
+				  <div class="panel-heading">
+				    <h3 class="panel-title">Jornadas</h3>
+				  </div>
+				  <div class="panel-body">
+						<table id="table-results">
+							<thead>
+								<tr>
+									<th colspan="2">Jornada X - Dia Y</th>
+								</tr>
+								<tr>
+									<th data-field="blue" >Equipo Azul <span class="pull-right"></span></th>
+									<th data-field="white" >Equipo Blanco <span class="pull-right"></span></th>
+								</tr>
+							</thead>
+							<tfoot>
+								<tr>
+									<th><button id="previous-match" class="btn pull-left">Anterior</button></th>
+									<th><button id="next-match" class="btn pull-right">Siguiente</button></th>
+								</tr>
+							</tfoot>
+						</table>
+					</div>
+				</div>			
 			
 			</div>
 			<div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
@@ -339,7 +364,7 @@
 				    <h3 class="panel-title">Goleadores</h3>
 				  </div>
 				  <div class="panel-body">
-						<table id="table-scorers" data-sort-name="scores" data-sort-order="desc" data-striped="true">
+						<table id="table-scorers" data-sort-name="scores" data-sort-order="desc" data-striped="true" data-pagination="true">
 							<thead>
 								<tr>
 									<th data-field="name" data-sortable="true">Nombre</th>
@@ -353,8 +378,8 @@
 			</div>
 		</div>
 		
-		<div class="row" style="display:none">
-			<div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
+		<div id="row3" class="row" style="display:none">
+			<div class="col-xs-12 col-sm-12 col-md-4 col-lg-4" >
 			
 				<div id="" class="panel panel-default">
 				  <div class="panel-heading">
@@ -375,7 +400,7 @@
 				</div>
 			
 			</div>
-			<div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
+			<div class="col-xs-12 col-sm-12 col-md-4 col-lg-4" >
 			
 				<div id="" class="panel panel-default">
 				  <div class="panel-heading">
@@ -400,37 +425,6 @@
 			
 				<div id="" class="panel panel-default">
 				  <div class="panel-heading">
-				    <h3 class="panel-title">Jornadas</h3>
-				  </div>
-				  <div class="panel-body">
-						<table id="table-results">
-							<thead>
-								<tr>
-									<th colspan="2">Jornada X - Dia Y</th>
-								</tr>
-								<tr>
-									<th data-field="blue" >Equipo Azul <span class="pull-right"></span></th>
-									<th data-field="white" >Equipo Blanco <span class="pull-right"></span></th>
-								</tr>
-							</thead>
-							<tfoot>
-								<tr>
-									<th><button id="previous-match" class="btn pull-left">Anterior</button></th>
-									<th><button id="next-match" class="btn pull-right">Siguiente</button></th>
-								</tr>
-							</tfoot>
-						</table>
-					</div>
-				</div>
-			
-			</div>
-		</div>
-		
-		<div class="row" style="display:none">
-			<div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
-			
-				<div id="" class="panel panel-default">
-				  <div class="panel-heading">
 				    <h3 class="panel-title">Comparación</h3>
 				  </div>
 				  <div class="panel-body">
@@ -447,10 +441,10 @@
 				  </div>
 				</div>
 				
-			</div>
+			</div>		
 		</div>
 		
-		<div class="row" style="display:none">
+		<div id="row4" class="row" style="display:none">
 			<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
 			
 				<div id="" class="panel panel-default">

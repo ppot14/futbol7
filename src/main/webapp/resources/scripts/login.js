@@ -1,4 +1,5 @@
 var nameweb;
+var playersPictures;
 
 function facebookStatusChangeCallback(response) {
 	if(response.status && response.status == 'connected'){
@@ -55,6 +56,7 @@ function loggedIn(response,loginType) {
 			JSON.stringify(data), 
 			function( data ) {
 				if(data && data.nameweb){
+					
     				nameweb = data.nameweb;
     				$( "td:contains('"+data.nameweb+"')" ).css( "font-weight", "bold" );
     				$( "tr:contains('"+data.nameweb+"')" ).addClass( "info" );
@@ -101,14 +103,14 @@ function updateListTeamScorers(match){
   						if(data1[match.data[i].blue]!=null && 
   							data1[match.data[i].blue]!=0){
   							var scoresB='';
-  							for(var j=0; j<data1[match.data[i].blue]; j++){ scoresB+='<span class="glyphicon glyphicon-record" aria-hidden="true"></span>'; }
+  							for(var j=0; j<data1[match.data[i].blue]; j++){ scoresB+='<i class="fa fa-futbol-o" aria-hidden="true"></i>'; }
   							scoresB = '<li class="player-goals">'+match.data[i].blue+' '+scoresB+'</li>';
   							$(scoresB).appendTo('.blue-scorers');
   						}
   						if(data1[match.data[i].white]!=null && 
   							data1[match.data[i].white]!=0){
   							var scoresA='';
-  							for(var j=0; j<data1[match.data[i].white]; j++){ scoresA+='<span class="glyphicon glyphicon-record" aria-hidden="true"></span>'; }
+  							for(var j=0; j<data1[match.data[i].white]; j++){ scoresA+='<i class="fa fa-futbol-o" aria-hidden="true"></i>'; }
   							scoresA = '<li class="player-goals">'+scoresA+' '+match.data[i].white+'</li>';
   							$(scoresA).appendTo('.white-scorers');
   							
@@ -121,16 +123,16 @@ function updateListTeamScorers(match){
   	  );
 }
 
-function addPlayerToResult(x, data){
+function addPlayerToResult(x, t, data){
 	var id = Date.now();
-	var row = $('<div class="row punctuation-row"><div class="row-wrap col-xs-12 col-sm-12 col-md-12 col-lg-12"><div class="panel panel-default '+(x==0?'panel-info':'')+'"><div class="panel-body '+(x==0?'bg-info':'')+'"></div></div></div></div>').appendTo($('#last-match-winner .modal-body'));
+	var row = $('<div class="row punctuation-row"><div class="row-wrap col-xs-12 col-sm-12 col-md-12 col-lg-12"><div class="panel panel-default '+(x==0?'panel-success':x==t-1?'panel-danger':nameweb==data.key?'panel-info':'')+'"><div class="panel-body '+(x==0?'bg-success':x==t-1?'bg-danger':nameweb==data.key?'bg-info':'')+'"></div></div></div></div>').appendTo($('#last-match-winner .modal-body'));
 	var scores = '';
 	if(data.value.scores){
-		for(var i=0; i<data.value.scores; i++){ scores+='<span class="glyphicon glyphicon-record" aria-hidden="true"></span>'; }
+		for(var i=0; i<data.value.scores; i++){ scores+='<i class="fa fa-futbol-o" aria-hidden="true"></i>'; }
 		scores = '<span class="player-goals">Goles: '+scores+'</span>';
 	}
 	$('<div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">'+
-		'<div class="pull-left" style="width: 30%;"><img class="player-picture img-circle" style="height: 60px;width: 60px;" src="'+((data.value.image)?data.value.image:'resources/images/logo50.png')+'"/></div>'+
+		'<div class="pull-left" style="width: 30%;"><img class="player-picture img-rounded" style="height: 60px;width: 60px;" src="'+((data.value.image)?data.value.image:'resources/images/logo50.png')+'"/></div>'+
 		'<div class="player-score-data pull-left" style="width: 70%;">'+
 			'<h4 class="player-name">'+data.key+' <span class="player-score pull-right">'+data.value.avg+'</span></h4>'+
 			scores+
@@ -186,51 +188,63 @@ function addPlayerToResult(x, data){
 function createPollingForm(){
 	$('.polling-form-group').remove();
 	for(var i=selectedSeasonMatches[currentMatch].data.length-1; i>=0; i--){	
-		$('<div class="form-group polling-form-group">'+
-			'<div class="col-md-2">'+
-			'<img id="blue-player-picture-'+i+'" class="player-picture img-circle" style="height: 100px;width: 100px;" src="resources/images/logo50.png"/>'+
-	    '</div>'+
-		'<div class="col-md-4">'+
-			'<h4 id="blue-player-name-'+i+'" class="player-name">'+selectedSeasonMatches[currentMatch].data[i].blue+'</h4>'+
-			'<input type="text" name="blue-player-punctuation-'+i+'" '+
-			'data-provide="slider" '+
-			'data-slider-id="slider-blue-'+i+'" '+
-			'data-slider-min="1"'+
-			'data-slider-max="10"'+
-			'data-slider-step="1"'+
-			'data-slider-value="5"'+
-			'data-slider-tooltip="hide" ><span id="blue-player-punctuation-number-'+i+'" class="pull-right"></span>'+
-			'<textarea name="blue-player-comment-'+i+'" class="form-control" rows="3" placeholder="Comentario"  '+((selectedSeasonMatches[currentMatch].data[i].blue==nameweb)?'disabled':'')+'></textarea>'+
-	    '</div>'+
-		'<div class="col-md-2">'+
-			'<img id="white-player-picture-'+i+'" class="player-picture img-circle" style="height: 100px;width: 100px;" src="resources/images/logo50.png"/>'+
-	    '</div>'+
-		'<div class="col-md-4">'+
-			'<h4 id="white-player-name-'+i+'" class="player-name">'+selectedSeasonMatches[currentMatch].data[i].white+'</h4>'+
-			'<input type="text" name="white-player-punctuation-'+i+'" '+
-			'data-provide="slider" '+
-			'data-slider-id="slider-white-'+i+'" '+
-			'data-slider-min="1"'+
-			'data-slider-max="10"'+
-			'data-slider-step="1"'+
-			'data-slider-value="5"'+
-			'data-slider-tooltip="hide"><span id="white-player-punctuation-number-'+i+'" class="pull-right"></span>'+
-			'<textarea name="white-player-comment-'+i+'" class="form-control" rows="3" placeholder="Comentario"  '+((selectedSeasonMatches[currentMatch].data[i].white==nameweb)?'disabled':'')+'></textarea>'+
-	    '</div>'+
-		'</div>').prependTo("#polling-form");
+		$('<div class="form-group polling-form-group"><div class=row>'+
+			'<div class="col-md-6"><div class=row style="margin-bottom: 15px">'+
+				'<div class="col-md-4">'+
+					'<img id="blue-player-picture-'+i+'" class="player-picture img-rounded" style="height: 100px;width: 100px;" src="'+
+					(playersPictures[selectedSeasonMatches[currentMatch].data[i].blue]?playersPictures[selectedSeasonMatches[currentMatch].data[i].blue]:'resources/images/logo50.png')+'"/>'+
+					'<i class="fa fa-flag fa-2x text-primary flag-blue" aria-hidden="true"></i>'+
+			    '</div>'+
+				'<div class="col-md-8">'+
+					'<h4 id="blue-player-name-'+i+'" class="player-name">'+selectedSeasonMatches[currentMatch].data[i].blue+'</h4>'+
+					'<input type="text" name="blue-player-punctuation-'+i+'" '+
+					'data-provide="slider" '+
+					'data-slider-id="slider-blue-'+i+'" '+
+					'data-slider-min="1"'+
+					'data-slider-max="10"'+
+					'data-slider-step="1"'+
+					'data-slider-value="5"'+
+					'data-slider-tooltip="hide" ><span id="blue-player-punctuation-number-'+i+'" class="player-punctuation-number pull-right"></span>'+
+					'<textarea name="blue-player-comment-'+i+'" class="form-control" rows="3" placeholder="Comentario"  '+((selectedSeasonMatches[currentMatch].data[i].blue==nameweb)?'disabled':'')+'></textarea>'+
+			    '</div>'+
+			'</div></div>'+
+			'<div class="col-md-6"><div class=row>'+
+				'<div class="col-md-4">'+
+					'<img id="white-player-picture-'+i+'" class="player-picture img-rounded" style="height: 100px;width: 100px;" src="'+
+					(playersPictures[selectedSeasonMatches[currentMatch].data[i].white]?playersPictures[selectedSeasonMatches[currentMatch].data[i].white]:'resources/images/logo50.png')+'"/>'+
+					'<i class="fa fa-flag-o fa-2x flag-white" aria-hidden="true"></i>'+
+			    '</div>'+
+				'<div class="col-md-8">'+
+					'<h4 id="white-player-name-'+i+'" class="player-name">'+selectedSeasonMatches[currentMatch].data[i].white+'</h4>'+
+					'<input type="text" name="white-player-punctuation-'+i+'" '+
+					'data-provide="slider" '+
+					'data-slider-id="slider-white-'+i+'" '+
+					'data-slider-min="1"'+
+					'data-slider-max="10"'+
+					'data-slider-step="1"'+
+					'data-slider-value="5"'+
+					'data-slider-tooltip="hide"><span id="white-player-punctuation-number-'+i+'" class="player-punctuation-number pull-right"></span>'+
+					'<textarea name="white-player-comment-'+i+'" class="form-control" rows="3" placeholder="Comentario"  '+((selectedSeasonMatches[currentMatch].data[i].white==nameweb)?'disabled':'')+'></textarea>'+
+			    '</div>'+
+			'</div></div>'+
+		'</div></div>').prependTo("#polling-form");
 		var mySliderB = $('input[name="blue-player-punctuation-'+i+'"]').slider();
 		var mySliderW = $('input[name="white-player-punctuation-'+i+'"]').slider();
-		mySliderB.on("slide", function(slideEvt) {
+		$('#blue-player-punctuation-number-'+i).text(mySliderB.val());
+		$('#white-player-punctuation-number-'+i).text(mySliderW.val());
+		mySliderB.on("slideStop", function(slideEvt) {
 			$('#'+slideEvt.target.name.replace("punctuation-","punctuation-number-")).text(slideEvt.value);
 		});
-		mySliderW.on("slide", function(slideEvt) {
+		mySliderW.on("slideStop", function(slideEvt) {
 			$('#'+slideEvt.target.name.replace("punctuation-","punctuation-number-")).text(slideEvt.value);
 		});
 		if(selectedSeasonMatches[currentMatch].data[i].blue==nameweb){
 			mySliderB.slider("disable");
+			$('#blue-player-punctuation-number-'+i).hide();
 		}
 		if(selectedSeasonMatches[currentMatch].data[i].white==nameweb){
 			mySliderW.slider("disable");
+			$('#white-player-punctuation-number-'+i).hide();
 		}
 	}
 
@@ -264,8 +278,8 @@ function createPollingForm(){
 	  					$('#polling-form button[type="submit"]').prop("disabled","disabled");
 	  					$('#polling').modal('hide');
 	  					$('#notification-score-button').slideUp();
-	  					$('<button type="button" class="btn btn-info pull-right" style="margin-top: 8px; margin-right: 10px">Votación realizada. Resultados disponibles: '+
-	  							new Date(selectedSeasonMatches[currentMatch].day+5*24*60*60*1000)+	
+	  					$('<button type="button" class="btn btn-info pull-right" style="margin-top: 8px; margin-right: 10px">Votación realizada. Resultados disponibles '+
+	  							$.timeago(selectedSeasonMatches[currentMatch].day+5*24*60*60*1000)+	
 	  					'</button>').appendTo('#top-navbar .container-fluid .navbar-header').delay(10000).slideUp();
 	  				}else{
 	  					if(data2.error){
@@ -353,6 +367,7 @@ $(function () {
 		$('.blue-score').text(parseInt(selectedSeasonMatches[currentMatch].scoreBlues));
 		$('.white-score').text(parseInt(selectedSeasonMatches[currentMatch].scoreWhites));
 		$('.last-match-date').text($.timeago(selectedSeasonMatches[currentMatch].day));
+		$('.polling-close-date').text($.timeago(selectedSeasonMatches[currentMatch].day+5*24*60*60*1000));
 		
 		updateListTeamScorers(selectedSeasonMatches[currentMatch]);
 		
@@ -380,7 +395,7 @@ $(function () {
 	  				if(data1 && Array.isArray(data1)){
 	  					$('.punctuation-row').remove();
 	  					for(var i=0; i<data1.length; i++){
-	  						addPlayerToResult(i, data1[i]);
+	  						addPlayerToResult(i, data1.length, data1[i]);
 	  					}
 	  				}else{
 	  					console.warn('There is no match results for the last match: '+request);

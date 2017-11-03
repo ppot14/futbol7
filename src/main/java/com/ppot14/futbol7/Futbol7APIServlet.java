@@ -77,6 +77,8 @@ public class Futbol7APIServlet extends HttpServlet {
     	    	reply = api.getOptions(); }
 			else if(requestPath.contains("/api/scorers.json")){
 	    		reply = api.getFullScorers(); }
+			else if(requestPath.contains("/api/playersPictures.json")){
+	    		reply = api.getPlayersPictures(); }
 			else{
 				logger.warning("Request path not found: "+requestPath);
 			}
@@ -106,15 +108,15 @@ public class Futbol7APIServlet extends HttpServlet {
 			if(requestPath.contains("/api/comparison.json")){
 		    	reply = api.getComparison(jsonNode);
 			}else if(requestPath.contains("/api/player.json")){
-				reply = DBConnector.getPlayer(jsonNode);
+				reply = api.getPlayer(jsonNode);
 			}else if(requestPath.contains("/api/player-has-voted.json")){
-				reply = DBConnector.hasVoted(jsonNode);
+				reply = api.hasVoted(jsonNode);
 			}else if(requestPath.contains("/api/last-match-result.json")){
-				reply = APIUtil.getLastMatchResult(jsonNode);
+				reply = api.getLastMatchResult(jsonNode);
 			}else if(requestPath.contains("/api/match-scorers.json")){
-				reply = APIUtil.getMatchScorers(jsonNode);
+				reply = api.getMatchScorers(jsonNode);
 			}else if(requestPath.contains("/api/save-polling.json")){
-				reply = APIUtil.savePolling(jsonNode);
+				reply = api.savePolling(jsonNode);
 			}else{
 				logger.warning("Request path not found: "+requestPath);
 			}
