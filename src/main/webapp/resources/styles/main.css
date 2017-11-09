@@ -21,9 +21,13 @@ select#season-selector{
     height: 34px;
 }
 #player-name{
-    color: white;    
-    line-height: 34px;
-    margin: 0px;
+/*     color: white;     */
+/*     line-height: 34px; */
+/*     margin: 0px; */
+}
+h3.player-name{
+	margin-top: 10px;
+    text-align: center;
 }
 .navbar-form button,
 .navbar-form select,
@@ -94,7 +98,6 @@ ul.white-scorers li{
 .player-score{
     font-weight: 900;
 }
-
 .polling-form-group .flag-white,
 .polling-form-group .flag-blue{
 	position: absolute;
@@ -105,4 +108,32 @@ ul.white-scorers li{
 	.polling-form-group .flag-blue{
 		display: none;
 	}
+}
+
+/*Last Match Winner*/ 
+#last-match-winner .player-picture{
+	height: 100px;
+	width: 100px;
+	float: left;
+}
+#last-match-winner .badges{
+	clear:right;
+}
+#last-match-winner .player-score{
+	font-size: xx-large;
+}
+#last-match-winner .badges div.player-badge{
+    background-color: lightgoldenrodyellow;
+    height: 50px;
+    width: 50px;
+    text-align: center;
+    display: table;
+    border-radius: 25px;
+    border: 4px solid lightcoral;
+}
+#last-match-winner .badges div.player-badge i{
+    color: lightcoral;
+    vertical-align: middle;
+    display: table-cell;
+    font-size: 25px;
 }

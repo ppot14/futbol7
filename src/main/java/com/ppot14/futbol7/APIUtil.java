@@ -181,31 +181,6 @@ public class APIUtil {
 		return fullScorers;
 	}
 
-	public void writeToFileAndServer(){
-
-		File project =  new File("");
-		
-		String jsonSrcFolder = project.getAbsolutePath()+"\\src\\main\\webapp\\resources\\json\\";
-		
-//		logger.info("Project src json folder: "+jsonSrcFolder);
-
-		try{
-			
-			writeToServer(writeJSONtoFile(jsonSrcFolder,"full.js",jsonToString(getFullRanking())),"/resources/json");
-			writeToServer(writeJSONtoFile(jsonSrcFolder,"pair.js",jsonToString(getPair())),"/resources/json");
-			writeToServer(writeJSONtoFile(jsonSrcFolder,"permanents.js",jsonToString(getRankingPermanents())),"/resources/json");
-			writeToServer(writeJSONtoFile(jsonSrcFolder,"substitutes.js",jsonToString(getRankingSubstitutes())),"/resources/json");
-			writeToServer(writeJSONtoFile(jsonSrcFolder,"vs.js",jsonToString(getVS())),"/resources/json");
-			writeToServer(writeJSONtoFile(jsonSrcFolder,"pointsSeries.js",jsonToString(getPointsSeries())),"/resources/json");
-			writeToServer(writeJSONtoFile(jsonSrcFolder,"matches.js",jsonToString(getResults())),"/resources/json");
-	        
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-		writeToServer(new File(project.getAbsolutePath()+"\\src\\main\\webapp\\index.html"),"");
-		
-	}
-
 	public Map<String,List<Map<String, Object>>> getResults() throws ParseException {
 		Map<String,List<Map<String, Object>>> res = new HashMap<String,List<Map<String,Object>>>();
 		
@@ -298,67 +273,6 @@ public class APIUtil {
         }
         
 		return data;
-	}
-
-	private File writeJSONtoFile(String folder, String file, String jsonString) throws IOException {
-		String varName = file.split("\\.")[0];
-//		logger.info("File created: "+folder+file+"; var "+varName+" = "+ jsonString+ ";");
-		List<String> lines = Arrays.asList("var "+varName+" = ", jsonString, ";");
-		Path path = Paths.get(folder+file);
-		Files.write(path, lines, Charset.forName("UTF-8"));
-		return path.toFile();
-	}
-	
-	private void writeToServer(File file, String subdir){
-			String SFTPHOST = (String) config.get("sftp-host");
-			int    SFTPPORT = (Integer) config.get("sftp-port");
-			String SFTPUSER = (String) config.get("sftp-username");
-			String SFTPPASS = (String) config.get("sftp-password");
-			String SFTPWORKINGDIR = (String) config.get("sftp-directory") + subdir;
-			 
-		    FTPClient ftp = new FTPClient();
-		    ftp.setConnectTimeout(10000);
-			 
-			try{
-			      int reply;
-			      ftp.connect(SFTPHOST,SFTPPORT);
-			      ftp.login(SFTPUSER, SFTPPASS);
-			      reply = ftp.getReplyCode();
-
-			      if(!FTPReply.isPositiveCompletion(reply)) {
-			        ftp.disconnect();
-					logger.severe("FTP server refused connection: "+ftp.getReplyString());
-			        return;
-			      }
-			      
-			      ftp.changeWorkingDirectory(SFTPWORKINGDIR);
-			      ftp.enterLocalPassiveMode();
-			      
-			      FileInputStream fis = new FileInputStream(file);
-			      ftp.storeFile(file.getName(), fis);
-
-			      reply = ftp.getReplyCode();
-			      if(!FTPReply.isPositiveCompletion(reply)) {
-			        ftp.disconnect();
-					logger.severe("FTP file transfer error: "+reply+" "+ftp.getReplyString());
-			        return;
-			      }
-			      
-			      fis.close();
-		          ftp.logout();				
-				logger.info("File "+file.getName()+" transfered to server folder "+SFTPWORKINGDIR);
-			}catch(Exception ex){
-				logger.severe("Impossible to transfer file to server: "+ex);
-				ex.printStackTrace();
-			}finally {
-		      if(ftp.isConnected()) {
-		          try {
-		            ftp.disconnect();
-		          } catch(IOException ioe) {
-		            // do nothing
-		          }
-		       }
-		    }
 	}
 
 	public Map<String,List<Map<String,String>>> getVS() throws java.text.ParseException {
@@ -802,39 +716,62 @@ public class APIUtil {
 			if(votes==null){ logger.warning("getVotes didn't return any result for season "+season+", date "+date); return null; }
 			Map<String,String> playersPictures = DBConnector.getPlayersPictures();
 			List<Document> scores = (List<Document>) votes.get("scores");
-			for(Document score : scores){
-				String voter = score.getString("voter");
-				String voted = score.getString("voted");
-				Integer scoreI = score.getInteger("score");
-				String comment = score.getString("comment");
-				Map<String,Object> punctuation = new HashMap<String,Object>();
-				punctuation.put("voter", voter);
-				punctuation.put("score", scoreI);
-				punctuation.put("comment", comment);
-				if(result2.containsKey(voted)){
-					((List<Integer>)result2.get(voted).get("avgList")).add(scoreI);
-					double newavg = ((List<Integer>)result2.get(voted).get("avgList")).stream().mapToDouble(new ToDoubleFunction<Integer>() {
-						@Override
-						public double applyAsDouble(Integer value) {
-							return value;
+			List<Document> scoresAVG = (List<Document>) votes.get("scoresAVG");
+			if(scores!=null && !scores.isEmpty()){
+				for(Document score : scores){
+					String voter = score.getString("voter");
+					String voted = score.getString("voted");
+					Integer scoreI = score.getInteger("score");
+					String comment = score.getString("comment");
+					Map<String,Object> punctuation = new HashMap<String,Object>();
+					punctuation.put("voter", voter);
+					punctuation.put("score", scoreI);
+					punctuation.put("comment", comment);
+					if(result2.containsKey(voted)){
+						((List<Integer>)result2.get(voted).get("avgList")).add(scoreI);
+						double newavg = ((List<Integer>)result2.get(voted).get("avgList")).stream().mapToDouble(new ToDoubleFunction<Integer>() {
+							@Override
+							public double applyAsDouble(Integer value) {
+								return value;
+							}
+						}).average().getAsDouble();
+						result2.get(voted).put("avg",newavg);
+						((List<Map<String,Object>>)result2.get(voted).get("punctuations")).add(punctuation);
+					}else{
+						List<Map<String,Object>> punctuations = new  ArrayList<Map<String,Object>>();
+						punctuations.add(punctuation);
+						List<Integer> avgList = new ArrayList<Integer>();
+						avgList.add(scoreI);
+						Map<String,Object> punctuationData = new HashMap<String,Object>();
+						punctuationData.put("punctuations", punctuations);
+						punctuationData.put("avgList", avgList);
+						punctuationData.put("avg", (double)scoreI);
+						if(playersPictures.containsKey(voted)){ punctuationData.put("image", playersPictures.get(voted)); }
+						if(fullScorersByDate!=null && fullScorersByDate.get(season)!=null && 
+							fullScorersByDate.get(season).get(date2)!=null){
+							punctuationData.put("scores",fullScorersByDate.get(season).get(date2).get(voted));
 						}
-					}).average().getAsDouble();
-					result2.get(voted).put("avg",newavg);
-					((List<Map<String,Object>>)result2.get(voted).get("punctuations")).add(punctuation);
-				}else{
-					List<Map<String,Object>> punctuations = new  ArrayList<Map<String,Object>>();
-					punctuations.add(punctuation);
-					List<Integer> avgList = new ArrayList<Integer>();
-					avgList.add(scoreI);
-					Map<String,Object> punctuationData = new HashMap<String,Object>();
-					punctuationData.put("punctuations", punctuations);
-					punctuationData.put("avgList", avgList);
-					punctuationData.put("avg", (double)scoreI);
-					if(playersPictures.containsKey(voted)){ punctuationData.put("image", playersPictures.get(voted)); }
-					if(fullScorersByDate!=null && fullScorersByDate.get(season)!=null && 
-						fullScorersByDate.get(season).get(date2)!=null){
-						punctuationData.put("scores",fullScorersByDate.get(season).get(date2).get(voted));
+						result2.put(voted,punctuationData);
 					}
+				}
+			}else if(scoresAVG!=null && !scoresAVG.isEmpty()){
+				for(Document score : scoresAVG){
+					String voted = score.getString("voted");
+					Double scoreD = score.getDouble("score");
+					Double scoreFublesD = score.getDouble("scoreFubles");
+					Map<String,Object> punctuationData = new HashMap<String,Object>();
+					punctuationData.put("linkFubles", score.getString("linkFubles"));
+					if(scoreFublesD!=null && scoreD!=null){
+						punctuationData.put("avg", scoreD);
+						punctuationData.put("avgFubles", scoreFublesD);
+					}else if(scoreFublesD!=null){
+						punctuationData.put("avg", (3.0*scoreFublesD/2.0-5));
+						punctuationData.put("avgFubles", scoreFublesD);
+					}else{
+						punctuationData.put("avg", scoreD);
+						punctuationData.put("avgFubles", (2.0*scoreD/3.0+10.0/3.0));
+					}
+					if(playersPictures.containsKey(voted)){ punctuationData.put("image", playersPictures.get(voted)); }
 					result2.put(voted,punctuationData);
 				}
 			}
@@ -842,7 +779,7 @@ public class APIUtil {
 			Collections.sort(result,new Comparator<Map.Entry<String,Map<String,Object>>>(){
 				@Override
 				public int compare(Map.Entry<String, Map<String,Object>> o1, Map.Entry<String, Map<String,Object>> o2) {
-					return (int) ( (Double)(o2.getValue()).get("avg") - (Double)(o1.getValue()).get("avg") );
+					return (int) ( ((Double)(o2.getValue()).get("avg") - (Double)(o1.getValue()).get("avg"))*1000 );
 				}
 				
 			});
@@ -873,23 +810,23 @@ public class APIUtil {
 			}
 			Document votes = DBConnector.getVotes(season, date);
 			if(votes==null){
-				Document d = Document.parse(jsonNode.toString());
+				Document d = new Document();
+				d.put("season", season);
 				d.put("date", date);
 				DBConnector.createScore(d);
-			}else{
-				for(JsonNode p : scores){
-					String voter = p.get("voter").asText();
-					String voted = p.get("voted").asText();
-					Integer score = p.get("score").asInt();
-					String comment = p.get("comment").asText();
-					Document hasVoted = DBConnector.hasVotedPlayer(voter, voted, dateL, season);
-					if(hasVoted==null){
-						if(!DBConnector.addPunctuation(voter, voted, score, comment, dateL, season)){
-							logger.warning("Error trying to insert into DB: "+voter+" votes "+voted+" for match "+date+" "+season);
-						}
-					}else{
-						logger.warning(voter+" already voted "+voted+" for match "+date+" "+season);
+			}
+			for(JsonNode p : scores){
+				String voter = p.get("voter").asText();
+				String voted = p.get("voted").asText();
+				Integer score = p.get("score").asInt();
+				String comment = p.get("comment").asText();
+				Document hasVoted = DBConnector.hasVotedPlayer(voter, voted, dateL, season);
+				if(hasVoted==null){
+					if(!DBConnector.addPunctuation(voter, voted, score, comment, dateL, season)){
+						logger.warning("Error trying to insert into DB: "+voter+" votes "+voted+" for match "+date+" "+season);
 					}
+				}else{
+					logger.warning(voter+" already voted "+voted+" for match "+date+" "+season);
 				}
 			}
 		}catch (Exception e) {
@@ -911,4 +848,101 @@ public class APIUtil {
 	public Object getPlayersPictures() {		
 		return DBConnector.getPlayersPictures();
 	}	
+
+
+	
+	/**
+	 * @deprecated
+	 */
+	public void writeToFileAndServer(){
+
+		File project =  new File("");
+		
+		String jsonSrcFolder = project.getAbsolutePath()+"\\src\\main\\webapp\\resources\\json\\";
+		
+//		logger.info("Project src json folder: "+jsonSrcFolder);
+
+		try{
+			
+			writeToServer(writeJSONtoFile(jsonSrcFolder,"full.js",jsonToString(getFullRanking())),"/resources/json");
+			writeToServer(writeJSONtoFile(jsonSrcFolder,"pair.js",jsonToString(getPair())),"/resources/json");
+			writeToServer(writeJSONtoFile(jsonSrcFolder,"permanents.js",jsonToString(getRankingPermanents())),"/resources/json");
+			writeToServer(writeJSONtoFile(jsonSrcFolder,"substitutes.js",jsonToString(getRankingSubstitutes())),"/resources/json");
+			writeToServer(writeJSONtoFile(jsonSrcFolder,"vs.js",jsonToString(getVS())),"/resources/json");
+			writeToServer(writeJSONtoFile(jsonSrcFolder,"pointsSeries.js",jsonToString(getPointsSeries())),"/resources/json");
+			writeToServer(writeJSONtoFile(jsonSrcFolder,"matches.js",jsonToString(getResults())),"/resources/json");
+	        
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		writeToServer(new File(project.getAbsolutePath()+"\\src\\main\\webapp\\index.html"),"");
+		
+	}
+	
+	/**
+	 * @deprecated
+	 */
+	private File writeJSONtoFile(String folder, String file, String jsonString) throws IOException {
+		String varName = file.split("\\.")[0];
+//		logger.info("File created: "+folder+file+"; var "+varName+" = "+ jsonString+ ";");
+		List<String> lines = Arrays.asList("var "+varName+" = ", jsonString, ";");
+		Path path = Paths.get(folder+file);
+		Files.write(path, lines, Charset.forName("UTF-8"));
+		return path.toFile();
+	}
+
+	/**
+	 * @deprecated
+	 */
+	private void writeToServer(File file, String subdir){
+			String SFTPHOST = (String) config.get("sftp-host");
+			int    SFTPPORT = (Integer) config.get("sftp-port");
+			String SFTPUSER = (String) config.get("sftp-username");
+			String SFTPPASS = (String) config.get("sftp-password");
+			String SFTPWORKINGDIR = (String) config.get("sftp-directory") + subdir;
+			 
+		    FTPClient ftp = new FTPClient();
+		    ftp.setConnectTimeout(10000);
+			 
+			try{
+			      int reply;
+			      ftp.connect(SFTPHOST,SFTPPORT);
+			      ftp.login(SFTPUSER, SFTPPASS);
+			      reply = ftp.getReplyCode();
+
+			      if(!FTPReply.isPositiveCompletion(reply)) {
+			        ftp.disconnect();
+					logger.severe("FTP server refused connection: "+ftp.getReplyString());
+			        return;
+			      }
+			      
+			      ftp.changeWorkingDirectory(SFTPWORKINGDIR);
+			      ftp.enterLocalPassiveMode();
+			      
+			      FileInputStream fis = new FileInputStream(file);
+			      ftp.storeFile(file.getName(), fis);
+
+			      reply = ftp.getReplyCode();
+			      if(!FTPReply.isPositiveCompletion(reply)) {
+			        ftp.disconnect();
+					logger.severe("FTP file transfer error: "+reply+" "+ftp.getReplyString());
+			        return;
+			      }
+			      
+			      fis.close();
+		          ftp.logout();				
+				logger.info("File "+file.getName()+" transfered to server folder "+SFTPWORKINGDIR);
+			}catch(Exception ex){
+				logger.severe("Impossible to transfer file to server: "+ex);
+				ex.printStackTrace();
+			}finally {
+		      if(ftp.isConnected()) {
+		          try {
+		            ftp.disconnect();
+		          } catch(IOException ioe) {
+		            // do nothing
+		          }
+		       }
+		    }
+	}
 }

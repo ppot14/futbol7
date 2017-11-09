@@ -43,24 +43,22 @@
 	
 	<script src="https://apis.google.com/js/platform.js"></script>
 	<script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
-	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.9.1/bootstrap-table.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.9.1/locale/bootstrap-table-es-ES.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.9.0/bootstrap-slider.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-timeago/1.6.1/jquery.timeago.min.js"></script>
 	<script src="https://code.highcharts.com/highcharts.js"></script>
 <!-- 	<script src="https://code.highcharts.com/highcharts-more.js"></script> -->
-<!-- 	<script src="resources/json/full.js"></script> -->
-<!-- 	<script src="resources/json/permanents.js"></script> -->
-<!-- 	<script src="resources/json/substitutes.js"></script> -->
-<!-- 	<script src="resources/json/vs.js"></script> -->
-<!-- 	<script src="resources/json/pair.js"></script> -->
-<!-- 	<script src="resources/json/pointsSeries.js"></script> -->
-<!-- 	<script src="resources/json/matches.js"></script> -->
 	<script src="resources/scripts/main.js"></script>
 	<script src="resources/scripts/login.js"></script>
 	
-	<link rel="shortcut icon" href="resources/images/logo.ico" />
+<!-- 	<link rel="shortcut icon" href="resources/images/logo.ico" /> -->
+	<link rel="apple-touch-icon" sizes="120x120" href="resources/images/favicon120.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="resources/images/favicon32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="resources/images/favicon16.png">
+	<link rel="manifest" href="/manifest.json">
+	<meta name="theme-color" content="#000000">	
 
   </head>
 
@@ -87,36 +85,33 @@
 <!-- 	      </form> -->
 		  <form class="navbar-form navbar-right">
   			 <div class="form-group">
-	            <button id="login-button" type="button" class="btn btn-default navbar-right" data-toggle="modal" data-target="#login-selector">
-				  <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+	            <button id="notification-score-button" type="button" class="btn btn-danger" data-toggle="modal" data-target="#polling" style="display:none">
+				  <span class="glyphicon glyphicon-envelope" aria-hidden="true"></span>
 				</button>
-	            <button id="logout-button" type="button" class="btn btn-default navbar-right" style="display:none">
-				  <span class="glyphicon glyphicon-log-out" aria-hidden="true"></span>
-				</button>
-<!-- 				<ul class="nav navbar-nav navbar-right"> -->
-<!-- 			        <li> -->
-						<img id="player-picture" class="navbar-right img-rounded" style="display:none"/>
-						<p id="player-name" class="navbar-text navbar-right" style="display:none"></p> 
-<!-- 					</li> -->
-<!-- 			    </ul> -->
-	            <button type="button" class="btn btn-default navbar-right" data-toggle="modal" data-target="#legend">
-				  <span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
-				</button>
-	            <button id="plus-info" type="button" class="btn btn-default navbar-right" style="display:none;">
-				  <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-				</button>
-	            <button id="refresh" type="button" class="btn btn-default navbar-right">
-				  <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
-				</button>
-		  		<select id="season-selector" class="form-control navbar-right"></select>
-	            <button id="last-match-winner-button" type="button" class="btn btn-default navbar-right" data-toggle="modal" data-target="#last-match-winner">
+	            <button id="last-match-winner-button" type="button" class="btn btn-default" data-toggle="modal" data-target="#last-match-winner">
 				  <i class="fa fa-shield" aria-hidden="true"></i>
 				</button>
-	            <button id="notification-score-button" type="button" class="btn btn-danger navbar-right" data-toggle="modal" data-target="#polling" style="display:none">
-				  <span class="glyphicon glyphicon-envelope" aria-hidden="true"></span>
+		  		<select id="season-selector" class="form-control"></select>
+	            <button id="refresh" type="button" class="btn btn-info" style="display:none">
+				  <span class="glyphicon glyphicon-refresh" aria-hidden="true"></span>
+				</button>
+				<button id="player-name" class="btn btn-link" style="display:none">
+				</button>
+				<img id="player-picture" class="img-rounded" style="display:none"/>
+	            <button id="logout-button" type="button" class="btn btn-default" style="display:none">
+				  <span class="glyphicon glyphicon-log-out" aria-hidden="true"></span>
+				</button>
+	            <button id="login-button" type="button" class="btn btn-default" data-toggle="modal" data-target="#login-selector">
+				  <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+				</button>
+	            <button type="button" class="btn btn-link" data-toggle="modal" data-target="#legend">
+				  <span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
 				</button>
 		     </div>
 		  </form>
+		  
+	      <button id="notification-bar" type="button" class="btn btn-info pull-right" style="margin-top: 8px; display:none"></button>
+	    	
 	    </div>
 	    
 <!-- 	    <div class="collapse navbar-collapse" id="navbar-collapse"> -->

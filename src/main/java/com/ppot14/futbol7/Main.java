@@ -12,12 +12,14 @@ import org.codehaus.jackson.map.ObjectMapper;
 public class Main {
 	
 	private static final Logger logger = Logger.getLogger(Main.class.getName());
+	
+	protected static APIUtil a;
 
 	public static void main(String[] args) throws Exception {
 		
 		long startTime = System.currentTimeMillis();
 		
-		APIUtil a = new APIUtil();
+		a = new APIUtil();
 //		m.processData(true);
 //		m.writeToFileAndServer();
 		
@@ -74,7 +76,7 @@ public class Main {
 		@Override
 	    public void run() {
 			logger.info("run() START");
-			APIUtil.savePolling(jsonNode);
+			a.savePolling(jsonNode);
 			logger.info("run() END");
 	    }
 

@@ -1,5 +1,8 @@
 var nameweb;
 var playersPictures;
+var usertype;
+var pollingLimit = 4*24*60*60*1000+12*60*60*1000;//4 days and half. Friday at midday
+var pollingReady = 23*60*60*1000;//Polling ready at 23:00
 
 function facebookStatusChangeCallback(response) {
 	if(response.status && response.status == 'connected'){
@@ -25,7 +28,16 @@ function loggedOut(){
   	$('#player-picture').slideUp();
   	$( "td:contains('"+nameweb+"')" ).css( "font-weight", "normal" );
 	$( "tr:contains('"+nameweb+"')" ).removeClass( "info" );
+	hideAdmin();
 	nameweb = null;
+	usertype = null;
+}
+
+function updateUserName(){
+	if(nameweb){
+		$( "td:contains('"+nameweb+"')" ).css( "font-weight", "bold" );
+		$( "tr:contains('"+nameweb+"')" ).addClass( "info" );
+	}
 }
 
 function loggedIn(response,loginType) {
@@ -58,17 +70,18 @@ function loggedIn(response,loginType) {
 				if(data && data.nameweb){
 					
     				nameweb = data.nameweb;
-    				$( "td:contains('"+data.nameweb+"')" ).css( "font-weight", "bold" );
-    				$( "tr:contains('"+data.nameweb+"')" ).addClass( "info" );
+    				usertype = data.usertype;
+    				showAdmin();
+    				updateUserName();
     				
     				//verify if match played and no score and current date<last match date + 5
     				console.log("Played? "+JSON.stringify(selectedSeasonMatches[currentMatch].data).includes(nameweb));
-    				console.log("Valid period to vote? "+(selectedSeasonMatches[currentMatch].day+5*24*60*60*1000>new Date().getTime()));
-    				console.log("Now is after Match? "+(selectedSeasonMatches[currentMatch].day+23*60*60*1000<new Date().getTime()));
+    				console.log("Valid period to vote? "+(selectedSeasonMatches[currentMatch].day+pollingLimit>new Date().getTime()));
+    				console.log("Now is after Match? "+(selectedSeasonMatches[currentMatch].day+pollingReady<new Date().getTime()));
     				
     				if(JSON.stringify(selectedSeasonMatches[currentMatch].data).includes(nameweb) && //Has played
-    						(selectedSeasonMatches[currentMatch].day+5*24*60*60*1000>new Date().getTime()) && //Expired 5 days to vote
-    						(selectedSeasonMatches[currentMatch].day+23*60*60*1000<new Date().getTime())){//No vote before the match, vote after 23h of the match day
+    						(selectedSeasonMatches[currentMatch].day+pollingLimit>new Date().getTime()) && //Expired 5 days to vote
+    						(selectedSeasonMatches[currentMatch].day+pollingReady<new Date().getTime())){//No vote before the match, vote after 23h of the match day
     					//Has scored?
 				      	$.post(
 				    			window.location.pathname+'api/player-has-voted.json', 
@@ -77,6 +90,9 @@ function loggedIn(response,loginType) {
 //									    				console.log("Played has voted? "+JSON.stringify(data));
 				    				if(!data){
 				    					$('#notification-score-button').slideDown();
+				    				}else{
+					  					$('#notification-bar').text('Resultados del partido del lunes disponibles '+$.timeago(selectedSeasonMatches[currentMatch].day+pollingLimit));
+					  					$('#notification-bar').slideDown().delay(10000).slideUp();
 				    				}
 				    			}
 				    	);
@@ -132,10 +148,15 @@ function addPlayerToResult(x, t, data){
 		scores = '<span class="player-goals">Goles: '+scores+'</span>';
 	}
 	$('<div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">'+
-		'<div class="pull-left" style="width: 30%;"><img class="player-picture img-rounded" style="height: 60px;width: 60px;" src="'+((data.value.image)?data.value.image:'resources/images/logo50.png')+'"/></div>'+
-		'<div class="player-score-data pull-left" style="width: 70%;">'+
-			'<h4 class="player-name">'+data.key+' <span class="player-score pull-right">'+data.value.avg+'</span></h4>'+
-			scores+
+		'<h3 class="player-name">'+data.key+'</h3>'+
+		'<img class="player-picture img-rounded" src="'+((data.value.image)?data.value.image:'resources/images/unknown-player.jpg')+'"/>'+
+		'<span class="player-score pull-right">'+data.value.avg+'</span>'+
+		'<div class="badges pull-right">'+
+			(x==0?
+			'<div class="player-badge"><i class="fa fa-trophy" aria-hidden="true"></i></div>':
+			x==t-1?
+			'<div class="player-badge"><i class="fa fa-undo" aria-hidden="true"></i></div>':
+			'')+
 		'</div>'+
 	'</div>').appendTo(row.find('.panel-body'));
 	
@@ -154,33 +175,45 @@ function addPlayerToResult(x, t, data){
 //		  '</a>'+
 //		'</div>'+
 //	'</div>').appendTo(row.find('.panel-body'));
+
 	
-//	Acordeon
-	$('<div class="col-xs-12 col-sm-12 col-md-8 col-lg-8">'+
-		'<div class="panel-group" id="accordion-'+id+'" role="tablist" aria-multiselectable="true">'+
-		'</div>'+
-	'</div>').appendTo(row.find('.panel-body'));	
+	if(data.value.punctuations){
+	//	Acordeon
+		$('<div class="col-xs-12 col-sm-12 col-md-8 col-lg-8">'+
+			'<div class="panel-group" id="accordion-'+id+'" role="tablist" aria-multiselectable="true">'+
+			'</div>'+
+		'</div>').appendTo(row.find('.panel-body'));	
 	
-	for(var j=0; j<data.value.punctuations.length; j++){
-//		Carousel
-//		$('<li data-target="#carousel-comments-scores-'+id+'" data-slide-to="'+j+'" class="'+(j==0?'active':'')+'"></li>').appendTo(row.find('.carousel-indicators'));
-//		$('<div class="item '+(j==0?'active':'')+'">'+
-//	    	'<h5 class="voter-name">'+data.value.punctuations[j].voter+' <span class="voter-score pull-right">'+data.value.punctuations[j].score+'</span></h5>'+
-//	    	'<div class="voter-comment">'+data.value.punctuations[j].comment+'</div>'+
-//	    '</div>').appendTo(row.find('.carousel-inner'));
+		data.value.punctuations.sort(function(a, b) {
+		    return parseFloat(b.score) - parseFloat(a.score);//Descending
+		});
 		
-//		Acordeon
-		$('<div class="panel panel-default">'+
-			  '<div class="panel-heading" role="tab" id="heading-'+id+'-'+j+'">'+
-			      '<h4 class="panel-title">'+
-			        '<a role="button" data-toggle="collapse" data-parent="#accordion-'+id+'" href="#collapse-'+id+'-'+j+'" aria-expanded="true" aria-controls="collapse-'+id+'-'+j+'">'+
-			        	data.value.punctuations[j].voter+' <span class="voter-score pull-right">'+data.value.punctuations[j].score+'</span></a>'+
-			       '</h4>'+
-			   '</div>'+
-			   '<div id="collapse-'+id+'-'+j+'" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading-'+id+'-'+j+'">'+
-			        '<div class="panel-body">'+data.value.punctuations[j].comment+'</div>'+
-			   '</div>'+
-	     '</div>').appendTo(row.find('#accordion-'+id));
+		for(var j=0; j<data.value.punctuations.length; j++){
+	//		Carousel
+	//		$('<li data-target="#carousel-comments-scores-'+id+'" data-slide-to="'+j+'" class="'+(j==0?'active':'')+'"></li>').appendTo(row.find('.carousel-indicators'));
+	//		$('<div class="item '+(j==0?'active':'')+'">'+
+	//	    	'<h5 class="voter-name">'+data.value.punctuations[j].voter+' <span class="voter-score pull-right">'+data.value.punctuations[j].score+'</span></h5>'+
+	//	    	'<div class="voter-comment">'+data.value.punctuations[j].comment+'</div>'+
+	//	    '</div>').appendTo(row.find('.carousel-inner'));
+			
+	//		Acordeon
+			$('<div class="panel panel-default">'+
+				  '<div class="panel-heading" role="tab" id="heading-'+id+'-'+j+'">'+
+				      '<h4 class="panel-title">'+
+				        '<a role="button" data-toggle="collapse" data-parent="#accordion-'+id+'" href="#collapse-'+id+'-'+j+'" aria-expanded="true" aria-controls="collapse-'+id+'-'+j+'">'+
+				        	data.value.punctuations[j].voter+' <span class="voter-score pull-right">'+data.value.punctuations[j].score+'</span></a>'+
+				       '</h4>'+
+				   '</div>'+
+				   '<div id="collapse-'+id+'-'+j+'" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading-'+id+'-'+j+'">'+
+				        '<div class="panel-body">'+data.value.punctuations[j].comment+'</div>'+
+				   '</div>'+
+		     '</div>').appendTo(row.find('#accordion-'+id));
+		}
+	}else{
+		$('<div class="col-xs-12 col-sm-12 col-md-8 col-lg-8">'+
+			'<p>Media de Fubles: <b>'+data.value.avgFubles+'</b></p>'+
+			'<a class="" href="'+data.value.linkFubles+'">Más datos en el partido de Fubles</a>'+
+		'</div>').appendTo(row.find('.panel-body'));
 	}
 }
 
@@ -211,7 +244,7 @@ function createPollingForm(){
 			'<div class="col-md-6"><div class=row>'+
 				'<div class="col-md-4">'+
 					'<img id="white-player-picture-'+i+'" class="player-picture img-rounded" style="height: 100px;width: 100px;" src="'+
-					(playersPictures[selectedSeasonMatches[currentMatch].data[i].white]?playersPictures[selectedSeasonMatches[currentMatch].data[i].white]:'resources/images/logo50.png')+'"/>'+
+					(playersPictures[selectedSeasonMatches[currentMatch].data[i].white]?playersPictures[selectedSeasonMatches[currentMatch].data[i].white]:'resources/images/unknown-player.jpg')+'"/>'+
 					'<i class="fa fa-flag-o fa-2x flag-white" aria-hidden="true"></i>'+
 			    '</div>'+
 				'<div class="col-md-8">'+
@@ -248,6 +281,7 @@ function createPollingForm(){
 		}
 	}
 
+	$('#polling-form').unbind('submit');
 	$('#polling-form').submit(function( event ) {
 		event.preventDefault();
 		
@@ -276,11 +310,10 @@ function createPollingForm(){
 //	  				console.log(data2);
 	  				if(!data2 || !data2.error){
 	  					$('#polling-form button[type="submit"]').prop("disabled","disabled");
-	  					$('#polling').modal('hide');
 	  					$('#notification-score-button').slideUp();
-	  					$('<button type="button" class="btn btn-info pull-right" style="margin-top: 8px; margin-right: 10px">Votación realizada. Resultados disponibles '+
-	  							$.timeago(selectedSeasonMatches[currentMatch].day+5*24*60*60*1000)+	
-	  					'</button>').appendTo('#top-navbar .container-fluid .navbar-header').delay(10000).slideUp();
+	  					$('#polling').modal('hide');
+	  					$('#notification-bar').text('Votación realizada. Resultados disponibles '+$.timeago(selectedSeasonMatches[currentMatch].day+pollingLimit));
+	  					$('#notification-bar').slideDown().delay(10000).slideUp();
 	  				}else{
 	  					if(data2.error){
 	  						console.error(data2.error);
@@ -342,7 +375,8 @@ $(function () {
 	});
 	
 
-	$('#logout-button').click(function(){
+	$('#logout-button, #player-name').click(function(event){
+		event.preventDefault();
 		try{
 			FB.logout(function(response) {
 			  if (response.status !== 'connected') {
@@ -367,7 +401,7 @@ $(function () {
 		$('.blue-score').text(parseInt(selectedSeasonMatches[currentMatch].scoreBlues));
 		$('.white-score').text(parseInt(selectedSeasonMatches[currentMatch].scoreWhites));
 		$('.last-match-date').text($.timeago(selectedSeasonMatches[currentMatch].day));
-		$('.polling-close-date').text($.timeago(selectedSeasonMatches[currentMatch].day+5*24*60*60*1000));
+		$('.polling-close-date').text($.timeago(selectedSeasonMatches[currentMatch].day+pollingLimit));
 		
 		updateListTeamScorers(selectedSeasonMatches[currentMatch]);
 		
@@ -377,7 +411,7 @@ $(function () {
 	//Last Match Winner Overlay
 	$('#last-match-winner').on('show.bs.modal', function (event) {
 		  var lastMatchResult = currentMatch-1;
-		  if( selectedSeasonMatches[currentMatch].day+5*24*60*60*1000<new Date().getTime() ){
+		  if( selectedSeasonMatches[currentMatch].day+pollingLimit<new Date().getTime() ){
 			  lastMatchResult = currentMatch;
 		  }
 
@@ -392,6 +426,7 @@ $(function () {
 	  			window.location.pathname+'api/last-match-result.json', 
 	  			request, 
 	  			function( data1 ) {
+	  				console.log('last-match-result.json: '+JSON.stringify(data1));
 	  				if(data1 && Array.isArray(data1)){
 	  					$('.punctuation-row').remove();
 	  					for(var i=0; i<data1.length; i++){

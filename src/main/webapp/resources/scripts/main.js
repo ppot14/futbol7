@@ -28,6 +28,96 @@ function lastMatchesFormat(value) {
 	}
 	return ret;
 }
+
+function showAdmin(){
+	var seasonLastYear = $("#season-selector").val().substring(5);
+	if(nameweb && (usertype == 'admin' || new Date()>new Date(seasonLastYear,6))){//All data public after 1st July at the end of the season
+		$('#refresh').slideDown();
+    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'realPoints');
+    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'wins');
+    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'draws');
+    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'loses');
+    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'matches');
+    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'goalsFor');
+    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'goalsAgainst');
+    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'pointsAVG');
+    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'goalsForAVG');
+    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'goalsAgainstAVG');
+
+    	$('#row1').show();
+    	$('#row3').show();
+    	$('#row4').show();
+    	
+    	$.getJSON(window.location.pathname+'api/pointsSeries.json', function (pointsSeries) {
+    	
+    			createChart(pointsSeries);
+	    
+    	});
+	}
+}
+
+function hideAdmin(){
+	$('#refresh').slideUp();
+	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('hideColumn', 'realPoints');
+	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('hideColumn', 'wins');
+	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('hideColumn', 'draws');
+	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('hideColumn', 'loses');
+	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('hideColumn', 'matches');
+	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('hideColumn', 'goalsFor');
+	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('hideColumn', 'goalsAgainst');
+	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('hideColumn', 'pointsAVG');
+	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('hideColumn', 'goalsForAVG');
+	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('hideColumn', 'goalsAgainstAVG');
+
+	$('#row1').hide();
+	$('#row3').hide();
+	$('#row4').hide();
+	
+	try{ chart.destroy(); }catch(e){console.warn(e.message)};
+}
+
+var createChart = function(pointsSeries){
+	chart = new Highcharts.Chart({
+        chart: {
+        	renderTo: 'container-graph',
+            type: 'line'
+        },
+        title: {
+            text: 'Acumulación de Puntos',
+            style: { "display": "none"}
+        },
+        xAxis: {
+            type: 'datetime',
+            dateTimeLabelFormats: {
+                month: '%e. %b',
+                year: '%b'
+            },
+            title: {
+                text: 'Dia'
+            }
+        },
+        yAxis: {
+            title: {
+                text: 'Puntos'
+            },
+            min: 0
+        },
+// 		        tooltip: {
+// 		            headerFormat: '<b>{series.name}</b><br>',
+// 		            pointFormat: '{point.x:%e. %b}: {point.y:.2f} m'
+// 		        },
+
+// 		        plotOptions: {
+// 		            line: {
+// 		                step: false,
+////		                pointStart: 0
+// 		                connectNulls: true
+// 		            }
+// 		        },
+
+        series: pointsSeries[$("#season-selector").val()]
+    });
+}
   
 $(function () {
 		  
@@ -101,6 +191,8 @@ $(function () {
 		    $('#table-results thead tr:first th div.th-inner').text('Jornada '+(currentMatch+1)+' ('+$.timeago(selectedSeasonMatches[currentMatch].day)+')'+remarks);
 		    $('#table-results thead tr:last th:first div.th-inner span').text(parseInt(selectedSeasonMatches[currentMatch].scoreBlues));
 		    $('#table-results thead tr:last th:last div.th-inner span').text(parseInt(selectedSeasonMatches[currentMatch].scoreWhites));
+		    
+		    updateUserName();
 		};
 		$('#next-match, #previous-match').unbind('click');
 	    $('#next-match').click(function(){
@@ -154,100 +246,66 @@ $(function () {
 	    });
     	
     };
-    
-    var createChart = function(pointsSeries){
-    	chart = new Highcharts.Chart({
-	        chart: {
-	        	renderTo: 'container-graph',
-	            type: 'line'
-	        },
-	        title: {
-	            text: 'Acumulación de Puntos',
-	            style: { "display": "none"}
-	        },
-	        xAxis: {
-	            type: 'datetime',
-	            dateTimeLabelFormats: {
-	                month: '%e. %b',
-	                year: '%b'
-	            },
-	            title: {
-	                text: 'Dia'
-	            }
-	        },
-	        yAxis: {
-	            title: {
-	                text: 'Puntos'
-	            },
-	            min: 0
-	        },
-//	 		        tooltip: {
-//	 		            headerFormat: '<b>{series.name}</b><br>',
-//	 		            pointFormat: '{point.x:%e. %b}: {point.y:.2f} m'
-//	 		        },
-
-//	 		        plotOptions: {
-//	 		            line: {
-//	 		                step: false,
-//// 		                pointStart: 0
-//	 		                connectNulls: true
-//	 		            }
-//	 		        },
-
-	        series: pointsSeries[$("#season-selector").val()]
-	    });
-    }
   
   	$.getJSON(window.location.pathname+'api/options.json', function(data) {
   		options = data;
   		var select = $("#season-selector");
   		for (var prop in options.permanents) {
-  			if(prop=='2017-2018'){//TODO change seasons
-  				select.prepend($("<option />").val(prop).text("Temporada "+prop));
-  			}
+//  			if(prop=='2017-2018'){//TODO change seasons
+  				select.prepend($('<option '+(prop=='2017-2018'?' selected="selected"':'')+'/>').val(prop).text("Temporada "+prop));
+//  			}
   		}
 	    $.getJSON(window.location.pathname+'api/matches.json', matchesFunction);
 	    $.getJSON(window.location.pathname+'api/players.json', playersFunction);
-//  		select.on('change', function() {
-//  			changeSeason(this.value);
-//  		});
+  		select.on('change', function() {
+  			changeSeason(this.value);
+  		});
     	
 	  	var season = $("#season-selector").val();
 	    $.getJSON(window.location.pathname+'api/full.json', function(full) {
 		    $('#table-full').bootstrapTable({
 		        data: full[season],
-		        locale:'es-ES'
+		        locale:'es-ES',
+		        onAll: function(name, args){ updateUserName() }
 		    });
 	    });
 	    $.getJSON(window.location.pathname+'api/permanents.json', function(permanents) {
 		    $('#table-permanents').bootstrapTable({
 		        data: permanents[season],
-		        locale:'es-ES'
+		        locale:'es-ES',
+		        onAll: function(name, args){ updateUserName() }
 		    });
 	    });
 	    $.getJSON(window.location.pathname+'api/substitutes.json', function(substitutes) {
 		    $('#table-substitutes').bootstrapTable({
 		        data: substitutes[season],
-		        locale:'es-ES'
+		        locale:'es-ES',
+		        onAll: function(name, args){ updateUserName() }
 		    });
 	    });
 	    $.getJSON(window.location.pathname+'api/vs.json', function(vs) {
 		    $('#table-vs').bootstrapTable({
 		        data: vs[season],
-		        locale:'es-ES'
+		        locale:'es-ES',
+		        onAll: function(name, args){ updateUserName() }
 		    });
 	    });
 	    $.getJSON(window.location.pathname+'api/pair.json', function(pair) {
 		    $('#table-pair').bootstrapTable({
 		        data: pair[season],
-		        locale:'es-ES'
+		        locale:'es-ES',
+		        onAll: function(name, args){ updateUserName() }
 		    });
 	    });
 	    $.getJSON(window.location.pathname+'api/scorers.json', function(scorers) {
 		    $('#table-scorers').bootstrapTable({
 		        data: scorers[season],
-		        locale:'es-ES'
+		        locale:'es-ES',
+		        onAll: function(name, args){ updateUserName() }
 		    });
+//			$('#table-scorers').on('page-change.bs.table', function (number, size) {
+//			    updateUserName();
+//			});
 	    });
   	});
     
@@ -278,61 +336,37 @@ $(function () {
     			}
     	);
     });
-
-    var isAdmin = getParameterByName('admin');
-    if(isAdmin==='true'){ $('#plus-info').show(); }
-    $('#plus-info').click(function(){
-    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'realPoints');
-    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'wins');
-    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'draws');
-    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'loses');
-    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'matches');
-    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'goalsFor');
-    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'goalsAgainst');
-    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'pointsAVG');
-    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'goalsForAVG');
-    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'goalsAgainstAVG');
-
-    	$('#row1').show();
-    	$('#row3').show();
-    	$('#row4').show();
-    	
-    	$.getJSON(window.location.pathname+'api/pointsSeries.json', function (pointsSeries) {
-    	
-    			createChart(pointsSeries);
-	    
-    	});
-	});
     
     $('#refresh').click(function(){
     	$.getJSON(window.location.pathname+'api/refresh.json', function (data) {
     		if(data=='true' || data==true){
-			    $('#table-full').bootstrapTable('refresh', {
-			    	url: window.location.pathname+'api/full.json'
-			    });
-			    $('#table-permanents').bootstrapTable('refresh', {
-			    	url: window.location.pathname+'api/permanents.json'
-			    });
-			    $('#table-substitutes').bootstrapTable('refresh', {
-			    	url: window.location.pathname+'api/substitutes.json'
-			    });
-			    $('#table-vs').bootstrapTable('refresh', {
-			    	url: window.location.pathname+'api/vs.json'
-			    });
-			    $('#table-pair').bootstrapTable('refresh', {
-			    	url: window.location.pathname+'api/pair.json'
-			    });
-			    $.getJSON(window.location.pathname+'api/matches.json', matchesFunction);
-		    	$.getJSON(window.location.pathname+'api/pointsSeries.json', function (pointsSeries) {
-		    		if(chart){
-		    			chart.series = pointsSeries[$("#season-selector").val()];
-		    			chart.redraw();
-		    		}
-		    	});
-			    $.getJSON(window.location.pathname+'api/players.json', playersFunction);
-			    $('#table-scorers').bootstrapTable('refresh', {
-			    	url: window.location.pathname+'api/scorers.json'
-			    });
+//			    $('#table-full').bootstrapTable('refresh', {
+//			    	url: window.location.pathname+'api/full.json'
+//			    });
+//			    $('#table-permanents').bootstrapTable('refresh', {
+//			    	url: window.location.pathname+'api/permanents.json'
+//			    });
+//			    $('#table-substitutes').bootstrapTable('refresh', {
+//			    	url: window.location.pathname+'api/substitutes.json'
+//			    });
+//			    $('#table-vs').bootstrapTable('refresh', {
+//			    	url: window.location.pathname+'api/vs.json'
+//			    });
+//			    $('#table-pair').bootstrapTable('refresh', {
+//			    	url: window.location.pathname+'api/pair.json'
+//			    });
+//			    $.getJSON(window.location.pathname+'api/matches.json', matchesFunction);
+//		    	$.getJSON(window.location.pathname+'api/pointsSeries.json', function (pointsSeries) {
+//		    		if(chart){
+//		    			chart.series = pointsSeries[$("#season-selector").val()];
+//		    			chart.redraw();
+//		    		}
+//		    	});
+//			    $.getJSON(window.location.pathname+'api/players.json', playersFunction);
+//			    $('#table-scorers').bootstrapTable('refresh', {
+//			    	url: window.location.pathname+'api/scorers.json'
+//			    });
+    			location.reload();
     		}
     	});
     });
