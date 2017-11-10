@@ -26,11 +26,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Function;
 import java.util.function.ToDoubleFunction;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPReply;
@@ -50,6 +52,14 @@ import org.codehaus.jackson.node.ObjectNode;
 public class APIUtil {
 	
 	private static final Logger logger = Logger.getLogger(APIUtil.class.getName());
+
+	private static final String TROMPITO = "trompito";
+	private static final String DANDY = "dandy";
+	private static final String FRANCES = "frances";
+	private static final String SILLEGAS = "sillegas";
+	private static final String PORCULERO = "porculero";
+	
+	private static final List<String> titles = Arrays.asList(TROMPITO,DANDY,FRANCES,SILLEGAS,PORCULERO);
 	
 	private static Map<String,List<String>> PERMANENTS = null;
 
@@ -754,7 +764,7 @@ public class APIUtil {
 						result2.put(voted,punctuationData);
 					}
 				}
-			}else if(scoresAVG!=null && !scoresAVG.isEmpty()){
+			}else if(scoresAVG!=null && !scoresAVG.isEmpty()){//Only for scores from fubles
 				for(Document score : scoresAVG){
 					String voted = score.getString("voted");
 					Double scoreD = score.getDouble("score");
@@ -775,6 +785,20 @@ public class APIUtil {
 					result2.put(voted,punctuationData);
 				}
 			}
+			//Get most titled players
+			for(String titleName : titles){
+				if(votes.containsKey(titleName)){
+					List<String> titlesList = (List<String>) votes.get(titleName);
+					Map<String, Long> occurrences = titlesList.stream().collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+					Entry<String, Long> max = occurrences.entrySet().stream().max(Comparator.comparing(Entry::getValue)).get();
+					for(Entry<String, Long> e : occurrences.entrySet()){
+						if(e.getValue()==max.getValue() && result2.containsKey(e.getKey())){
+							result2.get(e.getKey()).put(titleName, true);
+						}
+					}
+				}
+			}
+			
 			result.addAll(result2.entrySet());
 			Collections.sort(result,new Comparator<Map.Entry<String,Map<String,Object>>>(){
 				@Override
@@ -803,6 +827,11 @@ public class APIUtil {
 			Long dateL = jsonNode.get("date").asLong();
 			String date = formatter2.format(new Date(dateL));
 			String season = jsonNode.get("season").asText();
+			String trompito = jsonNode.get("trompito").asText();
+			String dandy = jsonNode.get("dandy").asText();
+			String frances = jsonNode.get("frances").asText();
+			String sillegas = jsonNode.get("sillegas").asText();
+			String porculero = jsonNode.get("porculero").asText();
 			ArrayNode scores = (ArrayNode) jsonNode.get("scores");
 			if(scores==null || scores.size()!=13){
 				logger.warning("No scores saving polling for match "+date+" "+season);
@@ -813,7 +842,14 @@ public class APIUtil {
 				Document d = new Document();
 				d.put("season", season);
 				d.put("date", date);
+				d.put("trompito", Arrays.asList(trompito));
+				d.put("dandy", Arrays.asList(dandy));
+				d.put("frances", Arrays.asList(frances));
+				d.put("sillegas", Arrays.asList(sillegas));
+				d.put("porculero", Arrays.asList(porculero));
 				DBConnector.createScore(d);
+			}else{
+				DBConnector.addTitleVote(dateL, season, trompito, dandy, frances, sillegas, porculero);
 			}
 			for(JsonNode p : scores){
 				String voter = p.get("voter").asText();

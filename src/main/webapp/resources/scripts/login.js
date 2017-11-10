@@ -1,7 +1,7 @@
 var nameweb;
 var playersPictures;
 var usertype;
-var pollingLimit = 4*24*60*60*1000+12*60*60*1000;//4 days and half. Friday at midday
+var pollingLimit = 4*24*60*60*1000 + 12*60*60*1000;//4 days and half. Friday at midday
 var pollingReady = 23*60*60*1000;//Polling ready at 23:00
 
 function facebookStatusChangeCallback(response) {
@@ -87,7 +87,7 @@ function loggedIn(response,loginType) {
 				    			window.location.pathname+'api/player-has-voted.json', 
 				    			JSON.stringify({name:nameweb,date:selectedSeasonMatches[currentMatch].day,season:$("#season-selector").val()}), 
 				    			function( data ) {
-//									    				console.log("Played has voted? "+JSON.stringify(data));
+//									console.log("Played has voted? "+JSON.stringify(data));
 				    				if(!data){
 				    					$('#notification-score-button').slideDown();
 				    				}else{
@@ -139,6 +139,55 @@ function updateListTeamScorers(match){
   	  );
 }
 
+/*
+ * LAST MATCH RESULTS
+ */
+function lastMatchResultRequest(lastMatchResult){
+
+	var request = JSON.stringify({season: $("#season-selector").val(), match: selectedSeasonMatches[lastMatchResult]});
+	$.post(
+			window.location.pathname+'api/last-match-result.json', 
+			request, 
+			function( data1 ) {
+//				console.log('last-match-result.json: '+JSON.stringify(data1));
+				if(data1 && Array.isArray(data1)){
+					$('.punctuation-row').remove();
+					for(var i=0; i<data1.length; i++){
+						addPlayerToResult(i, data1.length, data1[i]);
+						$('[data-toggle="tooltip"]').tooltip();
+					}
+				}else{
+					console.warn('There is no match results for the last match: '+request);
+				}
+			}
+	);
+}
+
+function addBadges(x, t, data){
+	var html = '';
+	if(x==0){
+		html += '<div class="player-badge" data-toggle="tooltip" data-placement="bottom" title="Título al MVP"><i class="fa fa-trophy" aria-hidden="true"></i></div>';
+	}else if(x==t-1){
+		html += '<div class="player-badge" data-toggle="tooltip" data-placement="bottom" title="Título al Cabra"><i class="fa fa-thumbs-down" aria-hidden="true"></i></div>';
+	}
+	if(data.trompito){
+		html += '<div class="player-badge" data-toggle="tooltip" data-placement="bottom" title="Título al más chupón"><i class="fa fa-undo" aria-hidden="true"></i></div>';
+	}
+	if(data.dandy){
+		html += '<div class="player-badge" data-toggle="tooltip" data-placement="bottom" title="Título al jugador con más clase y elegante"><i class="fa fa-glass" aria-hidden="true"></i></div>';
+	}
+	if(data.frances){
+		html += '<div class="player-badge" data-toggle="tooltip" data-placement="bottom" title="Título al más guarro"><i class="fa fa-wheelchair-alt" aria-hidden="true"></i></div>';
+	}
+	if(data.sillegas){
+		html += '<div class="player-badge" data-toggle="tooltip" data-placement="bottom" title="Título al más impuntual e impresentable"><i class="fa fa-clock-o" aria-hidden="true"></i></div>';
+	}
+	if(data.porculero){
+		html += '<div class="player-badge" data-toggle="tooltip" data-placement="bottom" title="Título al más protestón y vocazas"><i class="fa fa-bullhorn" aria-hidden="true"></i></div>';
+	}
+	return html;
+}
+
 function addPlayerToResult(x, t, data){
 	var id = Date.now();
 	var row = $('<div class="row punctuation-row"><div class="row-wrap col-xs-12 col-sm-12 col-md-12 col-lg-12"><div class="panel panel-default '+(x==0?'panel-success':x==t-1?'panel-danger':nameweb==data.key?'panel-info':'')+'"><div class="panel-body '+(x==0?'bg-success':x==t-1?'bg-danger':nameweb==data.key?'bg-info':'')+'"></div></div></div></div>').appendTo($('#last-match-winner .modal-body'));
@@ -151,13 +200,7 @@ function addPlayerToResult(x, t, data){
 		'<h3 class="player-name">'+data.key+'</h3>'+
 		'<img class="player-picture img-rounded" src="'+((data.value.image)?data.value.image:'resources/images/unknown-player.jpg')+'"/>'+
 		'<span class="player-score pull-right">'+data.value.avg+'</span>'+
-		'<div class="badges pull-right">'+
-			(x==0?
-			'<div class="player-badge"><i class="fa fa-trophy" aria-hidden="true"></i></div>':
-			x==t-1?
-			'<div class="player-badge"><i class="fa fa-undo" aria-hidden="true"></i></div>':
-			'')+
-		'</div>'+
+		'<div class="badges pull-right">'+addBadges(x,t,data.value)+'</div>'+
 	'</div>').appendTo(row.find('.panel-body'));
 	
 //	Carousel
@@ -211,21 +254,27 @@ function addPlayerToResult(x, t, data){
 		}
 	}else{
 		$('<div class="col-xs-12 col-sm-12 col-md-8 col-lg-8">'+
-			'<p>Media de Fubles: <b>'+data.value.avgFubles+'</b></p>'+
+			'<p>Media de Fubles: <b>'+data.value.avgFubles.toFixed(2)+'</b></p>'+
 			'<a class="" href="'+data.value.linkFubles+'">Más datos en el partido de Fubles</a>'+
 		'</div>').appendTo(row.find('.panel-body'));
 	}
 }
 
 
+/*
+ * POLLING FORM
+ */
 function createPollingForm(){
 	$('.polling-form-group').remove();
+	var matchPlayerNames = [];
 	for(var i=selectedSeasonMatches[currentMatch].data.length-1; i>=0; i--){	
+		matchPlayerNames.push(selectedSeasonMatches[currentMatch].data[i].blue);
+		matchPlayerNames.push(selectedSeasonMatches[currentMatch].data[i].white);
 		$('<div class="form-group polling-form-group"><div class=row>'+
 			'<div class="col-md-6"><div class=row style="margin-bottom: 15px">'+
 				'<div class="col-md-4">'+
 					'<img id="blue-player-picture-'+i+'" class="player-picture img-rounded" style="height: 100px;width: 100px;" src="'+
-					(playersPictures[selectedSeasonMatches[currentMatch].data[i].blue]?playersPictures[selectedSeasonMatches[currentMatch].data[i].blue]:'resources/images/logo50.png')+'"/>'+
+					(playersPictures[selectedSeasonMatches[currentMatch].data[i].blue]?playersPictures[selectedSeasonMatches[currentMatch].data[i].blue]:'resources/images/unknown-player.jpg')+'"/>'+
 					'<i class="fa fa-flag fa-2x text-primary flag-blue" aria-hidden="true"></i>'+
 			    '</div>'+
 				'<div class="col-md-8">'+
@@ -280,12 +329,51 @@ function createPollingForm(){
 			$('#white-player-punctuation-number-'+i).hide();
 		}
 	}
+	$('<div class="form-group polling-form-group"><div id="title-selector" class="row">'+
+			'<div class="col-md-1"></div>'+
+			'<div class="col-md-2">'+
+				'<h4 data-toggle="tooltip" data-placement="top" title="Título al más chupón">El Trompito <div class="player-badge" ><i class="fa fa-undo" aria-hidden="true"></i></div></h4>'+
+				'<select id="trompito-selector" class="matchtitle-selector form-control"></select>'+
+			'</div>'+
+			'<div class="col-md-2">'+
+				'<h4 data-toggle="tooltip" data-placement="top" title="Título al jugador con más clase y elegante">El Dandy <div class="player-badge"><i class="fa fa-glass" aria-hidden="true"></i></div></h4>'+
+				'<select id="dandy-selector" class="matchtitle-selector form-control"></select>'+
+			'</div>'+
+			'<div class="col-md-2">'+
+				'<h4 data-toggle="tooltip" data-placement="top" title="Título al más guarro">El Francés <div class="player-badge"><i class="fa fa-wheelchair-alt" aria-hidden="true"></i></div></h4>'+
+				'<select id="frances-selector" class="matchtitle-selector form-control"></select>'+
+			'</div>'+
+			'<div class="col-md-2">'+
+				'<h4 data-toggle="tooltip" data-placement="top" title="Título al más impuntual e impresentable">El Sillegas <div class="player-badge"><i class="fa fa-clock-o" aria-hidden="true"></i></div></h4>'+
+				'<select id="sillegas-selector" class="matchtitle-selector form-control"></select>'+
+			'</div>'+
+			'<div class="col-md-2">'+
+				'<h4 data-toggle="tooltip" data-placement="top" title="Título al más protestón y vocazas">El Porculero <div class="player-badge"><i class="fa fa-bullhorn" aria-hidden="true"></i></div></h4>'+
+				'<select id="porculero-selector" class="matchtitle-selector form-control"></select>'+
+			'</div>'+
+			'<div class="col-md-1"></div>'+
+	'</div></div>').prependTo("#polling-form");
+	var select = $("select.matchtitle-selector");
+	matchPlayerNames.sort();
+	matchPlayerNames.reverse();
+	for (var i in matchPlayerNames) {
+		select.prepend($('<option/>').val(matchPlayerNames[i]).text(matchPlayerNames[i]));
+	}
+	select.prepend($('<option selected/>').val("").text("Seleccione uno"));
+	$('[data-toggle="tooltip"]').tooltip();
 
 	$('#polling-form').unbind('submit');
 	$('#polling-form').submit(function( event ) {
 		event.preventDefault();
 		
-		var request = {season:$("#season-selector").val(), date:selectedSeasonMatches[currentMatch].day, scores:[]};
+		var request = {season:$("#season-selector").val(), 
+						date:selectedSeasonMatches[currentMatch].day, 
+						scores:[],
+						trompito: $('#trompito-selector').val(),
+						dandy: $('#dandy-selector').val(),
+						frances: $('#frances-selector').val(),
+						sillegas: $('#sillegas-selector').val(),
+						porculero: $('#porculero-selector').val()};
 		
 		for(var i=0; i<7; i++){
 			if($('#blue-player-name-'+i).text()!=nameweb){
@@ -312,7 +400,8 @@ function createPollingForm(){
 	  					$('#polling-form button[type="submit"]').prop("disabled","disabled");
 	  					$('#notification-score-button').slideUp();
 	  					$('#polling').modal('hide');
-	  					$('#notification-bar').text('Votación realizada. Resultados disponibles '+$.timeago(selectedSeasonMatches[currentMatch].day+pollingLimit));
+	  					$('#notification-bar').text('Votación realizada. Resultados disponibles el '+
+	  							new Date(selectedSeasonMatches[currentMatch].day+pollingLimit).toLocaleString('es-ES',{ day:'numeric',weekday: 'long', hour:'numeric',minute:'numeric' }));
 	  					$('#notification-bar').slideDown().delay(10000).slideUp();
 	  				}else{
 	  					if(data2.error){
@@ -421,22 +510,7 @@ $(function () {
 		  
 		  updateListTeamScorers(selectedSeasonMatches[lastMatchResult]);
 		  
-		  var request = JSON.stringify({season: $("#season-selector").val(), match: selectedSeasonMatches[lastMatchResult]});
-		  $.post(
-	  			window.location.pathname+'api/last-match-result.json', 
-	  			request, 
-	  			function( data1 ) {
-	  				console.log('last-match-result.json: '+JSON.stringify(data1));
-	  				if(data1 && Array.isArray(data1)){
-	  					$('.punctuation-row').remove();
-	  					for(var i=0; i<data1.length; i++){
-	  						addPlayerToResult(i, data1.length, data1[i]);
-	  					}
-	  				}else{
-	  					console.warn('There is no match results for the last match: '+request);
-	  				}
-	  			}
-	  	  );
+		  lastMatchResultRequest(lastMatchResult);
 			  
 	});
 });

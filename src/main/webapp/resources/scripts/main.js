@@ -30,29 +30,31 @@ function lastMatchesFormat(value) {
 }
 
 function showAdmin(){
-	var seasonLastYear = $("#season-selector").val().substring(5);
-	if(nameweb && (usertype == 'admin' || new Date()>new Date(seasonLastYear,6))){//All data public after 1st July at the end of the season
-		$('#refresh').slideDown();
-    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'realPoints');
-    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'wins');
-    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'draws');
-    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'loses');
-    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'matches');
-    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'goalsFor');
-    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'goalsAgainst');
-    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'pointsAVG');
-    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'goalsForAVG');
-    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'goalsAgainstAVG');
-
-    	$('#row1').show();
-    	$('#row3').show();
-    	$('#row4').show();
-    	
-    	$.getJSON(window.location.pathname+'api/pointsSeries.json', function (pointsSeries) {
-    	
-    			createChart(pointsSeries);
-	    
-    	});
+	if($("#season-selector").val()){
+		var seasonLastYear = $("#season-selector").val().substring(5);
+		if(nameweb && (usertype == 'admin' || new Date()>new Date(seasonLastYear,6))){//All data public after 1st July at the end of the season
+			$('#refresh').slideDown();
+	    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'realPoints');
+	    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'wins');
+	    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'draws');
+	    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'loses');
+	    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'matches');
+	    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'goalsFor');
+	    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'goalsAgainst');
+	    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'pointsAVG');
+	    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'goalsForAVG');
+	    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'goalsAgainstAVG');
+	
+	    	$('#row1').show();
+	    	$('#row3').show();
+	    	$('#row4').show();
+	    	
+	    	$.getJSON(window.location.pathname+'api/pointsSeries.json', function (pointsSeries) {
+	    	
+	    			createChart(pointsSeries);
+		    
+	    	});
+		}
 	}
 }
 

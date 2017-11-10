@@ -1,28 +1,24 @@
 package com.ppot14.futbol7;
 
 import static com.mongodb.client.model.Filters.and;
-import static com.mongodb.client.model.Filters.eq;
-import static com.mongodb.client.model.Filters.exists;
 import static com.mongodb.client.model.Filters.elemMatch;
+import static com.mongodb.client.model.Filters.eq;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Formatter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.node.ObjectNode;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.result.UpdateResult;
-
-import java.util.logging.*;
 
 public class DBConnector {
 	private static final Logger logger = Logger.getLogger(DBConnector.class.getName());
@@ -156,5 +152,25 @@ public class DBConnector {
 			e.printStackTrace();
 		}
 		return false;
+	}
+	
+	public static Boolean addTitleVote(Long dateL, String season, String trompito, String dandy, String frances, String sillegas, String porculero){
+		String date = formatter.format(new Date(dateL));
+		try {
+			MongoCollection<Document> configCollection;
+			configCollection = getCollection("Scores");
+			Bson filter = and(eq("season",season), eq("date",date));
+			Document titles = new Document();
+			titles.put("trompito", trompito);
+			titles.put("dandy", dandy);
+			titles.put("frances", frances);
+			titles.put("sillegas", sillegas);
+			titles.put("porculero", porculero);
+			UpdateResult res = configCollection.updateOne(filter, new Document("$push", titles));
+			if(res.getModifiedCount()==1){ return true; }
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 }
