@@ -9,7 +9,9 @@ function facebookStatusChangeCallback(response) {
 		FB.api("/me",
 				{fields: "picture,email,name"},
 				function(response) {
-					loggedIn(response,'facebook');
+					setTimeout(function(){//Hack to avoid season selector load before automatic login
+						loggedIn(response,'facebook');
+					},1000);
 				});
 	}
 }

@@ -71,7 +71,7 @@ public class APIUtil {
 	
 	private Map<String,List<Map<String,String>>> fullRanking = null;
 	private Map<String,List<Map<String,String>>> fullScorers = null;
-	private static Map<String,Map<String,Map<String,Integer>>> fullScorersByDate = null;
+	private Map<String,Map<String,Map<String,Integer>>> fullScorersByDate = null;
 	private Map<String,Integer> numMatches = new HashMap<String, Integer>();
 	private Map<String,Integer> numScorers = new HashMap<String, Integer>();
 	private Map<String,List<List<String>>> rawMatches = null;
@@ -791,6 +791,7 @@ public class APIUtil {
 					List<String> titlesList = (List<String>) votes.get(titleName);
 					Map<String, Long> occurrences = titlesList.stream().collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 					Entry<String, Long> max = occurrences.entrySet().stream().max(Comparator.comparing(Entry::getValue)).get();
+					
 					for(Entry<String, Long> e : occurrences.entrySet()){
 						if(e.getValue()==max.getValue() && result2.containsKey(e.getKey())){
 							result2.get(e.getKey()).put(titleName, true);
