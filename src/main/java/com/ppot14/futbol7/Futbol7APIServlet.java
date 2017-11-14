@@ -49,7 +49,7 @@ public class Futbol7APIServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 //		HttpSession session = request.getSession();
 		final String requestPath = request.getRequestURI();
-    	logger.info("RequestURI: "+requestPath);
+    	logger.fine("RequestURI: "+requestPath);
     	ObjectMapper mapper = new ObjectMapper();
     	
     	Object reply = null;

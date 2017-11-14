@@ -201,7 +201,7 @@ function addPlayerToResult(x, t, data){
 	$('<div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">'+
 		'<h3 class="player-name">'+data.key+'</h3>'+
 		'<img class="player-picture img-rounded" src="'+((data.value.image)?data.value.image:'resources/images/unknown-player.jpg')+'"/>'+
-		'<span class="player-score pull-right">'+data.value.avg+'</span>'+
+		'<span class="player-score pull-right">'+data.value.avg.toFixed(2)+'</span>'+
 		'<div class="badges pull-right">'+addBadges(x,t,data.value)+'</div>'+
 	'</div>').appendTo(row.find('.panel-body'));
 	
@@ -257,7 +257,7 @@ function addPlayerToResult(x, t, data){
 	}else{
 		$('<div class="col-xs-12 col-sm-12 col-md-8 col-lg-8">'+
 			'<p>Media de Fubles: <b>'+data.value.avgFubles.toFixed(2)+'</b></p>'+
-			'<a class="" href="'+data.value.linkFubles+'">Más datos en el partido de Fubles</a>'+
+			'<a class="" href="'+data.value.linkFubles+'" target="_blank">Más datos en el partido de Fubles</a>'+
 		'</div>').appendTo(row.find('.panel-body'));
 	}
 }
@@ -289,7 +289,7 @@ function createPollingForm(){
 					'data-slider-step="1"'+
 					'data-slider-value="5"'+
 					'data-slider-tooltip="hide" ><span id="blue-player-punctuation-number-'+i+'" class="player-punctuation-number pull-right"></span>'+
-					'<textarea name="blue-player-comment-'+i+'" class="form-control" rows="3" placeholder="Comentario"  '+((selectedSeasonMatches[currentMatch].data[i].blue==nameweb)?'disabled':'')+'></textarea>'+
+					'<textarea name="blue-player-comment-'+i+'" class="form-control" rows="3" maxlength="1000" placeholder="Comentario"  '+((selectedSeasonMatches[currentMatch].data[i].blue==nameweb)?'disabled':'')+'></textarea>'+
 			    '</div>'+
 			'</div></div>'+
 			'<div class="col-md-6"><div class=row>'+
@@ -308,7 +308,7 @@ function createPollingForm(){
 					'data-slider-step="1"'+
 					'data-slider-value="5"'+
 					'data-slider-tooltip="hide"><span id="white-player-punctuation-number-'+i+'" class="player-punctuation-number pull-right"></span>'+
-					'<textarea name="white-player-comment-'+i+'" class="form-control" rows="3" placeholder="Comentario"  '+((selectedSeasonMatches[currentMatch].data[i].white==nameweb)?'disabled':'')+'></textarea>'+
+					'<textarea name="white-player-comment-'+i+'" class="form-control" rows="3" maxlength="1000" placeholder="Comentario"  '+((selectedSeasonMatches[currentMatch].data[i].white==nameweb)?'disabled':'')+'></textarea>'+
 			    '</div>'+
 			'</div></div>'+
 		'</div></div>').prependTo("#polling-form");

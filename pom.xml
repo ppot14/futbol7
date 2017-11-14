@@ -5,6 +5,8 @@
   <version>0.0.1-SNAPSHOT</version>
   <packaging>war</packaging>
 
+  <name>futbol7</name>
+  
 	<dependencies>
 	   
 		<dependency>
@@ -17,6 +19,12 @@
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
 			<version>3.4</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi</artifactId>
+			<version>3.17</version>
 		</dependency>
 		
 		<dependency>
@@ -76,6 +84,7 @@
 	</dependencies>
 	
 	<properties>
+	    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     	<maven.compiler.source>1.8</maven.compiler.source>
     	<maven.compiler.target>1.8</maven.compiler.target>
   	</properties>	

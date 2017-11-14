@@ -125,6 +125,13 @@ div.player-badge i{
     display: table-cell;
     font-size: 16px;
 }
+div.player-badge:hover{
+    background-color: Khaki;
+    border: 3px solid IndianRed;
+}
+div.player-badge:hover i{
+    color: IndianRed;
+}
 /*Polling*/
 #polling .player-badge{
 	float: right;

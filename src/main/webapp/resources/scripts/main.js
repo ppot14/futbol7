@@ -166,8 +166,8 @@ $(function () {
 	    	else{ console.warn('Pictures from players not received')};
 	    });	    
     	
-    	if((selectedSeasonMatches[currentMatch].day+5*24*60*60*1000<new Date().getTime()) &&
-    			(selectedSeasonMatches[currentMatch].day+(8*24-2)*60*60*1000>new Date().getTime())){
+    	if((selectedSeasonMatches[currentMatch].day+pollingLimit<new Date().getTime()) &&
+    			(selectedSeasonMatches[currentMatch].day+pollingLimit+24*60*60*1000>new Date().getTime())){
     		setTimeout(function(){
         		$('#last-match-winner-button').removeClass('btn-default').addClass('btn-success');
     		},3000);
