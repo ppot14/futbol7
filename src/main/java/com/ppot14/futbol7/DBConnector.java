@@ -84,7 +84,7 @@ public class DBConnector {
 			Bson filter = and(eq("scores.voter",name),eq("date",date),eq("season",season));
 			FindIterable<Document> result = configCollection.find(filter);
 			if(result!=null && result.first()!=null){
-				logger.info("player did vote: "+result.first());
+				logger.info("player voted: "+jsonNode);
 				return (Document) result.first();
 			}else{
 				logger.info("player didn't vote: "+jsonNode);
@@ -145,7 +145,7 @@ public class DBConnector {
 			s.put("voter", voter);
 			s.put("voted", voted);
 			s.put("score", score);
-			s.put("commnet", comment);
+			s.put("comment", comment);
 			UpdateResult res = configCollection.updateOne(filter, new Document("$push", new Document("scores", s)));
 			if(res.getModifiedCount()==1){ return true; }
 		} catch (Exception e) {

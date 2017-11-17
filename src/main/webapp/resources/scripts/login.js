@@ -1,3 +1,6 @@
+/**
+ * login.js
+ */
 var nameweb;
 var playersPictures;
 var usertype;
@@ -20,7 +23,9 @@ function googleStatusChangeCallback(){
 	var response = {name: auth2.currentUser.get().getBasicProfile().getName(),
 				id: auth2.currentUser.get().getBasicProfile().getId(),
 				picture: auth2.currentUser.get().getBasicProfile().getImageUrl()};
-	loggedIn(response,'google');
+	setTimeout(function(){//Hack to avoid season selector load before automatic login
+		loggedIn(response,'google');
+	},1000);
 }
 
 function loggedOut(){
@@ -151,7 +156,6 @@ function lastMatchResultRequest(lastMatchResult){
 			window.location.pathname+'api/last-match-result.json', 
 			request, 
 			function( data1 ) {
-//				console.log('last-match-result.json: '+JSON.stringify(data1));
 				if(data1 && Array.isArray(data1)){
 					$('.punctuation-row').remove();
 					for(var i=0; i<data1.length; i++){
@@ -159,6 +163,7 @@ function lastMatchResultRequest(lastMatchResult){
 						$('[data-toggle="tooltip"]').tooltip();
 					}
 				}else{
+					$('.punctuation-row').remove();
 					console.warn('There is no match results for the last match: '+request);
 				}
 			}
@@ -205,23 +210,6 @@ function addPlayerToResult(x, t, data){
 		'<div class="badges pull-right">'+addBadges(x,t,data.value)+'</div>'+
 	'</div>').appendTo(row.find('.panel-body'));
 	
-//	Carousel
-//	$('<div class="col-xs-12 col-sm-12 col-md-8 col-lg-8">'+
-//		'<div id="carousel-comments-scores-'+id+'" class="carousel slide" data-ride="carousel" data-interval="600000">'+
-//		  '<ol class="carousel-indicators"></ol>'+
-//		  '<div class="carousel-inner" role="listbox"></div>'+
-//		  '<a class="left carousel-control" href="#carousel-comments-scores-'+id+'" role="button" data-slide="prev">'+
-//		    '<span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>'+
-//		    '<span class="sr-only">Previous</span>'+
-//		  '</a>'+
-//		  '<a class="right carousel-control" href="#carousel-comments-scores-'+id+'" role="button" data-slide="next">'+
-//		    '<span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>'+
-//		    '<span class="sr-only">Next</span>'+
-//		  '</a>'+
-//		'</div>'+
-//	'</div>').appendTo(row.find('.panel-body'));
-
-	
 	if(data.value.punctuations){
 	//	Acordeon
 		$('<div class="col-xs-12 col-sm-12 col-md-8 col-lg-8">'+
@@ -234,13 +222,6 @@ function addPlayerToResult(x, t, data){
 		});
 		
 		for(var j=0; j<data.value.punctuations.length; j++){
-	//		Carousel
-	//		$('<li data-target="#carousel-comments-scores-'+id+'" data-slide-to="'+j+'" class="'+(j==0?'active':'')+'"></li>').appendTo(row.find('.carousel-indicators'));
-	//		$('<div class="item '+(j==0?'active':'')+'">'+
-	//	    	'<h5 class="voter-name">'+data.value.punctuations[j].voter+' <span class="voter-score pull-right">'+data.value.punctuations[j].score+'</span></h5>'+
-	//	    	'<div class="voter-comment">'+data.value.punctuations[j].comment+'</div>'+
-	//	    '</div>').appendTo(row.find('.carousel-inner'));
-			
 	//		Acordeon
 			$('<div class="panel panel-default">'+
 				  '<div class="panel-heading" role="tab" id="heading-'+id+'-'+j+'">'+
@@ -356,10 +337,12 @@ function createPollingForm(){
 			'<div class="col-md-1"></div>'+
 	'</div></div>').prependTo("#polling-form");
 	var select = $("select.matchtitle-selector");
-	matchPlayerNames.sort();
+	matchPlayerNames.sort(function (a, b) {return a.localeCompare(b);});
 	matchPlayerNames.reverse();
 	for (var i in matchPlayerNames) {
-		select.prepend($('<option/>').val(matchPlayerNames[i]).text(matchPlayerNames[i]));
+		if(matchPlayerNames[i]!=nameweb){ 
+			select.prepend($('<option/>').val(matchPlayerNames[i]).text(matchPlayerNames[i]));
+		}
 	}
 	select.prepend($('<option selected/>').val("").text("Seleccione uno"));
 	$('[data-toggle="tooltip"]').tooltip();
@@ -390,15 +373,14 @@ function createPollingForm(){
 									score: $('input[name="white-player-punctuation-'+i+'"]').val(), 
 									comment: $('textarea[name="white-player-comment-'+i+'"]').val()});
 			}
-		}		
-//		console.log(request);
+		}
 
 		$.post(
 	  			window.location.pathname+'api/save-polling.json', 
 	  			JSON.stringify(request), 
 	  			function( data2 ) {
-//	  				console.log(data2);
 	  				if(!data2 || !data2.error){
+	  					ga('send', 'event', { eventCategory: 'form', eventAction: 'submit', eventLabel: 'vote'});
 	  					$('#polling-form button[type="submit"]').prop("disabled","disabled");
 	  					$('#notification-score-button').slideUp();
 	  					$('#polling').modal('hide');
@@ -446,8 +428,6 @@ $(function () {
       auth2 = gapi.auth2.init({
         client_id: '517911210517-uupk9pfrbcsnce7qblohvpmog4hc6bfu.apps.googleusercontent.com',
         cookiepolicy: 'single_host_origin',
-        // Request scopes in addition to 'profile' and 'email'
-        //scope: 'additional_scope'
       });
       if(auth2.isSignedIn.get()){
 		googleStatusChangeCallback();
@@ -488,7 +468,6 @@ $(function () {
 	
 	//Polling Overlay
 	$('#polling').on('show.bs.modal', function (event) {
-//		console.log('currentMatch: '+JSON.stringify(selectedSeasonMatches[currentMatch]));
 		$('.blue-score').text(parseInt(selectedSeasonMatches[currentMatch].scoreBlues));
 		$('.white-score').text(parseInt(selectedSeasonMatches[currentMatch].scoreWhites));
 		$('.last-match-date').text($.timeago(selectedSeasonMatches[currentMatch].day));
@@ -501,10 +480,23 @@ $(function () {
 	
 	//Last Match Winner Overlay
 	$('#last-match-winner').on('show.bs.modal', function (event) {
-		  var lastMatchResult = currentMatch-1;
-		  if( selectedSeasonMatches[currentMatch].day+pollingLimit<new Date().getTime() ){
-			  lastMatchResult = currentMatch;
-		  }
+		var matchDay = $(event.relatedTarget).attr('data-match-day');
+		var id = $(event.relatedTarget).attr('id');
+		var lastMatchResult;
+		if("match-winner-button"==id){
+			  if( currentMatch==matchDay && selectedSeasonMatches[currentMatch].day+pollingLimit>new Date().getTime() && usertype != 'admin'){
+				  $("#match-winner-button").addClass("disabled");
+				  return;
+			  }else{
+				  lastMatchResult = matchDay;
+			  }
+		}else if("last-match-winner-button"==id){
+			  if( selectedSeasonMatches[currentMatch].day+pollingLimit<new Date().getTime() || usertype == 'admin'){
+				  lastMatchResult = currentMatch;
+			  }else{
+				  lastMatchResult = currentMatch-1;
+			  }
+		}
 
 		  $('.blue-score').text(parseInt(selectedSeasonMatches[lastMatchResult].scoreBlues));
 		  $('.white-score').text(parseInt(selectedSeasonMatches[lastMatchResult].scoreWhites));

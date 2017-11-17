@@ -790,6 +790,7 @@ public class APIUtil {
 				if(votes.containsKey(titleName)){
 					List<String> titlesList = (List<String>) votes.get(titleName);
 					Map<String, Long> occurrences = titlesList.stream().collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+					occurrences.remove("");
 					Entry<String, Long> max = occurrences.entrySet().stream().max(Comparator.comparing(Entry::getValue)).get();
 					
 					for(Entry<String, Long> e : occurrences.entrySet()){
@@ -810,7 +811,7 @@ public class APIUtil {
 			});
 		}catch (Exception e) {
 			e.printStackTrace();
-			return Document.parse("{error, getLastMatchResult: '"+e.getMessage()+"'}");
+			return Document.parse("{error: 'getLastMatchResult: "+e.getMessage()+"'}");
 		}
 		return result;
 	}
@@ -833,6 +834,7 @@ public class APIUtil {
 			String frances = jsonNode.get("frances").asText();
 			String sillegas = jsonNode.get("sillegas").asText();
 			String porculero = jsonNode.get("porculero").asText();
+			String voter = null;
 			ArrayNode scores = (ArrayNode) jsonNode.get("scores");
 			if(scores==null || scores.size()!=13){
 				logger.warning("No scores saving polling for match "+date+" "+season);
@@ -853,7 +855,7 @@ public class APIUtil {
 				DBConnector.addTitleVote(dateL, season, trompito, dandy, frances, sillegas, porculero);
 			}
 			for(JsonNode p : scores){
-				String voter = p.get("voter").asText();
+				voter = p.get("voter").asText();
 				String voted = p.get("voted").asText();
 				Integer score = p.get("score").asInt();
 				String comment = p.get("comment").asText();
@@ -866,9 +868,10 @@ public class APIUtil {
 					logger.warning(voter+" already voted "+voted+" for match "+date+" "+season);
 				}
 			}
+			logger.info(voter+" has voted "+scores.size()+" players, for match "+date+" "+season);
 		}catch (Exception e) {
 			e.printStackTrace();
-			return Document.parse("{error, savePolling: '"+e.getMessage()+"'}");
+			return Document.parse("{error: 'savePolling: "+e.getMessage()+"'}");
 		}
 		return null;
 	}
