@@ -1,17 +1,11 @@
 package com.ppot14.futbol7;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.SocketTimeoutException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -26,16 +20,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.function.Function;
-import java.util.function.ToDoubleFunction;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.function.Function;
+import java.util.function.ToDoubleFunction;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-import org.apache.commons.net.ftp.FTPClient;
-import org.apache.commons.net.ftp.FTPReply;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -65,7 +57,7 @@ public class APIUtil {
 
 	private static SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy");
 	private static SimpleDateFormat formatter2 = new SimpleDateFormat("dd/MM/yyyy");
-	private static SimpleDateFormat formatter3 = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+//	private static SimpleDateFormat formatter3 = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 	
 	private static Map<String,Object> config = null;
 	
@@ -82,24 +74,28 @@ public class APIUtil {
 		this("config.json");
 	}
 	
+	@SuppressWarnings({ "unchecked" })
 	public APIUtil(String propFileName){
 		
 		config = null;
-        ObjectMapper mapper = new ObjectMapper();
-		InputStream inputStream = APIUtil.class.getClassLoader().getResourceAsStream(propFileName);
 
 		try {
-			if (inputStream != null) {
-				config = mapper.readValue(inputStream, Map.class);
-			} else {
-				throw new FileNotFoundException("property file '" + propFileName + "' not found in the classpath");
+			config = DBConnector.getConfig();
+			if(config==null){
+		        ObjectMapper mapper = new ObjectMapper();
+				InputStream inputStream = APIUtil.class.getClassLoader().getResourceAsStream(propFileName);
+				if (inputStream != null) {
+					config = mapper.readValue(inputStream, Map.class);
+					inputStream.close();
+				} else {
+					throw new FileNotFoundException("property file '" + propFileName + "' not found in the classpath");
+				}
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		
 		PERMANENTS = (Map<String,List<String>>) config.get("permanents");
-//		logger.info("PERMANENTS: "+PERMANENTS);
 		
 	}
 	
@@ -107,18 +103,22 @@ public class APIUtil {
 		return config;
 	}
 
-	public Object getOptions() {
+	public Object getPermanents() {
 		Map<String, Object> options = new HashMap<String,Object>();
 		options.put("permanents", PERMANENTS);
 		return options;
 	}
 
+	@SuppressWarnings("unchecked")
 	public synchronized boolean processData(boolean refresh){
     	
 		try{
-			
+			if(refresh){ 
+				config = DBConnector.getConfig();
+				PERMANENTS = (Map<String,List<String>>) config.get("permanents");
+			}
 			if(rawMatches==null || refresh){
-			
+				
 				InputStream inputStream = null;
 				try{
 					inputStream = GoogleImporter.importFromGoogleDrive(config,null);
@@ -446,7 +446,7 @@ public class APIUtil {
 //			rawScorers.get(seasonScorerName).remove(0);
 //			rawScorers.get(seasonScorerName).remove(0);
 			for(int i = 2; i<rawScorers.get(seasonScorerName).size(); i++){
-				List<String> row = rawScorers.get(seasonScorerName).get(i);
+//				List<String> row = rawScorers.get(seasonScorerName).get(i);
 				String date = rawScorers.get(seasonScorerName).get(i).get(0);
 				data.get(seasonName).put(date, new HashMap<String,Integer>());
 				for(int j = 3; j<rawScorers.get(seasonScorerName).get(i).size(); j++){
@@ -478,6 +478,8 @@ public class APIUtil {
 		players = new HashMap<String, Set<String>>();
 		
 		for(String seasonName: rawMatches.keySet()){
+			Map<String, String> avgSeasonPlayerScore = avgSeasonPlayerScore(seasonName);
+			
 			data.put(seasonName, new ArrayList<Map<String,String>>());
 	        players.put(seasonName, getListOfPlayers(points, realPoints, goalsFor, goalsAgainst, wins, draws, loses, matches, seasonName));
 	        logger.fine(seasonName+": "+players.toString());
@@ -498,10 +500,68 @@ public class APIUtil {
 	        	e.put("pointsAVG", (valid?new Float(realPoints.get(seasonName).get(name)*1.0F/matches.get(seasonName).get(name)):"").toString());
 	        	e.put("goalsForAVG", (valid?new Float(goalsFor.get(seasonName).get(name)*1.0F/matches.get(seasonName).get(name)):"").toString());
 	        	e.put("goalsAgainstAVG", (valid?new Float(goalsAgainst.get(seasonName).get(name)*1.0F/matches.get(seasonName).get(name)):new Float(99.99F)).toString());
+	        	e.put("scoreAVG", avgSeasonPlayerScore.containsKey(name)?avgSeasonPlayerScore.get(name):"0");
 				data.get(seasonName).add(e);
 	        }
 		}
 		return data;
+	}
+	
+	private Map<String, String> avgSeasonPlayerScore(String seasonName){
+		Document d = DBConnector.getVotes(seasonName);
+		Map<String, String> avgSeasonPlayerScore = new HashMap<String,String>();
+		Map<String, List<Double>> listSeasonPlayerScore = new HashMap<String,List<Double>>();
+		for(Entry<String, Object> date : d.entrySet()){
+			List<Document> scores = (List<Document>) ((Document)date.getValue()).get("scores");
+			List<Document> scoresAVG = (List<Document>) ((Document)date.getValue()).get("scoresAVG");
+			if(scores!=null){
+				Map<String, List<Integer>> temp = new HashMap<String,List<Integer>>();
+				for(Document score : scores){
+					String voted = score.getString("voted");
+					Integer scoreI = score.getInteger("score");
+					if(!temp.containsKey(voted)){
+						List<Integer> l = new ArrayList<Integer>();
+						temp.put(voted, l);
+					}
+					temp.get(voted).add(scoreI);
+				}
+				for(Entry<String, List<Integer>> dateScores : temp.entrySet()){
+					String voted = dateScores.getKey();
+					if(!listSeasonPlayerScore.containsKey(voted)){
+						List<Double> l = new ArrayList<Double>();
+						listSeasonPlayerScore.put(voted, l);
+					}
+					listSeasonPlayerScore.get(voted).add(
+							dateScores.getValue().stream().mapToDouble(new ToDoubleFunction<Integer>() {
+								@Override
+								public double applyAsDouble(Integer value) {
+									return value;
+								}
+							}).average().getAsDouble()
+					);
+				}
+			}else if(scoresAVG!=null){
+				for(Document score : scoresAVG){
+					String voted = score.getString("voted");
+					Double scoreFubles = score.getDouble("scoreFubles");
+					if(!listSeasonPlayerScore.containsKey(voted)){
+						List<Double> l = new ArrayList<Double>();
+						listSeasonPlayerScore.put(voted, l);
+					}
+					listSeasonPlayerScore.get(voted).add(scoreFubles);
+				}
+			}
+		}
+		for(Entry<String, List<Double>> seasonPlayerScore : listSeasonPlayerScore.entrySet()){
+			avgSeasonPlayerScore.put(seasonPlayerScore.getKey(),""+
+					seasonPlayerScore.getValue().stream().mapToDouble(new ToDoubleFunction<Double>() {
+						@Override
+						public double applyAsDouble(Double value) {
+							return value;
+						}
+					}).average().getAsDouble());
+		}
+		return avgSeasonPlayerScore;
 	}
 
 	private String getLastMatches(String name, String seasonName) {
@@ -712,6 +772,7 @@ public class APIUtil {
 		return (row==null || row.isEmpty() || row.size()<13 || "".equals(row.get(0)));
 	}
 
+	@SuppressWarnings("unchecked")
 	public Object getLastMatchResult(JsonNode jsonNode) {
 		List<Map.Entry<String,Map<String,Object>>> result = new ArrayList<Map.Entry<String,Map<String,Object>>>();
 
@@ -887,102 +948,5 @@ public class APIUtil {
 	
 	public Object getPlayersPictures() {		
 		return DBConnector.getPlayersPictures();
-	}	
-
-
-	
-	/**
-	 * @deprecated
-	 */
-	public void writeToFileAndServer(){
-
-		File project =  new File("");
-		
-		String jsonSrcFolder = project.getAbsolutePath()+"\\src\\main\\webapp\\resources\\json\\";
-		
-//		logger.info("Project src json folder: "+jsonSrcFolder);
-
-		try{
-			
-			writeToServer(writeJSONtoFile(jsonSrcFolder,"full.js",jsonToString(getFullRanking())),"/resources/json");
-			writeToServer(writeJSONtoFile(jsonSrcFolder,"pair.js",jsonToString(getPair())),"/resources/json");
-			writeToServer(writeJSONtoFile(jsonSrcFolder,"permanents.js",jsonToString(getRankingPermanents())),"/resources/json");
-			writeToServer(writeJSONtoFile(jsonSrcFolder,"substitutes.js",jsonToString(getRankingSubstitutes())),"/resources/json");
-			writeToServer(writeJSONtoFile(jsonSrcFolder,"vs.js",jsonToString(getVS())),"/resources/json");
-			writeToServer(writeJSONtoFile(jsonSrcFolder,"pointsSeries.js",jsonToString(getPointsSeries())),"/resources/json");
-			writeToServer(writeJSONtoFile(jsonSrcFolder,"matches.js",jsonToString(getResults())),"/resources/json");
-	        
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-		writeToServer(new File(project.getAbsolutePath()+"\\src\\main\\webapp\\index.html"),"");
-		
-	}
-	
-	/**
-	 * @deprecated
-	 */
-	private File writeJSONtoFile(String folder, String file, String jsonString) throws IOException {
-		String varName = file.split("\\.")[0];
-//		logger.info("File created: "+folder+file+"; var "+varName+" = "+ jsonString+ ";");
-		List<String> lines = Arrays.asList("var "+varName+" = ", jsonString, ";");
-		Path path = Paths.get(folder+file);
-		Files.write(path, lines, Charset.forName("UTF-8"));
-		return path.toFile();
-	}
-
-	/**
-	 * @deprecated
-	 */
-	private void writeToServer(File file, String subdir){
-			String SFTPHOST = (String) config.get("sftp-host");
-			int    SFTPPORT = (Integer) config.get("sftp-port");
-			String SFTPUSER = (String) config.get("sftp-username");
-			String SFTPPASS = (String) config.get("sftp-password");
-			String SFTPWORKINGDIR = (String) config.get("sftp-directory") + subdir;
-			 
-		    FTPClient ftp = new FTPClient();
-		    ftp.setConnectTimeout(10000);
-			 
-			try{
-			      int reply;
-			      ftp.connect(SFTPHOST,SFTPPORT);
-			      ftp.login(SFTPUSER, SFTPPASS);
-			      reply = ftp.getReplyCode();
-
-			      if(!FTPReply.isPositiveCompletion(reply)) {
-			        ftp.disconnect();
-					logger.severe("FTP server refused connection: "+ftp.getReplyString());
-			        return;
-			      }
-			      
-			      ftp.changeWorkingDirectory(SFTPWORKINGDIR);
-			      ftp.enterLocalPassiveMode();
-			      
-			      FileInputStream fis = new FileInputStream(file);
-			      ftp.storeFile(file.getName(), fis);
-
-			      reply = ftp.getReplyCode();
-			      if(!FTPReply.isPositiveCompletion(reply)) {
-			        ftp.disconnect();
-					logger.severe("FTP file transfer error: "+reply+" "+ftp.getReplyString());
-			        return;
-			      }
-			      
-			      fis.close();
-		          ftp.logout();				
-				logger.info("File "+file.getName()+" transfered to server folder "+SFTPWORKINGDIR);
-			}catch(Exception ex){
-				logger.severe("Impossible to transfer file to server: "+ex);
-				ex.printStackTrace();
-			}finally {
-		      if(ftp.isConnected()) {
-		          try {
-		            ftp.disconnect();
-		          } catch(IOException ioe) {
-		            // do nothing
-		          }
-		       }
-		    }
 	}
 }

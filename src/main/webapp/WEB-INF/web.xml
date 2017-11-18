@@ -18,7 +18,7 @@
     </servlet>
   	<servlet-mapping>
       <servlet-name>Futbol7APIServlet</servlet-name>
-      <url-pattern>*.json</url-pattern>
+      <url-pattern>*.request</url-pattern>
   	</servlet-mapping>
   	
 </web-app>

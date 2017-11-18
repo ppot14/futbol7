@@ -3,6 +3,7 @@ package com.ppot14.futbol7;
 import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.elemMatch;
 import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.exists;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -34,6 +35,22 @@ public class DBConnector {
 		}
 		MongoCollection<Document> collection = mongo.getDatabase("futbol7").getCollection(collectionName);
 		return collection;
+	}
+	
+	public static Document getConfig(){
+		try {
+			MongoCollection<Document> configCollection;
+			configCollection = getCollection("Config");
+			Bson filter = exists("permanents");
+			FindIterable<Document> result = configCollection.find(filter);
+			if(result!=null && result.first()!=null){
+				logger.info(result.first().toString());
+				return (Document) result.first();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 	
 	public static Document getPlayer(JsonNode jsonNode){
@@ -110,6 +127,25 @@ public class DBConnector {
 		}
 		return null;
 	}	
+	
+	public static Document getVotes(String season){
+		Document ret = new Document();
+		try {
+			MongoCollection<Document> configCollection;
+			configCollection = getCollection("Scores");
+			Bson filter = eq("season",season);
+			FindIterable<Document> result = configCollection.find(filter);
+			if(result!=null){
+				for(Document d:result){
+					ret.put(d.getString("date"), d);
+				}
+				return ret;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
 	
 	public static Document getVotes(String season, String date){
 		try {

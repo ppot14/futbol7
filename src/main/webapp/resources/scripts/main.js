@@ -44,12 +44,13 @@ function showAdmin(){
 	    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'pointsAVG');
 	    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'goalsForAVG');
 	    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'goalsAgainstAVG');
+	    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'scoreAVG');
 	
 	    	$('#row1').show();
 	    	$('#row3').show();
 	    	$('#row4').show();
 	    	
-	    	$.getJSON(window.location.pathname+'api/pointsSeries.json', function (pointsSeries) {
+	    	$.getJSON(window.location.pathname+'api/pointsSeries.request', function (pointsSeries) {
 	    		createChart(pointsSeries);
 	    	});
 		}
@@ -68,6 +69,7 @@ function hideAdmin(){
 	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('hideColumn', 'pointsAVG');
 	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('hideColumn', 'goalsForAVG');
 	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('hideColumn', 'goalsAgainstAVG');
+	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('hideColumn', 'scoreAVG');
 
 	$('#row1').hide();
 	$('#row3').hide();
@@ -147,7 +149,7 @@ $(function () {
 	    var remarks = (selectedSeasonMatches[numMatches-1].remarks.indexOf('RD') > -1) ?' (Número de goles desconocido, por defecto 1-0 o 0-0)':'';
 
 		//Receive players pictures
-		$.getJSON(window.location.pathname+'api/playersPictures.json', function(data) {
+		$.getJSON(window.location.pathname+'api/playersPictures.request', function(data) {
 	    	if(data){ playersPictures = data }
 	    	else{ console.warn('Pictures from players not received')};
 	    });	    
@@ -211,82 +213,82 @@ $(function () {
 	  
     var changeSeason = function(season){
 
-	    $.getJSON(window.location.pathname+'api/full.json', function(full) {
+	    $.getJSON(window.location.pathname+'api/full.request', function(full) {
 	    	$('#table-full').bootstrapTable('load', full[season]);
 	    });
-	    $.getJSON(window.location.pathname+'api/permanents.json', function(permanents) {
+	    $.getJSON(window.location.pathname+'api/permanents.request', function(permanents) {
 	    	$('#table-permanents').bootstrapTable('load', permanents[season]);
 	    });
-	    $.getJSON(window.location.pathname+'api/substitutes.json', function(substitutes) {
+	    $.getJSON(window.location.pathname+'api/substitutes.request', function(substitutes) {
 		    $('#table-substitutes').bootstrapTable('load', substitutes[season]);
 	    });
-	    $.getJSON(window.location.pathname+'api/vs.json', function(vs) {
+	    $.getJSON(window.location.pathname+'api/vs.request', function(vs) {
 		    $('#table-vs').bootstrapTable('load', vs[season]);
 	    });
-	    $.getJSON(window.location.pathname+'api/pair.json', function(pair) {
+	    $.getJSON(window.location.pathname+'api/pair.request', function(pair) {
 			$('#table-pair').bootstrapTable('load', pair[season]);
 	    });
 	    chart.destroy();
-    	$.getJSON(window.location.pathname+'api/pointsSeries.json', function (pointsSeries) {
+    	$.getJSON(window.location.pathname+'api/pointsSeries.request', function (pointsSeries) {
 			createChart(pointsSeries);
 	    });
-	    $.getJSON(window.location.pathname+'api/matches.json', matchesFunction);
-	    $.getJSON(window.location.pathname+'api/players.json', playersFunction);
-	    $.getJSON(window.location.pathname+'api/scorers.json', function(scorers) {
+	    $.getJSON(window.location.pathname+'api/matches.request', matchesFunction);
+	    $.getJSON(window.location.pathname+'api/players.request', playersFunction);
+	    $.getJSON(window.location.pathname+'api/scorers.request', function(scorers) {
 			$('#table-scorers').bootstrapTable('load', scorers[season]);
 	    });
     	
     };
   
-  	$.getJSON(window.location.pathname+'api/options.json', function(data) {
+  	$.getJSON(window.location.pathname+'api/options.request', function(data) {
   		options = data;
   		var select = $("#season-selector");
   		for (var prop in options.permanents) {
   			select.prepend($('<option '+(prop=='2017-2018'?' selected="selected"':'')+'/>').val(prop).text("Temporada "+prop));
   		}
-	    $.getJSON(window.location.pathname+'api/matches.json', matchesFunction);
-	    $.getJSON(window.location.pathname+'api/players.json', playersFunction);
+	    $.getJSON(window.location.pathname+'api/matches.request', matchesFunction);
+	    $.getJSON(window.location.pathname+'api/players.request', playersFunction);
   		select.on('change', function() {
   			changeSeason(this.value);
   		});
     	
 	  	var season = $("#season-selector").val();
-	    $.getJSON(window.location.pathname+'api/full.json', function(full) {
+	    $.getJSON(window.location.pathname+'api/full.request', function(full) {
 		    $('#table-full').bootstrapTable({
 		        data: full[season],
 		        locale:'es-ES',
 		        onAll: function(name, args){ updateUserName() }
 		    });
 	    });
-	    $.getJSON(window.location.pathname+'api/permanents.json', function(permanents) {
+	    $.getJSON(window.location.pathname+'api/permanents.request', function(permanents) {
 		    $('#table-permanents').bootstrapTable({
 		        data: permanents[season],
 		        locale:'es-ES',
 		        onAll: function(name, args){ updateUserName() }
 		    });
 	    });
-	    $.getJSON(window.location.pathname+'api/substitutes.json', function(substitutes) {
+	    $.getJSON(window.location.pathname+'api/substitutes.request', function(substitutes) {
 		    $('#table-substitutes').bootstrapTable({
 		        data: substitutes[season],
 		        locale:'es-ES',
 		        onAll: function(name, args){ updateUserName() }
 		    });
 	    });
-	    $.getJSON(window.location.pathname+'api/vs.json', function(vs) {
+	    $.getJSON(window.location.pathname+'api/vs.request', function(vs) {
 		    $('#table-vs').bootstrapTable({
 		        data: vs[season],
 		        locale:'es-ES',
 		        onAll: function(name, args){ updateUserName() }
 		    });
 	    });
-	    $.getJSON(window.location.pathname+'api/pair.json', function(pair) {
+	    $.getJSON(window.location.pathname+'api/pair.request', function(pair) {
 		    $('#table-pair').bootstrapTable({
 		        data: pair[season],
 		        locale:'es-ES',
 		        onAll: function(name, args){ updateUserName() }
 		    });
 	    });
-	    $.getJSON(window.location.pathname+'api/scorers.json', function(scorers) {
+	    $.getJSON(window.location.pathname+'api/scorers.request', function(scorers) {
 		    $('#table-scorers').bootstrapTable({
 		        data: scorers[season],
 		        locale:'es-ES',
@@ -299,7 +301,7 @@ $(function () {
     	var playerOne = $( "#player-one option:selected" ).text();
     	var playerTwo = $( "#player-two option:selected" ).text();
     	$.post(
-    			window.location.pathname+'api/comparison.json', 
+    			window.location.pathname+'api/comparison.request', 
     			JSON.stringify({season: $("#season-selector").val(), 
     							playerOne: playerOne,
     							playerTwo: playerTwo}), 
@@ -324,7 +326,7 @@ $(function () {
     });
     
     $('#refresh').click(function(){
-    	$.getJSON(window.location.pathname+'api/refresh.json', function (data) {
+    	$.getJSON(window.location.pathname+'api/refresh.request', function (data) {
     		if(data=='true' || data==true){
     			location.reload();
     		}

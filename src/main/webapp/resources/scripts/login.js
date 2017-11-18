@@ -71,7 +71,7 @@ function loggedIn(response,loginType) {
 	  $('#login-selector').modal('hide');
   	  
 	  $.post(
-			window.location.pathname+'api/player.json', 
+			window.location.pathname+'api/player.request', 
 			JSON.stringify(data), 
 			function( data ) {
 				if(data && data.nameweb){
@@ -91,7 +91,7 @@ function loggedIn(response,loginType) {
     						(selectedSeasonMatches[currentMatch].day+pollingReady<new Date().getTime())){//No vote before the match, vote after 23h of the match day
     					//Has scored?
 				      	$.post(
-				    			window.location.pathname+'api/player-has-voted.json', 
+				    			window.location.pathname+'api/player-has-voted.request', 
 				    			JSON.stringify({name:nameweb,date:selectedSeasonMatches[currentMatch].day,season:$("#season-selector").val()}), 
 				    			function( data ) {
 //									console.log("Played has voted? "+JSON.stringify(data));
@@ -116,7 +116,7 @@ function loggedIn(response,loginType) {
 
 function updateListTeamScorers(match){
 	$.post(
-  			window.location.pathname+'api/match-scorers.json', 
+  			window.location.pathname+'api/match-scorers.request', 
   			JSON.stringify({season: $("#season-selector").val(), match: match}), 
   			function( data1 ) {
   				$('.blue-scorers').empty();
@@ -153,7 +153,7 @@ function lastMatchResultRequest(lastMatchResult){
 
 	var request = JSON.stringify({season: $("#season-selector").val(), match: selectedSeasonMatches[lastMatchResult]});
 	$.post(
-			window.location.pathname+'api/last-match-result.json', 
+			window.location.pathname+'api/last-match-result.request', 
 			request, 
 			function( data1 ) {
 				if(data1 && Array.isArray(data1)){
@@ -190,7 +190,7 @@ function addBadges(x, t, data){
 		html += '<div class="player-badge" data-toggle="tooltip" data-placement="bottom" title="Título al más impuntual e impresentable"><i class="fa fa-clock-o" aria-hidden="true"></i></div>';
 	}
 	if(data.porculero){
-		html += '<div class="player-badge" data-toggle="tooltip" data-placement="bottom" title="Título al más protestón y vocazas"><i class="fa fa-bullhorn" aria-hidden="true"></i></div>';
+		html += '<div class="player-badge" data-toggle="tooltip" data-placement="bottom" title="Título al más protestón y bocazas"><i class="fa fa-bullhorn" aria-hidden="true"></i></div>';
 	}
 	return html;
 }
@@ -331,7 +331,7 @@ function createPollingForm(){
 				'<select id="sillegas-selector" class="matchtitle-selector form-control"></select>'+
 			'</div>'+
 			'<div class="col-md-2">'+
-				'<h4 data-toggle="tooltip" data-placement="top" title="Título al más protestón y vocazas">El Porculero <div class="player-badge"><i class="fa fa-bullhorn" aria-hidden="true"></i></div></h4>'+
+				'<h4 data-toggle="tooltip" data-placement="top" title="Título al más protestón y bocazas">El Porculero <div class="player-badge"><i class="fa fa-bullhorn" aria-hidden="true"></i></div></h4>'+
 				'<select id="porculero-selector" class="matchtitle-selector form-control"></select>'+
 			'</div>'+
 			'<div class="col-md-1"></div>'+
@@ -376,7 +376,7 @@ function createPollingForm(){
 		}
 
 		$.post(
-	  			window.location.pathname+'api/save-polling.json', 
+	  			window.location.pathname+'api/save-polling.request', 
 	  			JSON.stringify(request), 
 	  			function( data2 ) {
 	  				if(!data2 || !data2.error){

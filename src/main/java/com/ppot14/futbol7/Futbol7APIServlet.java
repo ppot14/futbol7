@@ -53,31 +53,31 @@ public class Futbol7APIServlet extends HttpServlet {
     	ObjectMapper mapper = new ObjectMapper();
     	
     	Object reply = null;
-    	boolean processed = api.processData(requestPath.contains("/api/refresh.json"));
+    	boolean processed = api.processData(requestPath.contains("/api/refresh.request"));
     	try {
-			if(requestPath.contains("/api/refresh.json")){
+			if(requestPath.contains("/api/refresh.request")){
 				reply = processed; }
-			else if(requestPath.contains("/api/full.json")){
+			else if(requestPath.contains("/api/full.request")){
 	    		reply = api.getFullRanking(); }
-			else if(requestPath.contains("/api/pair.json")){
+			else if(requestPath.contains("/api/pair.request")){
 	    		reply = api.getPair(); }
-			else if(requestPath.contains("/api/permanents.json")){
+			else if(requestPath.contains("/api/permanents.request")){
 	    		reply = api.getRankingPermanents(); }
-			else if(requestPath.contains("/api/substitutes.json")){
+			else if(requestPath.contains("/api/substitutes.request")){
 	    		reply = api.getRankingSubstitutes(); }
-			else if(requestPath.contains("/api/vs.json")){
+			else if(requestPath.contains("/api/vs.request")){
 	    		reply = api.getVS(); }
-			else if(requestPath.contains("/api/pointsSeries.json")){
+			else if(requestPath.contains("/api/pointsSeries.request")){
 	    		reply = api.getPointsSeries();}
-			else if(requestPath.contains("/api/matches.json")){
+			else if(requestPath.contains("/api/matches.request")){
     	    	reply = api.getResults(); }
-			else if(requestPath.contains("/api/players.json")){
+			else if(requestPath.contains("/api/players.request")){
     	    	reply = api.getPlayers(); }
-			else if(requestPath.contains("/api/options.json")){
-    	    	reply = api.getOptions(); }
-			else if(requestPath.contains("/api/scorers.json")){
+			else if(requestPath.contains("/api/options.request")){
+    	    	reply = api.getPermanents(); }
+			else if(requestPath.contains("/api/scorers.request")){
 	    		reply = api.getFullScorers(); }
-			else if(requestPath.contains("/api/playersPictures.json")){
+			else if(requestPath.contains("/api/playersPictures.request")){
 	    		reply = api.getPlayersPictures(); }
 			else{
 				logger.warning("Request path not found: "+requestPath);
@@ -105,17 +105,17 @@ public class Futbol7APIServlet extends HttpServlet {
     	Object reply = null;
 
     	try {
-			if(requestPath.contains("/api/comparison.json")){
+			if(requestPath.contains("/api/comparison.request")){
 		    	reply = api.getComparison(jsonNode);
-			}else if(requestPath.contains("/api/player.json")){
+			}else if(requestPath.contains("/api/player.request")){
 				reply = api.getPlayer(jsonNode);
-			}else if(requestPath.contains("/api/player-has-voted.json")){
+			}else if(requestPath.contains("/api/player-has-voted.request")){
 				reply = api.hasVoted(jsonNode);
-			}else if(requestPath.contains("/api/last-match-result.json")){
+			}else if(requestPath.contains("/api/last-match-result.request")){
 				reply = api.getLastMatchResult(jsonNode);
-			}else if(requestPath.contains("/api/match-scorers.json")){
+			}else if(requestPath.contains("/api/match-scorers.request")){
 				reply = api.getMatchScorers(jsonNode);
-			}else if(requestPath.contains("/api/save-polling.json")){
+			}else if(requestPath.contains("/api/save-polling.request")){
 				reply = api.savePolling(jsonNode);
 			}else{
 				logger.warning("Request path not found: "+requestPath);
