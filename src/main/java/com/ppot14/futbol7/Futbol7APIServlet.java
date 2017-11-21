@@ -36,11 +36,14 @@ public class Futbol7APIServlet extends HttpServlet {
      */
     @Override
     public void init(final ServletConfig config) throws ServletException {
-    	logger.fine("Futbol7APIServlet init");
+		long startTime = System.currentTimeMillis();
     	
     	String configurationFile = config.getServletContext().getInitParameter("configurationFile");
     	
     	api = new APIUtil(configurationFile);
+
+		long endTime = System.currentTimeMillis();
+    	logger.info("Servlet init ("+(endTime - startTime)+"ms)");
     }
 
 	/**
@@ -48,8 +51,8 @@ public class Futbol7APIServlet extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 //		HttpSession session = request.getSession();
+		long startTime = System.currentTimeMillis();
 		final String requestPath = request.getRequestURI();
-    	logger.fine("RequestURI: "+requestPath);
     	ObjectMapper mapper = new ObjectMapper();
     	
     	Object reply = null;
@@ -90,14 +93,16 @@ public class Futbol7APIServlet extends HttpServlet {
 		response.setContentType("application/json");
 		response.setStatus(200);
 		mapper.writeValue(response.getOutputStream(), reply);
+		long endTime = System.currentTimeMillis();
+    	logger.info("RequestURI ("+(endTime - startTime)+"ms): "+requestPath);
 	}
 
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		long startTime = System.currentTimeMillis();
 		final String requestPath = request.getRequestURI();
-    	logger.info("RequestURI: "+requestPath);
     	ObjectMapper mapper = new ObjectMapper();
 		final String requestBody = getBody(request);
 		logger.fine("requestBody: "+requestBody);
@@ -128,6 +133,8 @@ public class Futbol7APIServlet extends HttpServlet {
 		response.setContentType("application/json");
 		response.setStatus(200);
 		mapper.writeValue(response.getOutputStream(), reply);
+		long endTime = System.currentTimeMillis();
+    	logger.info("RequestURI ("+(endTime - startTime)+"ms): "+requestPath);
 	}
 
     protected String getBody(final HttpServletRequest request) throws IOException {

@@ -12,9 +12,9 @@ function facebookStatusChangeCallback(response) {
 		FB.api("/me",
 				{fields: "picture,email,name"},
 				function(response) {
-					setTimeout(function(){//Hack to avoid season selector load before automatic login
+//					setTimeout(function(){//Hack to avoid season selector load before automatic login
 						loggedIn(response,'facebook');
-					},1000);
+//					},1000);
 				});
 	}
 }
@@ -23,9 +23,9 @@ function googleStatusChangeCallback(){
 	var response = {name: auth2.currentUser.get().getBasicProfile().getName(),
 				id: auth2.currentUser.get().getBasicProfile().getId(),
 				picture: auth2.currentUser.get().getBasicProfile().getImageUrl()};
-	setTimeout(function(){//Hack to avoid season selector load before automatic login
+//	setTimeout(function(){//Hack to avoid season selector load before automatic login
 		loggedIn(response,'google');
-	},1000);
+//	},1000);
 }
 
 function loggedOut(){
@@ -76,34 +76,51 @@ function loggedIn(response,loginType) {
 			function( data ) {
 				if(data && data.nameweb){
 					
-    				nameweb = data.nameweb;
-    				usertype = data.usertype;
-    				showAdmin();
-    				updateUserName();
+					var waiter = setInterval(waitForMain, 1000);
+						
+					function waitForMain(){
+						
+						if(selectedSeasonMatches){
+					
+		    				nameweb = data.nameweb;
+		    				usertype = data.usertype;
+		    				showAdmin();
+		    				updateUserName();
+		    				
+		    				
+		    				//verify if match played and no score and current date<last match date + 5
+		    				console.log("Played? "+JSON.stringify(selectedSeasonMatches[numMatches-1].data).includes(nameweb));
+		    				console.log("Valid period to vote? "+(selectedSeasonMatches[numMatches-1].day+pollingLimit>new Date().getTime()));
+		    				console.log("Now is after Match? "+(selectedSeasonMatches[numMatches-1].day+pollingReady<new Date().getTime()));
+		    				
+		    				if(JSON.stringify(selectedSeasonMatches[numMatches-1].data).includes(nameweb) && //Has played
+		    						(selectedSeasonMatches[numMatches-1].day+pollingLimit>new Date().getTime()) && //Expired 5 days to vote
+		    						(selectedSeasonMatches[numMatches-1].day+pollingReady<new Date().getTime())){//No vote before the match, vote after 23h of the match day
+		    					//Has scored?
+						      	$.post(
+						    			window.location.pathname+'api/player-has-voted.request', 
+						    			JSON.stringify({name:nameweb,date:selectedSeasonMatches[numMatches-1].day,season:$("#season-selector").val()}), 
+						    			function( data ) {
+		//									console.log("Played has voted? "+JSON.stringify(data));
+						    				if(!data){
+						    					$('#notification-score-button').slideDown();
+						    				}else{
+							  					$('#notification-bar').text('Resultados del partido del lunes disponibles '+$.timeago(selectedSeasonMatches[numMatches-1].day+pollingLimit));
+							  					$('#notification-bar').slideDown().delay(10000).slideUp();
+						    				}
+						    			}
+						    	);
+		    				}
+
+							console.log('Finished waiting for selectedSeasonMatches');
+		    				clearInterval(waiter);
+	    				
+						}else{
+							console.log('Waiting for selectedSeasonMatches...');
+						}
+					
+					}
     				
-    				//verify if match played and no score and current date<last match date + 5
-    				console.log("Played? "+JSON.stringify(selectedSeasonMatches[currentMatch].data).includes(nameweb));
-    				console.log("Valid period to vote? "+(selectedSeasonMatches[currentMatch].day+pollingLimit>new Date().getTime()));
-    				console.log("Now is after Match? "+(selectedSeasonMatches[currentMatch].day+pollingReady<new Date().getTime()));
-    				
-    				if(JSON.stringify(selectedSeasonMatches[currentMatch].data).includes(nameweb) && //Has played
-    						(selectedSeasonMatches[currentMatch].day+pollingLimit>new Date().getTime()) && //Expired 5 days to vote
-    						(selectedSeasonMatches[currentMatch].day+pollingReady<new Date().getTime())){//No vote before the match, vote after 23h of the match day
-    					//Has scored?
-				      	$.post(
-				    			window.location.pathname+'api/player-has-voted.request', 
-				    			JSON.stringify({name:nameweb,date:selectedSeasonMatches[currentMatch].day,season:$("#season-selector").val()}), 
-				    			function( data ) {
-//									console.log("Played has voted? "+JSON.stringify(data));
-				    				if(!data){
-				    					$('#notification-score-button').slideDown();
-				    				}else{
-					  					$('#notification-bar').text('Resultados del partido del lunes disponibles '+$.timeago(selectedSeasonMatches[currentMatch].day+pollingLimit));
-					  					$('#notification-bar').slideDown().delay(10000).slideUp();
-				    				}
-				    			}
-				    	);
-    				}
 				}else if(data && data.newuser){
 					console.info("New user created: "+data.newuser);
 				}else{
@@ -122,23 +139,36 @@ function updateListTeamScorers(match){
   				$('.blue-scorers').empty();
   				$('.white-scorers').empty();
   				if(data1){
+  					var scoreBlues=0;
+  					var scoreWhites=0;
   					for(var i=0; i<match.data.length; i++){
   						if(data1[match.data[i].blue]!=null && 
   							data1[match.data[i].blue]!=0){
   							var scoresB='';
-  							for(var j=0; j<data1[match.data[i].blue]; j++){ scoresB+='<i class="fa fa-futbol-o" aria-hidden="true"></i>'; }
+  							for(var j=0; j<data1[match.data[i].blue]; j++){ scoresB+='<i class="fa fa-futbol-o" aria-hidden="true"></i>'; scoreBlues++;}
   							scoresB = '<li class="player-goals">'+match.data[i].blue+' '+scoresB+'</li>';
   							$(scoresB).appendTo('.blue-scorers');
   						}
   						if(data1[match.data[i].white]!=null && 
   							data1[match.data[i].white]!=0){
   							var scoresA='';
-  							for(var j=0; j<data1[match.data[i].white]; j++){ scoresA+='<i class="fa fa-futbol-o" aria-hidden="true"></i>'; }
+  							for(var j=0; j<data1[match.data[i].white]; j++){ scoresA+='<i class="fa fa-futbol-o" aria-hidden="true"></i>'; scoreWhites++;}
   							scoresA = '<li class="player-goals">'+scoresA+' '+match.data[i].white+'</li>';
   							$(scoresA).appendTo('.white-scorers');
-  							
   						}
   					}
+					if(scoreBlues<match.scoreBlues){
+						var scoresB='';
+						for(var j=scoreBlues; j<match.scoreBlues; j++){ scoresB+='<i class="fa fa-futbol-o" aria-hidden="true"></i>';}
+						scoresB = '<li class="player-goals">P.P./S.D. '+scoresB+'</li>';
+						$(scoresB).appendTo('.blue-scorers');
+					}
+					if(scoreWhites<match.scoreWhites){
+						var scoresA='';
+						for(var j=scoreWhites; j<match.scoreWhites; j++){ scoresA+='<i class="fa fa-futbol-o" aria-hidden="true"></i>';}
+						scoresA = '<li class="player-goals">'+scoresA+' P.P./S.D.</li>';
+						$(scoresA).appendTo('.white-scorers');
+					}
   				}else{
 					console.warn("Unknown exception updating team scorers: "+data1);
   				}
@@ -205,7 +235,7 @@ function addPlayerToResult(x, t, data){
 	}
 	$('<div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">'+
 		'<h3 class="player-name">'+data.key+'</h3>'+
-		'<img class="player-picture img-rounded" src="'+((data.value.image)?data.value.image:'resources/images/unknown-player.jpg')+'"/>'+
+		'<img class="player-picture img-rounded" alt="'+data.key+' picture" src="'+((data.value.image)?data.value.image:'resources/images/unknown-player.jpg')+'"/>'+
 		'<span class="player-score pull-right">'+data.value.avg.toFixed(2)+'</span>'+
 		'<div class="badges pull-right">'+addBadges(x,t,data.value)+'</div>'+
 	'</div>').appendTo(row.find('.panel-body'));
@@ -250,18 +280,18 @@ function addPlayerToResult(x, t, data){
 function createPollingForm(){
 	$('.polling-form-group').remove();
 	var matchPlayerNames = [];
-	for(var i=selectedSeasonMatches[currentMatch].data.length-1; i>=0; i--){	
-		matchPlayerNames.push(selectedSeasonMatches[currentMatch].data[i].blue);
-		matchPlayerNames.push(selectedSeasonMatches[currentMatch].data[i].white);
+	for(var i=selectedSeasonMatches[numMatches-1].data.length-1; i>=0; i--){	
+		matchPlayerNames.push(selectedSeasonMatches[numMatches-1].data[i].blue);
+		matchPlayerNames.push(selectedSeasonMatches[numMatches-1].data[i].white);
 		$('<div class="form-group polling-form-group"><div class=row>'+
 			'<div class="col-md-6"><div class=row style="margin-bottom: 15px">'+
 				'<div class="col-md-4">'+
-					'<img id="blue-player-picture-'+i+'" class="player-picture img-rounded" style="height: 100px;width: 100px;" src="'+
-					(playersPictures[selectedSeasonMatches[currentMatch].data[i].blue]?playersPictures[selectedSeasonMatches[currentMatch].data[i].blue]:'resources/images/unknown-player.jpg')+'"/>'+
+					'<img id="blue-player-picture-'+i+'" alt="'+selectedSeasonMatches[numMatches-1].data[i].blue+' picture" class="player-picture img-rounded" style="height: 100px;width: 100px;" src="'+
+					(playersPictures[selectedSeasonMatches[numMatches-1].data[i].blue]?playersPictures[selectedSeasonMatches[numMatches-1].data[i].blue]:'resources/images/unknown-player.jpg')+'"/>'+
 					'<i class="fa fa-flag fa-2x text-primary flag-blue" aria-hidden="true"></i>'+
 			    '</div>'+
 				'<div class="col-md-8">'+
-					'<h4 id="blue-player-name-'+i+'" class="player-name">'+selectedSeasonMatches[currentMatch].data[i].blue+'</h4>'+
+					'<h4 id="blue-player-name-'+i+'" class="player-name">'+selectedSeasonMatches[numMatches-1].data[i].blue+'</h4>'+
 					'<input type="text" name="blue-player-punctuation-'+i+'" '+
 					'data-provide="slider" '+
 					'data-slider-id="slider-blue-'+i+'" '+
@@ -270,17 +300,17 @@ function createPollingForm(){
 					'data-slider-step="1"'+
 					'data-slider-value="5"'+
 					'data-slider-tooltip="hide" ><span id="blue-player-punctuation-number-'+i+'" class="player-punctuation-number pull-right"></span>'+
-					'<textarea name="blue-player-comment-'+i+'" class="form-control" rows="3" maxlength="1000" placeholder="Comentario"  '+((selectedSeasonMatches[currentMatch].data[i].blue==nameweb)?'disabled':'')+'></textarea>'+
+					'<textarea name="blue-player-comment-'+i+'" class="form-control" rows="3" maxlength="1000" placeholder="Comentario"  '+((selectedSeasonMatches[numMatches-1].data[i].blue==nameweb)?'disabled':'')+'></textarea>'+
 			    '</div>'+
 			'</div></div>'+
 			'<div class="col-md-6"><div class=row>'+
 				'<div class="col-md-4">'+
-					'<img id="white-player-picture-'+i+'" class="player-picture img-rounded" style="height: 100px;width: 100px;" src="'+
-					(playersPictures[selectedSeasonMatches[currentMatch].data[i].white]?playersPictures[selectedSeasonMatches[currentMatch].data[i].white]:'resources/images/unknown-player.jpg')+'"/>'+
+					'<img id="white-player-picture-'+i+'" alt="'+selectedSeasonMatches[numMatches-1].data[i].white+' picture" class="player-picture img-rounded" style="height: 100px;width: 100px;" src="'+
+					(playersPictures[selectedSeasonMatches[numMatches-1].data[i].white]?playersPictures[selectedSeasonMatches[numMatches-1].data[i].white]:'resources/images/unknown-player.jpg')+'"/>'+
 					'<i class="fa fa-flag-o fa-2x flag-white" aria-hidden="true"></i>'+
 			    '</div>'+
 				'<div class="col-md-8">'+
-					'<h4 id="white-player-name-'+i+'" class="player-name">'+selectedSeasonMatches[currentMatch].data[i].white+'</h4>'+
+					'<h4 id="white-player-name-'+i+'" class="player-name">'+selectedSeasonMatches[numMatches-1].data[i].white+'</h4>'+
 					'<input type="text" name="white-player-punctuation-'+i+'" '+
 					'data-provide="slider" '+
 					'data-slider-id="slider-white-'+i+'" '+
@@ -289,7 +319,7 @@ function createPollingForm(){
 					'data-slider-step="1"'+
 					'data-slider-value="5"'+
 					'data-slider-tooltip="hide"><span id="white-player-punctuation-number-'+i+'" class="player-punctuation-number pull-right"></span>'+
-					'<textarea name="white-player-comment-'+i+'" class="form-control" rows="3" maxlength="1000" placeholder="Comentario"  '+((selectedSeasonMatches[currentMatch].data[i].white==nameweb)?'disabled':'')+'></textarea>'+
+					'<textarea name="white-player-comment-'+i+'" class="form-control" rows="3" maxlength="1000" placeholder="Comentario"  '+((selectedSeasonMatches[numMatches-1].data[i].white==nameweb)?'disabled':'')+'></textarea>'+
 			    '</div>'+
 			'</div></div>'+
 		'</div></div>').prependTo("#polling-form");
@@ -303,11 +333,11 @@ function createPollingForm(){
 		mySliderW.on("slideStop", function(slideEvt) {
 			$('#'+slideEvt.target.name.replace("punctuation-","punctuation-number-")).text(slideEvt.value);
 		});
-		if(selectedSeasonMatches[currentMatch].data[i].blue==nameweb){
+		if(selectedSeasonMatches[numMatches-1].data[i].blue==nameweb){
 			mySliderB.slider("disable");
 			$('#blue-player-punctuation-number-'+i).hide();
 		}
-		if(selectedSeasonMatches[currentMatch].data[i].white==nameweb){
+		if(selectedSeasonMatches[numMatches-1].data[i].white==nameweb){
 			mySliderW.slider("disable");
 			$('#white-player-punctuation-number-'+i).hide();
 		}
@@ -352,7 +382,7 @@ function createPollingForm(){
 		event.preventDefault();
 		
 		var request = {season:$("#season-selector").val(), 
-						date:selectedSeasonMatches[currentMatch].day, 
+						date:selectedSeasonMatches[numMatches-1].day, 
 						scores:[],
 						trompito: $('#trompito-selector').val(),
 						dandy: $('#dandy-selector').val(),
@@ -385,7 +415,7 @@ function createPollingForm(){
 	  					$('#notification-score-button').slideUp();
 	  					$('#polling').modal('hide');
 	  					$('#notification-bar').text('Votación realizada. Resultados disponibles el '+
-	  							new Date(selectedSeasonMatches[currentMatch].day+pollingLimit).toLocaleString('es-ES',{ day:'numeric',weekday: 'long', hour:'numeric',minute:'numeric' }));
+	  							new Date(selectedSeasonMatches[numMatches-1].day+pollingLimit).toLocaleString('es-ES',{ day:'numeric',weekday: 'long', hour:'numeric',minute:'numeric' }));
 	  					$('#notification-bar').slideDown().delay(10000).slideUp();
 	  				}else{
 	  					if(data2.error){
@@ -468,12 +498,12 @@ $(function () {
 	
 	//Polling Overlay
 	$('#polling').on('show.bs.modal', function (event) {
-		$('.blue-score').text(parseInt(selectedSeasonMatches[currentMatch].scoreBlues));
-		$('.white-score').text(parseInt(selectedSeasonMatches[currentMatch].scoreWhites));
-		$('.last-match-date').text($.timeago(selectedSeasonMatches[currentMatch].day));
-		$('.polling-close-date').text($.timeago(selectedSeasonMatches[currentMatch].day+pollingLimit));
+		$('.blue-score').text(parseInt(selectedSeasonMatches[numMatches-1].scoreBlues));
+		$('.white-score').text(parseInt(selectedSeasonMatches[numMatches-1].scoreWhites));
+		$('.last-match-date').text($.timeago(selectedSeasonMatches[numMatches-1].day));
+		$('.polling-close-date').text($.timeago(selectedSeasonMatches[numMatches-1].day+pollingLimit));
 		
-		updateListTeamScorers(selectedSeasonMatches[currentMatch]);
+		updateListTeamScorers(selectedSeasonMatches[numMatches-1]);
 		
 		createPollingForm();
 	});
@@ -491,10 +521,10 @@ $(function () {
 				  lastMatchResult = matchDay;
 			  }
 		}else if("last-match-winner-button"==id){
-			  if( selectedSeasonMatches[currentMatch].day+pollingLimit<new Date().getTime() || usertype == 'admin'){
-				  lastMatchResult = currentMatch;
+			  if( selectedSeasonMatches[numMatches-1].day+pollingLimit<new Date().getTime() || usertype == 'admin'){
+				  lastMatchResult = numMatches-1;
 			  }else{
-				  lastMatchResult = currentMatch-1;
+				  lastMatchResult = numMatches-2;
 			  }
 		}
 

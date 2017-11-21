@@ -50,6 +50,7 @@ public class APIUtil {
 	private static final String FRANCES = "frances";
 	private static final String SILLEGAS = "sillegas";
 	private static final String PORCULERO = "porculero";
+	private static double MIN_VALID_MATCHES = 4;
 	
 	private static final List<String> titles = Arrays.asList(TROMPITO,DANDY,FRANCES,SILLEGAS,PORCULERO);
 	
@@ -63,7 +64,8 @@ public class APIUtil {
 	
 	private Map<String,List<Map<String,String>>> fullRanking = null;
 	private Map<String,List<Map<String,String>>> fullScorers = null;
-	private Map<String,Map<String,Map<String,Integer>>> fullScorersByDate = null;
+	private Map<String,Map<String,Map<String,Integer>>> scorersByDate = null;
+	private Map<String,Map<String, Integer>> scorersByName = null;
 	private Map<String,Integer> numMatches = new HashMap<String, Integer>();
 	private Map<String,Integer> numScorers = new HashMap<String, Integer>();
 	private Map<String,List<List<String>>> rawMatches = null;
@@ -96,7 +98,7 @@ public class APIUtil {
 		}
 		
 		PERMANENTS = (Map<String,List<String>>) config.get("permanents");
-		
+		MIN_VALID_MATCHES = (Double) config.get("minimumValidMatches");
 	}
 	
 	public static Map<String, Object> getConfig() {
@@ -116,6 +118,7 @@ public class APIUtil {
 			if(refresh){ 
 				config = DBConnector.getConfig();
 				PERMANENTS = (Map<String,List<String>>) config.get("permanents");
+				MIN_VALID_MATCHES = (Double) config.get("minimumValidMatches");
 			}
 			if(rawMatches==null || refresh){
 				
@@ -126,13 +129,6 @@ public class APIUtil {
 					logger.severe("Error downloading from Google Drive: "+e.getMessage());
 					return false;
 				}
-//				finally{
-//					if(inputStream==null){
-//						logger.info("Importing CSV from local: "+"Futbol7.csv");
-//						ClassLoader classLoader = APIUtil.class.getClassLoader();
-//						inputStream = classLoader.getResourceAsStream("Futbol7.csv");
-//					}
-//				}
 				rawMatches = formatPOIdata(inputStream);
 				rawScorers = new TreeMap<String, List<List<String>>>();
 //				matches = formatODSdata(inputStream);
@@ -155,14 +151,9 @@ public class APIUtil {
 						numMatches.put(s, item.getValue().size());
 					}
 				}
-//				logger.info("Num of Matches: "+numMatches);
-//				logger.info("Matches: "+rawMatches);
-//				logger.info("Num of Scorers: "+numScorers);
-//				logger.info("Scorers: "+rawScorers);
-				
-				fullRanking = getRanking();
-				fullScorers = getScorers();
-				fullScorersByDate = getScorersByDate();
+
+				setScorers();
+				setRanking();
 				
 				return true;
 			
@@ -393,13 +384,17 @@ public class APIUtil {
 		
 	}
 	
-	private Map<String,List<Map<String, String>>> getScorers() throws java.text.ParseException {
+	private void setScorers() throws java.text.ParseException {
 		
-		Map<String, List<Map<String, String>>> data = new HashMap<String,List<Map<String,String>>>();
+		fullScorers = new HashMap<String,List<Map<String,String>>>();
+		scorersByName = new HashMap<String,Map<String,Integer>>();
+		scorersByDate = new HashMap<String,Map<String,Map<String,Integer>>>();
 		
 		for(String seasonScorerName: rawScorers.keySet()){
 			String seasonName = seasonScorerName.substring("Goleadores".length(), seasonScorerName.length());
-			data.put(seasonName, new ArrayList<Map<String, String>>());
+			fullScorers.put(seasonName, new ArrayList<Map<String, String>>());
+			scorersByName.put(seasonName, new HashMap<String,Integer>());
+			scorersByDate.put(seasonName, new HashMap<String,Map<String,Integer>>());
 			List<String> scorers = new ArrayList<String>(rawScorers.get(seasonScorerName).get(0));
 			scorers.remove("Fecha");
 			scorers.remove("TOTAL");
@@ -415,96 +410,73 @@ public class APIUtil {
 					List<String> l = it.next();
 					if(l.size()<=i){ continue; }
 					String cell = l.get(i);
+					String date = l.get(0);
+					if(i==3){
+						scorersByDate.get(seasonName).put(date, new HashMap<String,Integer>());
+					} 
 					if(cell!=null && !"".equals(cell)){
-						sumScore += Float.parseFloat(cell);
+						float cellFloat = Float.parseFloat(cell);
+						sumScore += cellFloat;
+						scorersByDate.get(seasonName).get(date).put(scorers.get(i-3), (int)cellFloat);
 					}
 				}
 				if(sumScore>0 && !scorers.get(i-3).contains("Propia")){
 					Map<String,String> mName = new HashMap<String,String>();
 					mName.put("name", scorers.get(i-3));
 					mName.put("scores", ""+sumScore);
-					data.get(seasonName).add(mName);
+					fullScorers.get(seasonName).add(mName);
+					scorersByName.get(seasonName).put(scorers.get(i-3), sumScore);
 				}
 			}
-			logger.fine(seasonScorerName+": "+data.get(seasonName));
+			logger.fine(seasonScorerName+": "+fullScorers.get(seasonName));
 		}
-		
-		return data;
 	}
-	
-	private Map<String,Map<String, Map<String, Integer>>> getScorersByDate() throws java.text.ParseException {
-		
-		Map<String,Map<String, Map<String, Integer>>> data = new HashMap<String,Map<String, Map<String, Integer>>>();
-		
-		for(String seasonScorerName: rawScorers.keySet()){
-			String seasonName = seasonScorerName.substring("Goleadores".length(), seasonScorerName.length());
-			data.put(seasonName, new HashMap<String,Map<String, Integer>>());
-			List<String> scorers = new ArrayList<String>(rawScorers.get(seasonScorerName).get(0));
-//			scorers.remove("Fecha");
-//			scorers.remove("TOTAL");
-//			scorers.remove("CHECK");
-//			rawScorers.get(seasonScorerName).remove(0);
-//			rawScorers.get(seasonScorerName).remove(0);
-			for(int i = 2; i<rawScorers.get(seasonScorerName).size(); i++){
-//				List<String> row = rawScorers.get(seasonScorerName).get(i);
-				String date = rawScorers.get(seasonScorerName).get(i).get(0);
-				data.get(seasonName).put(date, new HashMap<String,Integer>());
-				for(int j = 3; j<rawScorers.get(seasonScorerName).get(i).size(); j++){
-					int s = (int)Float.parseFloat(!"".equals(rawScorers.get(seasonScorerName).get(i).get(j))?
-													rawScorers.get(seasonScorerName).get(i).get(j): "0");
-					data.get(seasonName).get(date).put(scorers.get(j), s);
-				}
-			}
-			logger.fine(seasonScorerName+": "+data.get(seasonName));
-		}
-		
-		return data;
-	}	
 		   
 
-	private Map<String,List<Map<String, String>>> getRanking() throws java.text.ParseException {
+	private void setRanking() throws java.text.ParseException {
         
 		Map<String,Map<String,Integer>> points = new HashMap<String,Map<String,Integer>>();
 		Map<String,Map<String,Integer>> realPoints = new HashMap<String,Map<String,Integer>>();
-		Map<String,Map<String,Integer>> goalsFor = new HashMap<String,Map<String,Integer>>();
-		Map<String,Map<String,Integer>> goalsAgainst = new HashMap<String,Map<String,Integer>>();
+//		Map<String,Map<String,Integer>> goalsFor = new HashMap<String,Map<String,Integer>>();
+//		Map<String,Map<String,Integer>> goalsAgainst = new HashMap<String,Map<String,Integer>>();
 		Map<String,Map<String,Integer>> wins = new HashMap<String,Map<String,Integer>>();
 		Map<String,Map<String,Integer>> draws = new HashMap<String,Map<String,Integer>>();
 		Map<String,Map<String,Integer>> loses = new HashMap<String,Map<String,Integer>>();
 		Map<String,Map<String,Integer>> matches = new HashMap<String,Map<String,Integer>>();
 
-		Map<String,List<Map<String,String>>> data = new HashMap<String,List<Map<String,String>>>();
+		fullRanking = new HashMap<String,List<Map<String,String>>>();
 
 		players = new HashMap<String, Set<String>>();
 		
 		for(String seasonName: rawMatches.keySet()){
 			Map<String, String> avgSeasonPlayerScore = avgSeasonPlayerScore(seasonName);
 			
-			data.put(seasonName, new ArrayList<Map<String,String>>());
-	        players.put(seasonName, getListOfPlayers(points, realPoints, goalsFor, goalsAgainst, wins, draws, loses, matches, seasonName));
+			fullRanking.put(seasonName, new ArrayList<Map<String,String>>());
+	        players.put(seasonName, getListOfPlayers(points, realPoints, wins, draws, loses, matches, seasonName));
 	        logger.fine(seasonName+": "+players.toString());
 	        for(String name : players.get(seasonName)){
 	        	Map<String, String> e = new HashMap<String, String>();
+	        	Integer goals = scorersByName.containsKey(seasonName)&&scorersByName.get(seasonName).containsKey(name)?scorersByName.get(seasonName).get(name):0;
 	        	e.put("name", name);
 	        	e.put("realPoints", realPoints.get(seasonName).get(name).toString());
 	        	e.put("points", points.get(seasonName).get(name).toString());
-	        	e.put("goalsFor", goalsFor.get(seasonName).get(name).toString());
-	        	e.put("goalsAgainst", goalsAgainst.get(seasonName).get(name).toString());
+	        	e.put("goalsFor", goals.toString());
+//	        	e.put("goalsFor", goalsFor.get(seasonName).get(name).toString());
+//	        	e.put("goalsAgainst", goalsAgainst.get(seasonName).get(name).toString());
 	        	e.put("wins", wins.get(seasonName).containsKey(name)?wins.get(seasonName).get(name).toString():"0");
 	        	e.put("draws", draws.get(seasonName).containsKey(name)?draws.get(seasonName).get(name).toString():"0");
 	        	e.put("loses", loses.get(seasonName).containsKey(name)?loses.get(seasonName).get(name).toString():"0");
 	        	e.put("matches", matches.get(seasonName).get(name).toString());
 	        	e.put("lastMatches", getLastMatches(name,seasonName));
-	        	//*(matches.get(name)<(numMatches/3)?0:1.0F) in case of less than 1/4 of total match the avg is 0 or 99
-	        	boolean valid = matches.get(seasonName).get(name)>=(numMatches.get(seasonName)*1.0/4);
+	        	boolean valid = matches.get(seasonName).get(name)>=(numMatches.get(seasonName)*MIN_VALID_MATCHES);
 	        	e.put("pointsAVG", (valid?new Float(realPoints.get(seasonName).get(name)*1.0F/matches.get(seasonName).get(name)):"").toString());
-	        	e.put("goalsForAVG", (valid?new Float(goalsFor.get(seasonName).get(name)*1.0F/matches.get(seasonName).get(name)):"").toString());
-	        	e.put("goalsAgainstAVG", (valid?new Float(goalsAgainst.get(seasonName).get(name)*1.0F/matches.get(seasonName).get(name)):new Float(99.99F)).toString());
-	        	e.put("scoreAVG", avgSeasonPlayerScore.containsKey(name)?avgSeasonPlayerScore.get(name):"0");
-				data.get(seasonName).add(e);
+	        	e.put("goalsForAVG", (valid?new Float(goals*1.0F/matches.get(seasonName).get(name)):"").toString());
+//	        	e.put("goalsForAVG", (valid?new Float(goalsFor.get(seasonName).get(name)*1.0F/matches.get(seasonName).get(name)):"").toString());
+//	        	e.put("goalsAgainstAVG", (valid?new Float(goalsAgainst.get(seasonName).get(name)*1.0F/matches.get(seasonName).get(name)):new Float(99.99F)).toString());
+	        	e.put("scoreAVG", valid&&avgSeasonPlayerScore.containsKey(name)?avgSeasonPlayerScore.get(name):"0");
+	        	fullRanking.get(seasonName).add(e);
 	        }
 		}
-		return data;
 	}
 	
 	private Map<String, String> avgSeasonPlayerScore(String seasonName){
@@ -628,8 +600,8 @@ public class APIUtil {
 
 	private Set<String> getListOfPlayers(Map<String,Map<String,Integer>> points,
 										Map<String,Map<String,Integer>> realPoints,
-										Map<String,Map<String,Integer>> goalsFor,
-										Map<String,Map<String,Integer>> goalsAgainst,
+//										Map<String,Map<String,Integer>> goalsFor,
+//										Map<String,Map<String,Integer>> goalsAgainst,
 										Map<String,Map<String,Integer>> wins,
 										Map<String,Map<String,Integer>> draws,
 										Map<String,Map<String,Integer>> loses,
@@ -638,8 +610,8 @@ public class APIUtil {
 		Set<String> names = new TreeSet<String>();
 		points.put(seasonName, new HashMap<String,Integer>());
 		realPoints.put(seasonName, new HashMap<String,Integer>());
-		goalsFor.put(seasonName, new HashMap<String,Integer>());
-		goalsAgainst.put(seasonName, new HashMap<String,Integer>());
+//		goalsFor.put(seasonName, new HashMap<String,Integer>());
+//		goalsAgainst.put(seasonName, new HashMap<String,Integer>());
 		wins.put(seasonName, new HashMap<String,Integer>());
 		draws.put(seasonName, new HashMap<String,Integer>());
 		loses.put(seasonName, new HashMap<String,Integer>());
@@ -659,10 +631,10 @@ public class APIUtil {
 					int gAgainst = ((i<8)?goalsB:goalsA);
 					int pointsM = ((gFor>gAgainst)?3:((gFor<gAgainst)?1:2));
 					int pointsN = ((gFor>gAgainst)?3:((gFor<gAgainst)?0:1));
-					goalsFor.get(seasonName).put(player, (goalsFor.get(seasonName).get(player)!=null?
-														goalsFor.get(seasonName).get(player):0) + gFor );
-					goalsAgainst.get(seasonName).put(player, (goalsAgainst.get(seasonName).get(player)!=null?
-															goalsAgainst.get(seasonName).get(player):0) + gAgainst );
+//					goalsFor.get(seasonName).put(player, (goalsFor.get(seasonName).get(player)!=null?
+//														goalsFor.get(seasonName).get(player):0) + gFor );
+//					goalsAgainst.get(seasonName).put(player, (goalsAgainst.get(seasonName).get(player)!=null?
+//															goalsAgainst.get(seasonName).get(player):0) + gAgainst );
 					points.get(seasonName).put(player, (points.get(seasonName).get(player)!=null?
 														points.get(seasonName).get(player):0) + pointsM );
 					realPoints.get(seasonName).put(player, (realPoints.get(seasonName).get(player)!=null?
@@ -818,9 +790,9 @@ public class APIUtil {
 						punctuationData.put("avgList", avgList);
 						punctuationData.put("avg", (double)scoreI);
 						if(playersPictures.containsKey(voted)){ punctuationData.put("image", playersPictures.get(voted)); }
-						if(fullScorersByDate!=null && fullScorersByDate.get(season)!=null && 
-							fullScorersByDate.get(season).get(date2)!=null){
-							punctuationData.put("scores",fullScorersByDate.get(season).get(date2).get(voted));
+						if(scorersByDate!=null && scorersByDate.get(season)!=null && 
+							scorersByDate.get(season).get(date2)!=null){
+							punctuationData.put("scores",scorersByDate.get(season).get(date2).get(voted));
 						}
 						result2.put(voted,punctuationData);
 					}
@@ -881,7 +853,7 @@ public class APIUtil {
 		Long dateL = jsonNode.get("match").get("day").asLong();
 		String date2 = formatter.format(new Date(dateL));
 		String season = jsonNode.get("season").asText();
-		return fullScorersByDate.get(season)!=null?fullScorersByDate.get(season).get(date2):null;
+		return scorersByDate.get(season)!=null?scorersByDate.get(season).get(date2):null;
 	}
 
 	public synchronized Object savePolling(JsonNode jsonNode) {

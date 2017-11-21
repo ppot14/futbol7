@@ -15,6 +15,12 @@ a#web-name.navbar-brand{
 select#season-selector{
 	width: 200px
 }
+th.column-name{
+	min-width: 122px;
+}
+th[data-field="lastMatches"]{
+	min-width: 120px;
+}
 #player-picture{
 /* 	margin-top: 8px; */
 /*     margin-right: 10px; */
