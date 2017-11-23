@@ -6,6 +6,7 @@ var playersPictures;
 var usertype;
 var pollingLimit = 4*24*60*60*1000 + 12*60*60*1000;//4 days and half. Friday at midday
 var pollingReady = 23*60*60*1000;//Polling ready at 23:00
+var matchScores;
 
 function facebookStatusChangeCallback(response) {
 	if(response.status && response.status == 'connected'){
@@ -136,6 +137,7 @@ function updateListTeamScorers(match){
   			window.location.pathname+'api/match-scorers.request', 
   			JSON.stringify({season: $("#season-selector").val(), match: match}), 
   			function( data1 ) {
+  				matchScores=data1;
   				$('.blue-scorers').empty();
   				$('.white-scorers').empty();
   				if(data1){
@@ -189,7 +191,7 @@ function lastMatchResultRequest(lastMatchResult){
 				if(data1 && Array.isArray(data1)){
 					$('.punctuation-row').remove();
 					for(var i=0; i<data1.length; i++){
-						addPlayerToResult(i, data1.length, data1[i]);
+						addPlayerToResult(i, data1);
 						$('[data-toggle="tooltip"]').tooltip();
 					}
 				}else{
@@ -200,75 +202,86 @@ function lastMatchResultRequest(lastMatchResult){
 	);
 }
 
-function addBadges(x, t, data){
+function addBadges(x, data, pValueAvg, max, min){
 	var html = '';
-	if(x==0){
+	var dataX = data[x].value;
+	if(pValueAvg==max){
 		html += '<div class="player-badge" data-toggle="tooltip" data-placement="bottom" title="Título al MVP"><i class="fa fa-trophy" aria-hidden="true"></i></div>';
-	}else if(x==t-1){
+	}else if(pValueAvg==min){
 		html += '<div class="player-badge" data-toggle="tooltip" data-placement="bottom" title="Título al Cabra"><i class="fa fa-thumbs-down" aria-hidden="true"></i></div>';
 	}
-	if(data.trompito){
+	if(dataX.trompito){
 		html += '<div class="player-badge" data-toggle="tooltip" data-placement="bottom" title="Título al más chupón"><i class="fa fa-undo" aria-hidden="true"></i></div>';
 	}
-	if(data.dandy){
+	if(dataX.dandy){
 		html += '<div class="player-badge" data-toggle="tooltip" data-placement="bottom" title="Título al jugador con más clase y elegante"><i class="fa fa-glass" aria-hidden="true"></i></div>';
 	}
-	if(data.frances){
+	if(dataX.frances){
 		html += '<div class="player-badge" data-toggle="tooltip" data-placement="bottom" title="Título al más guarro"><i class="fa fa-wheelchair-alt" aria-hidden="true"></i></div>';
 	}
-	if(data.sillegas){
+	if(dataX.sillegas){
 		html += '<div class="player-badge" data-toggle="tooltip" data-placement="bottom" title="Título al más impuntual e impresentable"><i class="fa fa-clock-o" aria-hidden="true"></i></div>';
 	}
-	if(data.porculero){
+	if(dataX.porculero){
 		html += '<div class="player-badge" data-toggle="tooltip" data-placement="bottom" title="Título al más protestón y bocazas"><i class="fa fa-bullhorn" aria-hidden="true"></i></div>';
+	}
+	if(matchScores[data[x].key]>2){//killer
+		html += '<div class="player-badge" data-toggle="tooltip" data-placement="bottom" title="Título al Killer (3 o más goles)"><i class="fa fa-futbol-o" aria-hidden="true"></i></div>';
 	}
 	return html;
 }
 
-function addPlayerToResult(x, t, data){
+function addPlayerToResult(x, data){
+	var l = data.length;
+	var pValue = data[x].value;
+	var max = data[0].value.avg;
+	var min = data[l-1].value.avg;
 	var id = Date.now();
-	var row = $('<div class="row punctuation-row"><div class="row-wrap col-xs-12 col-sm-12 col-md-12 col-lg-12"><div class="panel panel-default '+(x==0?'panel-success':x==t-1?'panel-danger':nameweb==data.key?'panel-info':'')+'"><div class="panel-body '+(x==0?'bg-success':x==t-1?'bg-danger':nameweb==data.key?'bg-info':'')+'"></div></div></div></div>').appendTo($('#last-match-winner .modal-body'));
+	var row = $('<div class="row punctuation-row"><div class="row-wrap col-xs-12 col-sm-12 col-md-12 col-lg-12">'+
+					'<div class="panel panel-default '+(pValue.avg==max?'panel-success':pValue.avg==min?'panel-danger':nameweb==data[x].key?'panel-info':'')+'">'+
+						'<div class="panel-body '+(pValue.avg==max?'bg-success':pValue.avg==min?'bg-danger':nameweb==data[x].key?'bg-info':'')+'">'+
+				'</div></div></div></div>').appendTo($('#last-match-winner .modal-body'));
 	var scores = '';
-	if(data.value.scores){
-		for(var i=0; i<data.value.scores; i++){ scores+='<i class="fa fa-futbol-o" aria-hidden="true"></i>'; }
+	if(pValue.scores){
+		for(var i=0; i<pValue.scores; i++){ scores+='<i class="fa fa-futbol-o" aria-hidden="true"></i>'; }
 		scores = '<span class="player-goals">Goles: '+scores+'</span>';
 	}
 	$('<div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">'+
-		'<h3 class="player-name">'+data.key+'</h3>'+
-		'<img class="player-picture img-rounded" alt="'+data.key+' picture" src="'+((data.value.image)?data.value.image:'resources/images/unknown-player.jpg')+'"/>'+
-		'<span class="player-score pull-right">'+data.value.avg.toFixed(2)+'</span>'+
-		'<div class="badges pull-right">'+addBadges(x,t,data.value)+'</div>'+
+		'<h3 class="player-name">'+data[x].key+'</h3>'+
+		'<img class="player-picture img-rounded" alt="'+data[x].key+' picture" src="'+((pValue.image)?pValue.image:'resources/images/unknown-player.jpg')+'"/>'+
+		'<span class="player-score pull-right">'+pValue.avg.toFixed(2)+'</span>'+
+		'<div class="badges pull-right">'+addBadges(x, data, pValue.avg, max, min)+'</div>'+
 	'</div>').appendTo(row.find('.panel-body'));
 	
-	if(data.value.punctuations){
+	if(pValue.punctuations){
 	//	Acordeon
 		$('<div class="col-xs-12 col-sm-12 col-md-8 col-lg-8">'+
 			'<div class="panel-group" id="accordion-'+id+'" role="tablist" aria-multiselectable="true">'+
 			'</div>'+
 		'</div>').appendTo(row.find('.panel-body'));	
 	
-		data.value.punctuations.sort(function(a, b) {
+		pValue.punctuations.sort(function(a, b) {
 		    return parseFloat(b.score) - parseFloat(a.score);//Descending
 		});
 		
-		for(var j=0; j<data.value.punctuations.length; j++){
+		for(var j=0; j<pValue.punctuations.length; j++){
 	//		Acordeon
 			$('<div class="panel panel-default">'+
 				  '<div class="panel-heading" role="tab" id="heading-'+id+'-'+j+'">'+
 				      '<h4 class="panel-title">'+
 				        '<a role="button" data-toggle="collapse" data-parent="#accordion-'+id+'" href="#collapse-'+id+'-'+j+'" aria-expanded="true" aria-controls="collapse-'+id+'-'+j+'">'+
-				        	data.value.punctuations[j].voter+' <span class="voter-score pull-right">'+data.value.punctuations[j].score+'</span></a>'+
+				        	pValue.punctuations[j].voter+' <span class="voter-score pull-right">'+pValue.punctuations[j].score+'</span></a>'+
 				       '</h4>'+
 				   '</div>'+
 				   '<div id="collapse-'+id+'-'+j+'" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading-'+id+'-'+j+'">'+
-				        '<div class="panel-body">'+data.value.punctuations[j].comment+'</div>'+
+				        '<div class="panel-body">'+pValue.punctuations[j].comment+'</div>'+
 				   '</div>'+
 		     '</div>').appendTo(row.find('#accordion-'+id));
 		}
 	}else{
 		$('<div class="col-xs-12 col-sm-12 col-md-8 col-lg-8">'+
-			'<p>Media de Fubles: <b>'+data.value.avgFubles.toFixed(2)+'</b></p>'+
-			'<a class="" href="'+data.value.linkFubles+'" target="_blank">Más datos en el partido de Fubles</a>'+
+			'<p>Media de Fubles: <b>'+pValue.avgFubles.toFixed(2)+'</b></p>'+
+			'<a class="" href="'+pValue.linkFubles+'" target="_blank">Más datos en el partido de Fubles</a>'+
 		'</div>').appendTo(row.find('.panel-body'));
 	}
 }
@@ -297,7 +310,7 @@ function createPollingForm(){
 					'data-slider-id="slider-blue-'+i+'" '+
 					'data-slider-min="1"'+
 					'data-slider-max="10"'+
-					'data-slider-step="1"'+
+					'data-slider-step="0.5"'+
 					'data-slider-value="5"'+
 					'data-slider-tooltip="hide" ><span id="blue-player-punctuation-number-'+i+'" class="player-punctuation-number pull-right"></span>'+
 					'<textarea name="blue-player-comment-'+i+'" class="form-control" rows="3" maxlength="1000" placeholder="Comentario"  '+((selectedSeasonMatches[numMatches-1].data[i].blue==nameweb)?'disabled':'')+'></textarea>'+
@@ -316,7 +329,7 @@ function createPollingForm(){
 					'data-slider-id="slider-white-'+i+'" '+
 					'data-slider-min="1"'+
 					'data-slider-max="10"'+
-					'data-slider-step="1"'+
+					'data-slider-step="0.5"'+
 					'data-slider-value="5"'+
 					'data-slider-tooltip="hide"><span id="white-player-punctuation-number-'+i+'" class="player-punctuation-number pull-right"></span>'+
 					'<textarea name="white-player-comment-'+i+'" class="form-control" rows="3" maxlength="1000" placeholder="Comentario"  '+((selectedSeasonMatches[numMatches-1].data[i].white==nameweb)?'disabled':'')+'></textarea>'+
@@ -327,11 +340,11 @@ function createPollingForm(){
 		var mySliderW = $('input[name="white-player-punctuation-'+i+'"]').slider();
 		$('#blue-player-punctuation-number-'+i).text(mySliderB.val());
 		$('#white-player-punctuation-number-'+i).text(mySliderW.val());
-		mySliderB.on("slideStop", function(slideEvt) {
-			$('#'+slideEvt.target.name.replace("punctuation-","punctuation-number-")).text(slideEvt.value);
+		mySliderB.on("change", function(slideEvt) {
+			$('#'+slideEvt.target.name.replace("punctuation-","punctuation-number-")).text(slideEvt.value.newValue);
 		});
-		mySliderW.on("slideStop", function(slideEvt) {
-			$('#'+slideEvt.target.name.replace("punctuation-","punctuation-number-")).text(slideEvt.value);
+		mySliderW.on("change", function(slideEvt) {
+			$('#'+slideEvt.target.name.replace("punctuation-","punctuation-number-")).text(slideEvt.value.newValue);
 		});
 		if(selectedSeasonMatches[numMatches-1].data[i].blue==nameweb){
 			mySliderB.slider("disable");

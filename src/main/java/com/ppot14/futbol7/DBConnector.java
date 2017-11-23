@@ -171,7 +171,7 @@ public class DBConnector {
 			e.printStackTrace();
 		}
 	}
-	public static Boolean addPunctuation(String voter, String voted, Integer score, String comment, Long dateL, String season){
+	public static Boolean addPunctuation(String voter, String voted, Double score, String comment, Long dateL, String season){
 		String date = formatter.format(new Date(dateL));
 		try {
 			MongoCollection<Document> configCollection;

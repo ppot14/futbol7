@@ -27,6 +27,7 @@ import java.util.function.Function;
 import java.util.function.ToDoubleFunction;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -52,7 +53,7 @@ public class APIUtil {
 	private static final String PORCULERO = "porculero";
 	private static double MIN_VALID_MATCHES = 4;
 	
-	private static final List<String> titles = Arrays.asList(TROMPITO,DANDY,FRANCES,SILLEGAS,PORCULERO);
+	private static final List<String> TITLES = Arrays.asList(TROMPITO,DANDY,FRANCES,SILLEGAS,PORCULERO);
 	
 	private static Map<String,List<String>> PERMANENTS = null;
 
@@ -487,30 +488,38 @@ public class APIUtil {
 			List<Document> scores = (List<Document>) ((Document)date.getValue()).get("scores");
 			List<Document> scoresAVG = (List<Document>) ((Document)date.getValue()).get("scoresAVG");
 			if(scores!=null){
-				Map<String, List<Integer>> temp = new HashMap<String,List<Integer>>();
+				Map<String, List<Double>> temp = new HashMap<String,List<Double>>();
 				for(Document score : scores){
 					String voted = score.getString("voted");
-					Integer scoreI = score.getInteger("score");
+					Double scoreD = score.get("score") instanceof Integer? score.getInteger("score") : score.getDouble("score");
 					if(!temp.containsKey(voted)){
-						List<Integer> l = new ArrayList<Integer>();
+						List<Double> l = new ArrayList<Double>();
 						temp.put(voted, l);
 					}
-					temp.get(voted).add(scoreI);
+					temp.get(voted).add(scoreD);
 				}
-				for(Entry<String, List<Integer>> dateScores : temp.entrySet()){
+				for(Entry<String, List<Double>> dateScores : temp.entrySet()){
 					String voted = dateScores.getKey();
 					if(!listSeasonPlayerScore.containsKey(voted)){
 						List<Double> l = new ArrayList<Double>();
 						listSeasonPlayerScore.put(voted, l);
 					}
-					listSeasonPlayerScore.get(voted).add(
-							dateScores.getValue().stream().mapToDouble(new ToDoubleFunction<Integer>() {
+					Stream<Double> stream = dateScores.getValue().stream();
+					if(dateScores.getValue().size()>3){
+						stream = stream.sorted()
+						.skip(1)//Ignore higher punctuation far AVG
+						.sorted(Comparator.reverseOrder())
+						.skip(1);//Ignore lower punctuation for AVG
+					}
+					double avg = stream.mapToDouble(new ToDoubleFunction<Double>() {
 								@Override
-								public double applyAsDouble(Integer value) {
+								public double applyAsDouble(Double value) {
 									return value;
 								}
-							}).average().getAsDouble()
-					);
+							})
+							.average()
+							.getAsDouble();
+					listSeasonPlayerScore.get(voted).add(avg);
 				}
 			}else if(scoresAVG!=null){
 				for(Document score : scoresAVG){
@@ -764,31 +773,24 @@ public class APIUtil {
 				for(Document score : scores){
 					String voter = score.getString("voter");
 					String voted = score.getString("voted");
-					Integer scoreI = score.getInteger("score");
+					Double scoreD = score.get("score") instanceof Integer? score.getInteger("score") : score.getDouble("score");
 					String comment = score.getString("comment");
 					Map<String,Object> punctuation = new HashMap<String,Object>();
 					punctuation.put("voter", voter);
-					punctuation.put("score", scoreI);
+					punctuation.put("score", scoreD);
 					punctuation.put("comment", comment);
 					if(result2.containsKey(voted)){
-						((List<Integer>)result2.get(voted).get("avgList")).add(scoreI);
-						double newavg = ((List<Integer>)result2.get(voted).get("avgList")).stream().mapToDouble(new ToDoubleFunction<Integer>() {
-							@Override
-							public double applyAsDouble(Integer value) {
-								return value;
-							}
-						}).average().getAsDouble();
-						result2.get(voted).put("avg",newavg);
+						((List<Double>)result2.get(voted).get("avgList")).add(scoreD);
 						((List<Map<String,Object>>)result2.get(voted).get("punctuations")).add(punctuation);
 					}else{
 						List<Map<String,Object>> punctuations = new  ArrayList<Map<String,Object>>();
 						punctuations.add(punctuation);
-						List<Integer> avgList = new ArrayList<Integer>();
-						avgList.add(scoreI);
+						List<Double> avgList = new ArrayList<Double>();
+						avgList.add(scoreD);
 						Map<String,Object> punctuationData = new HashMap<String,Object>();
 						punctuationData.put("punctuations", punctuations);
 						punctuationData.put("avgList", avgList);
-						punctuationData.put("avg", (double)scoreI);
+//						punctuationData.put("avg", (double)scoreI);
 						if(playersPictures.containsKey(voted)){ punctuationData.put("image", playersPictures.get(voted)); }
 						if(scorersByDate!=null && scorersByDate.get(season)!=null && 
 							scorersByDate.get(season).get(date2)!=null){
@@ -796,6 +798,24 @@ public class APIUtil {
 						}
 						result2.put(voted,punctuationData);
 					}
+				}
+				for(String voted : result2.keySet()){
+					Stream<Double> stream = ((List<Double>)result2.get(voted).get("avgList")).stream();
+					if(((List<Double>)result2.get(voted).get("avgList")).size()>3){
+						stream = stream.sorted()
+						.skip(1)//Ignore higher punctuation far AVG
+						.sorted(Comparator.reverseOrder())
+						.skip(1);//Ignore lower punctuation for AVG
+					}
+					double avg = stream.mapToDouble(new ToDoubleFunction<Double>() {
+								@Override
+								public double applyAsDouble(Double value) {
+									return value;
+								}
+							})
+							.average()
+							.getAsDouble();
+					result2.get(voted).put("avg",avg);
 				}
 			}else if(scoresAVG!=null && !scoresAVG.isEmpty()){//Only for scores from fubles
 				for(Document score : scoresAVG){
@@ -819,16 +839,19 @@ public class APIUtil {
 				}
 			}
 			//Get most titled players
-			for(String titleName : titles){
+			for(String titleName : TITLES){
 				if(votes.containsKey(titleName)){
 					List<String> titlesList = (List<String>) votes.get(titleName);
 					Map<String, Long> occurrences = titlesList.stream().collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 					occurrences.remove("");
-					Entry<String, Long> max = occurrences.entrySet().stream().max(Comparator.comparing(Entry::getValue)).get();
-					
-					for(Entry<String, Long> e : occurrences.entrySet()){
-						if(e.getValue()==max.getValue() && result2.containsKey(e.getKey())){
-							result2.get(e.getKey()).put(titleName, true);
+					if(!occurrences.isEmpty()){
+						Entry<String, Long> max = occurrences.entrySet().stream().max(Comparator.comparing(Entry::getValue)).get();
+						if(max.getValue()>1){//Titles only for more than 1 vote.
+							for(Entry<String, Long> e : occurrences.entrySet()){
+								if(e.getValue()==max.getValue() && result2.containsKey(e.getKey())){
+									result2.get(e.getKey()).put(titleName, true);
+								}
+							}
 						}
 					}
 				}
@@ -853,7 +876,7 @@ public class APIUtil {
 		Long dateL = jsonNode.get("match").get("day").asLong();
 		String date2 = formatter.format(new Date(dateL));
 		String season = jsonNode.get("season").asText();
-		return scorersByDate.get(season)!=null?scorersByDate.get(season).get(date2):null;
+		return scorersByDate!=null && scorersByDate.get(season)!=null?scorersByDate.get(season).get(date2):null;
 	}
 
 	public synchronized Object savePolling(JsonNode jsonNode) {
@@ -890,7 +913,7 @@ public class APIUtil {
 			for(JsonNode p : scores){
 				voter = p.get("voter").asText();
 				String voted = p.get("voted").asText();
-				Integer score = p.get("score").asInt();
+				Double score = p.get("score").asDouble();
 				String comment = p.get("comment").asText();
 				Document hasVoted = DBConnector.hasVotedPlayer(voter, voted, dateL, season);
 				if(hasVoted==null){
