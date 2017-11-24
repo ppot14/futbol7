@@ -933,7 +933,6 @@ public class APIUtil {
 	}
 	
 	public Object getPlayer(JsonNode jsonNode){
-		((ObjectNode)jsonNode).put("created", new Date().getTime());
 		return DBConnector.getPlayer(jsonNode);
 	}
 	

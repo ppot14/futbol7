@@ -4,6 +4,7 @@ import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.elemMatch;
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Filters.exists;
+import static com.mongodb.client.model.Updates.set;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -15,6 +16,7 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.node.ObjectNode;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.FindIterable;
@@ -62,9 +64,12 @@ public class DBConnector {
 			Bson filter = and(eq("name", name),eq("id",id));
 			FindIterable<Document> result = configCollection.find(filter);
 			if(result!=null && result.first()!=null){
+				Bson update = set("picture", jsonNode.get("picture").asText());
+				configCollection.updateOne(filter,update);
 				logger.info("player exists: "+result.first());
 				return (Document) result.first();
 			}else{
+				((ObjectNode)jsonNode).put("created", new Date().getTime());
 				ObjectMapper mapper = new ObjectMapper();
 				configCollection.insertOne(new Document((Map<String, Object>) mapper.convertValue(jsonNode, Map.class)));
 				logger.info("new player: "+jsonNode);

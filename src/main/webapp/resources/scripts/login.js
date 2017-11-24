@@ -11,7 +11,7 @@ var matchScores;
 function facebookStatusChangeCallback(response) {
 	if(response.status && response.status == 'connected'){
 		FB.api("/me",
-				{fields: "picture,email,name"},
+				{fields: "picture.type(large),email,name"},
 				function(response) {
 //					setTimeout(function(){//Hack to avoid season selector load before automatic login
 						loggedIn(response,'facebook');
