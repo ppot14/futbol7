@@ -51,7 +51,7 @@ public class APIUtil {
 	private static final String FRANCES = "frances";
 	private static final String SILLEGAS = "sillegas";
 	private static final String PORCULERO = "porculero";
-	private static double MIN_VALID_MATCHES = 4;
+	private static double MIN_VALID_MATCHES = 0.25d;
 	
 	private static final List<String> TITLES = Arrays.asList(TROMPITO,DANDY,FRANCES,SILLEGAS,PORCULERO);
 	
@@ -474,7 +474,7 @@ public class APIUtil {
 	        	e.put("goalsForAVG", (valid?new Float(goals*1.0F/matches.get(seasonName).get(name)):"").toString());
 //	        	e.put("goalsForAVG", (valid?new Float(goalsFor.get(seasonName).get(name)*1.0F/matches.get(seasonName).get(name)):"").toString());
 //	        	e.put("goalsAgainstAVG", (valid?new Float(goalsAgainst.get(seasonName).get(name)*1.0F/matches.get(seasonName).get(name)):new Float(99.99F)).toString());
-	        	e.put("scoreAVG", valid&&avgSeasonPlayerScore.containsKey(name)?avgSeasonPlayerScore.get(name):"0");
+	        	e.put("scoreAVG", (valid&&avgSeasonPlayerScore.containsKey(name))?avgSeasonPlayerScore.get(name):"0");
 	        	fullRanking.get(seasonName).add(e);
 	        }
 		}
@@ -529,7 +529,7 @@ public class APIUtil {
 						List<Double> l = new ArrayList<Double>();
 						listSeasonPlayerScore.put(voted, l);
 					}
-					listSeasonPlayerScore.get(voted).add(scoreFubles);
+					listSeasonPlayerScore.get(voted).add(3.0*scoreFubles/2.0-5);
 				}
 			}
 		}

@@ -6,7 +6,8 @@ textarea.form-control {
 	float: none;
 }
 img#logo{
-	position: absolute;
+	position: absolute;    
+	left: 15px;
 }
 a#web-name.navbar-brand{
 	margin-left: 85px;
