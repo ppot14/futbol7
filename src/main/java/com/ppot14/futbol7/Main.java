@@ -19,7 +19,7 @@ public class Main {
 		
 		long startTime = System.currentTimeMillis();
 		
-		a = new APIUtil();
+		a = new APIUtil(null);
 //		m.processData(true);
 //		m.writeToFileAndServer();
 		

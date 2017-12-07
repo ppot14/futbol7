@@ -1,7 +1,6 @@
 package com.ppot14.futbol7;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -40,6 +39,7 @@ import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.ArrayNode;
+import org.codehaus.jackson.node.JsonNodeFactory;
 import org.codehaus.jackson.node.ObjectNode;
 
 public class APIUtil {
@@ -51,7 +51,10 @@ public class APIUtil {
 	private static final String FRANCES = "frances";
 	private static final String SILLEGAS = "sillegas";
 	private static final String PORCULERO = "porculero";
+//	private static final String LOCAL = "local";
+//	private static final String PRODUCTION = "production";
 	private static double MIN_VALID_MATCHES = 0.25d;
+//	private static String ENVIRONMENT = LOCAL;
 	
 	private static final List<String> TITLES = Arrays.asList(TROMPITO,DANDY,FRANCES,SILLEGAS,PORCULERO);
 	
@@ -60,8 +63,6 @@ public class APIUtil {
 	private static SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy");
 	private static SimpleDateFormat formatter2 = new SimpleDateFormat("dd/MM/yyyy");
 //	private static SimpleDateFormat formatter3 = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-	
-	private static Map<String,Object> config = null;
 	
 	private Map<String,List<Map<String,String>>> fullRanking = null;
 	private Map<String,List<Map<String,String>>> fullScorers = null;
@@ -73,37 +74,12 @@ public class APIUtil {
 	private Map<String,List<List<String>>> rawScorers = null;
 	private Map<String,Set<String>> players = null;	
 	
-	public APIUtil(){
-		this("config.json");
-	}
-	
 	@SuppressWarnings({ "unchecked" })
-	public APIUtil(String propFileName){
-		
-		config = null;
-
-		try {
-			config = DBConnector.getConfig();
-			if(config==null){
-		        ObjectMapper mapper = new ObjectMapper();
-				InputStream inputStream = APIUtil.class.getClassLoader().getResourceAsStream(propFileName);
-				if (inputStream != null) {
-					config = mapper.readValue(inputStream, Map.class);
-					inputStream.close();
-				} else {
-					throw new FileNotFoundException("property file '" + propFileName + "' not found in the classpath");
-				}
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	public APIUtil(Map<String,Object> config){
 		
 		PERMANENTS = (Map<String,List<String>>) config.get("permanents");
 		MIN_VALID_MATCHES = (Double) config.get("minimumValidMatches");
-	}
-	
-	public static Map<String, Object> getConfig() {
-		return config;
+//		ENVIRONMENT = (String) config.get("environment");
 	}
 
 	public Object getPermanents() {
@@ -113,13 +89,13 @@ public class APIUtil {
 	}
 
 	@SuppressWarnings("unchecked")
-	public synchronized boolean processData(boolean refresh){
+	public synchronized boolean processData(boolean refresh, Map<String,Object> config){
     	
 		try{
-			if(refresh){ 
-				config = DBConnector.getConfig();
+			if(refresh){
 				PERMANENTS = (Map<String,List<String>>) config.get("permanents");
 				MIN_VALID_MATCHES = (Double) config.get("minimumValidMatches");
+//				ENVIRONMENT = (String) config.get("environment");
 			}
 			if(rawMatches==null || refresh){
 				
@@ -167,6 +143,18 @@ public class APIUtil {
 		}
 		
 		return false;
+	}
+	
+	/**
+	 * @return the fullRanking
+	 */
+	public Map<String, String> getUserStats(String season, String user) {
+		for(Map<String,String> row : fullRanking.get(season)){
+			if(user.equals(row.get("name"))){
+				return row;
+			}
+		}
+		return null;
 	}
 	
 	/**
@@ -765,7 +753,9 @@ public class APIUtil {
 			String date2 = formatter.format(new Date(dateL));
 			String season = jsonNode.get("season").asText();
 			Document votes = DBConnector.getVotes(season, date);
-			if(votes==null){ logger.warning("getVotes didn't return any result for season "+season+", date "+date); return null; }
+			if(votes==null){ 
+//				logger.warning("getVotes didn't return any result for season "+season+", date "+date); 
+				return null; }
 			Map<String,String> playersPictures = DBConnector.getPlayersPictures();
 			List<Document> scores = (List<Document>) votes.get("scores");
 			List<Document> scoresAVG = (List<Document>) votes.get("scoresAVG");
@@ -932,7 +922,7 @@ public class APIUtil {
 		return null;
 	}
 	
-	public Object getPlayer(JsonNode jsonNode){
+	public Object login(JsonNode jsonNode){
 		return DBConnector.getPlayer(jsonNode);
 	}
 	
@@ -942,5 +932,56 @@ public class APIUtil {
 	
 	public Object getPlayersPictures() {		
 		return DBConnector.getPlayersPictures();
+	}
+
+	public Object getUserMatches(String user) throws ParseException {
+		Map<String,List<Map<String, String>>> res = new HashMap<String,List<Map<String,String>>>();
+		
+		for(Entry<String, List<List<String>>> seasonMatches: rawMatches.entrySet()){
+			String season = seasonMatches.getKey();
+			List<Map<String, String>> res1 = new ArrayList<Map<String,String>>();
+			for(List<String> match : seasonMatches.getValue()){
+				if(isRowEmpty(match)) break;
+				
+				Map<String, String> formattedMatch = new HashMap<String, String>();
+				String date = match.get(0);
+				formattedMatch.put("date", formatter2.format(formatter.parse(date)));
+				formattedMatch.put("team", "");
+				for(int i=1;i<8;i++){
+					if(user.equals(match.get(i))){
+						formattedMatch.put("team", "blue");
+						break;
+					}
+					if(user.equals(match.get(i+9))){
+						formattedMatch.put("team", "white");
+						break;
+					}
+				}
+				
+				formattedMatch.put("result",  match.get(8)+","+match.get(9) );
+				formattedMatch.put("goals", (scorersByDate.get(season)!=null && 
+											scorersByDate.get(season).get(date)!=null && 
+											scorersByDate.get(season).get(date).get(user)!=null)?
+											scorersByDate.get(season).get(date).get(user)+"": "");
+				ObjectNode jsonNode = new ObjectNode(JsonNodeFactory.instance);
+				jsonNode.put("season", season);
+				ObjectNode day = new ObjectNode(JsonNodeFactory.instance);
+				day.put("day", formatter.parse(date).getTime());
+				jsonNode.put("match", day);
+				List<Map.Entry<String,Map<String,Object>>> o = (List<Entry<String, Map<String, Object>>>) getLastMatchResult(jsonNode);
+				if(o!=null){
+					for(Map.Entry<String,Map<String,Object>> e : o){
+						if(user.equals(e.getKey())){
+							formattedMatch.put("score", String.format("%,.2f",e.getValue().get("avg")));
+							formattedMatch.put("titles",  "" );
+							break;
+						}
+					}
+				}
+				res1.add(0,formattedMatch);
+			}
+			res.put(season, res1);
+		}
+		return res;
 	}
 }

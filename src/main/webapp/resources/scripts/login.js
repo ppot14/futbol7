@@ -64,15 +64,15 @@ function loggedIn(response,loginType) {
 			data.picture = response.picture;
 		}
 		
-  	  $('#player-name').text(data.name);
-  	  $('#player-picture').attr("src",data.picture);
+  	  $('.user-name').text(data.name);
+  	  $('.user-picture').attr("src",data.picture);
   	  $('#login-button').slideUp(function() {$('#logout-button').slideDown();});
   	  $('#player-name').slideDown();
   	  $('#player-picture').slideDown();
 	  $('#login-selector').modal('hide');
   	  
 	  $.post(
-			window.location.pathname+'api/player.request', 
+			window.location.pathname+'api/login.request', 
 			JSON.stringify(data), 
 			function( data ) {
 				if(data && data.nameweb){
@@ -100,7 +100,7 @@ function loggedIn(response,loginType) {
 		    					//Has scored?
 						      	$.post(
 						    			window.location.pathname+'api/player-has-voted.request', 
-						    			JSON.stringify({name:nameweb,date:selectedSeasonMatches[numMatches-1].day,season:$("#season-selector").val()}), 
+						    			JSON.stringify({name:nameweb,date:selectedSeasonMatches[numMatches-1].day,season:season}), 
 						    			function( data ) {
 		//									console.log("Played has voted? "+JSON.stringify(data));
 						    				if(!data){
@@ -135,7 +135,7 @@ function loggedIn(response,loginType) {
 function updateListTeamScorers(match){
 	$.post(
   			window.location.pathname+'api/match-scorers.request', 
-  			JSON.stringify({season: $("#season-selector").val(), match: match}), 
+  			JSON.stringify({season: season, match: match}), 
   			function( data1 ) {
   				matchScores=data1;
   				$('.blue-scorers').empty();
@@ -183,7 +183,7 @@ function updateListTeamScorers(match){
  */
 function lastMatchResultRequest(lastMatchResult){
 
-	var request = JSON.stringify({season: $("#season-selector").val(), match: selectedSeasonMatches[lastMatchResult]});
+	var request = JSON.stringify({season: season, match: selectedSeasonMatches[lastMatchResult]});
 	$.post(
 			window.location.pathname+'api/last-match-result.request', 
 			request, 
@@ -394,7 +394,7 @@ function createPollingForm(){
 	$('#polling-form').submit(function( event ) {
 		event.preventDefault();
 		
-		var request = {season:$("#season-selector").val(), 
+		var request = {season:season, 
 						date:selectedSeasonMatches[numMatches-1].day, 
 						scores:[],
 						trompito: $('#trompito-selector').val(),
@@ -489,8 +489,9 @@ $(function () {
 	});
 	
 
-	$('#logout-button, #player-name').click(function(event){
+	$('#logout-button').click(function(event){
 		event.preventDefault();
+		$.get(window.location.pathname+'api/logout.request'); 
 		try{
 			FB.logout(function(response) {
 			  if (response.status !== 'connected') {

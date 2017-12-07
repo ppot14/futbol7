@@ -1,0 +1,8 @@
+# global
+User-agent: *
+Disallow: /head
+Disallow: /nav
+Disallow: /legend-modal
+Disallow: /last-match-winner-modal
+Disallow: /login-modal
+Disallow: /polling-modal

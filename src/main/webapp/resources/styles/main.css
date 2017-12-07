@@ -20,7 +20,7 @@ th.column-name{
 	min-width: 122px;
 }
 th[data-field="lastMatches"]{
-	min-width: 120px;
+	min-width: 118px;
 }
 #player-picture{
 /* 	margin-top: 8px; */
@@ -166,4 +166,54 @@ div.player-badge:hover i{
 }
 #last-match-winner .player-score{
 	font-size: xx-large;
+}
+
+/*PAGE - me*/
+#user-picture{
+	height: 100px;
+}
+#user-name{
+	margin-top: 0px;
+    margin-bottom: 0px;
+    line-height: 100px;
+}
+
+#table-player-matches th[data-field="result"]{
+	min-width: 110px;
+}
+#table-player-matches .result{
+	width: 60px;
+	display: inline-block;
+}
+.team-bullet{
+    height: 15px;
+    width: 15px;
+    text-align: center;
+    display: inline-table;
+    border-radius: 2px 2px 8px 8px;
+}
+.blue-team{
+	background-color: white;
+}
+.white-team{
+	background-color: darkgray;
+}
+.team-bullet i{
+    display: table-cell;
+    font-size: 16px;
+}
+.blue-team i{
+	color: blue;
+}
+.white-team i{
+	color: white;
+}
+@media (max-width: 767px) { 
+	#user-picture{
+		margin: 0px auto;
+    	display: block;
+	}	
+	#user-name{
+		text-align: center;
+	}
 }

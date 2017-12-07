@@ -88,4 +88,45 @@
     	<maven.compiler.source>1.8</maven.compiler.source>
     	<maven.compiler.target>1.8</maven.compiler.target>
   	</properties>	
+  	
+<build>
+    <plugins>
+		<plugin>
+	        <groupId>com.samaxes.maven</groupId>
+	        <artifactId>minify-maven-plugin</artifactId>
+	        <version>1.7.6</version>
+	        <executions>
+	          <execution>
+	            <id>default-minify</id>
+	            <phase>package</phase>
+	            <configuration>
+	              <charset>UTF-8</charset>
+	              
+	              <cssSourceDir>../webapp/resources/styles</cssSourceDir>
+	              <cssTargetDir>/resources/styles</cssTargetDir>
+	              <cssTargetDir>../../src/main/webapp/resources/styles</cssTargetDir>
+	              <cssSourceIncludes>
+	                <cssSourceInclude>**</cssSourceInclude>
+	              </cssSourceIncludes>
+	              <cssFinalFile>merged.css</cssFinalFile>
+	              
+	              <jsSourceDir>../webapp/resources/scripts</jsSourceDir>
+	              <jsTargetDir>/resources/scripts</jsTargetDir>
+	              <jsTargetDir>../../src/main/webapp/resources/scripts</jsTargetDir>
+	              <jsSourceIncludes>
+	                <jsSourceInclude>**</jsSourceInclude>
+	              </jsSourceIncludes>             
+	              <jsFinalFile>merged.js</jsFinalFile>
+	              
+	              <jsEngine>CLOSURE</jsEngine>
+	            </configuration>
+	            <goals>
+	              <goal>minify</goal>
+	            </goals>
+	          </execution>
+	        </executions>
+		</plugin>
+	</plugins>
+  </build>	
+    	
 </project>

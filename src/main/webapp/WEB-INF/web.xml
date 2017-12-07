@@ -14,11 +14,25 @@
 	
 	<servlet>
       <servlet-name>Futbol7APIServlet</servlet-name>
-      <servlet-class>com.ppot14.futbol7.Futbol7APIServlet</servlet-class>
+      <servlet-class>com.ppot14.futbol7.servlet.Futbol7APIServlet</servlet-class>
     </servlet>
   	<servlet-mapping>
       <servlet-name>Futbol7APIServlet</servlet-name>
       <url-pattern>*.request</url-pattern>
   	</servlet-mapping>
+  	
+	<servlet>
+      <servlet-name>Futbol7HTMLServlet</servlet-name>
+      <servlet-class>com.ppot14.futbol7.servlet.Futbol7HTMLServlet</servlet-class>
+    </servlet>
+  	<servlet-mapping>
+      <servlet-name>Futbol7HTMLServlet</servlet-name>
+      <url-pattern></url-pattern>
+  	</servlet-mapping>
+  	<servlet-mapping>
+      <servlet-name>Futbol7HTMLServlet</servlet-name>
+      <url-pattern>/me</url-pattern>
+  	</servlet-mapping>
+  	
   	
 </web-app>
