@@ -81,6 +81,8 @@ public class Futbol7APIServlet extends Futbol7Servlet {
 	    		reply = api.getVS(); 
 			}else if(requestPath.contains("api/pointsSeries.request")){
 	    		reply = api.getPointsSeries();
+			}else if(requestPath.contains("api/userPointsSeries.request")){
+	    		reply = session.getAttribute("user")!=null?api.getPointsSeries((String)((Document)session.getAttribute("user")).get("nameweb")):null;
 			}else if(requestPath.contains("api/matches.request")){
     	    	reply = api.getResults(); 
 			}else if(requestPath.contains("api/players.request")){
@@ -94,9 +96,9 @@ public class Futbol7APIServlet extends Futbol7Servlet {
 			}else if(requestPath.contains("api/logout.request")){
 				session.removeAttribute("user");
 			}else if(requestPath.contains("api/userStats.request")){
-	    		reply = api.getUserStats(parameters.get("season")[0],(String)((Document)session.getAttribute("user")).get("nameweb")); 
+	    		reply = session.getAttribute("user")!=null?api.getUserStats(parameters.get("season")[0],(String)((Document)session.getAttribute("user")).get("nameweb")):null; 
 			}else if(requestPath.contains("api/userMatches.request")){
-	    		reply = api.getUserMatches((String)((Document)session.getAttribute("user")).get("nameweb")); 
+	    		reply = session.getAttribute("user")!=null?api.getUserMatches((String)((Document)session.getAttribute("user")).get("nameweb")):null; 
 			}else{
 				logger.warning("Request path not found: "+requestPath);
 			}

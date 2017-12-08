@@ -105,7 +105,7 @@ function showAdmin(){
 		    	$('#row4').show();
 		    	
 		    	$.getJSON(window.location.pathname+'api/pointsSeries.request', function (pointsSeries) {
-		    		createChart(pointsSeries);
+		    		createChart(pointsSeries, 'container-graph');
 		    	});
 			}
 		}	
@@ -139,10 +139,10 @@ function hideAdmin(){
 	}
 }
 
-var createChart = function(pointsSeries){
+var createChart = function(pointsSeries, id){
 	chart = new Highcharts.Chart({
         chart: {
-        	renderTo: 'container-graph',
+        	renderTo: id,
             type: 'line'
         },
         title: {
@@ -300,6 +300,9 @@ $(function () {
 		    $.getJSON(window.location.pathname+'api/userMatches.request', function(data) {
 			    $('#table-player-matches').bootstrapTable('load', data[season]);
 		    });
+	    	$.getJSON(window.location.pathname+'api/userPointsSeries.request', function (pointsSeries) {
+				createChart(pointsSeries, 'container-player-graph');
+		    });
 		    
   		}else{
   			
@@ -320,7 +323,7 @@ $(function () {
 		    });
 		    chart.destroy();
 	    	$.getJSON(window.location.pathname+'api/pointsSeries.request', function (pointsSeries) {
-				createChart(pointsSeries);
+				createChart(pointsSeries, 'container-graph');
 		    });
 		    $.getJSON(window.location.pathname+'api/matches.request', matchesFunction);
 		    $.getJSON(window.location.pathname+'api/players.request', playersFunction);
@@ -365,10 +368,15 @@ $(function () {
 		    });
 
 		    $.getJSON(window.location.pathname+'api/userMatches.request', function(data) {
-			    $('#table-player-matches').bootstrapTable({
-			        data: data[season],
-			        locale:'es-ES'
-			    });
+		    	if(data){
+				    $('#table-player-matches').bootstrapTable({
+				        data: data[season],
+				        locale:'es-ES'
+				    });
+		    	}
+		    });
+	    	$.getJSON(window.location.pathname+'api/userPointsSeries.request', function (pointsSeries) {
+	    		if(pointsSeries){ createChart(pointsSeries, 'container-player-graph'); }
 		    });
   		    
   		}else{

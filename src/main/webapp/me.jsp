@@ -76,10 +76,10 @@
 			
 				<div id="" class="panel panel-default">
 				  <div class="panel-heading">
-				    <h3 class="panel-title">Evolución de Puntos y Goles</h3>
+				    <h3 class="panel-title">Evolución de Puntos</h3>
 				  </div>
 				  <div class="panel-body">
-				  		<div id="container-player-graph" style="min-width: 310px; height: 600px; margin: 0 auto">Próximamente</div>
+				  		<div id="container-player-graph" style="min-width: 310px; height: 600px; margin: 0 auto"></div>
 					</div>
 				</div>
 			

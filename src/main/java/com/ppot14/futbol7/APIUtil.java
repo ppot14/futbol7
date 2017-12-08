@@ -201,6 +201,9 @@ public class APIUtil {
 	}
 
 	public Map<String,List<Map<String, Object>>> getPointsSeries() throws ParseException {
+		return getPointsSeries(null);
+	}
+	public Map<String,List<Map<String, Object>>> getPointsSeries(String user) throws ParseException {
 		Date today = new Date();
 		Map<String,List<Map<String, Object>>> data = new HashMap<String,List<Map<String,Object>>>();
 
@@ -208,55 +211,58 @@ public class APIUtil {
 			String season = seasonMatches.getKey();
 			data.put(season, new ArrayList<Map<String, Object>>());
 			for(String name : players.get(season)){
-    			int points = 0;
-            	List<List<Object>> playerData = new ArrayList<List<Object>>();
-    			for(List<String> row : seasonMatches.getValue()){
-	    			if(isRowEmpty(row)) break;
-	        		if(row.contains(name)){
-		        		int i=0;
-		        		int gA=0,gB=0;
-		        		String date = null;
-		        		String colour=null;
-		        		for(String cell : row){
-		        			if(i==0){date=cell;}
-		        			if(i==8){gA=Math.round(Float.parseFloat(cell));}
-		        			if(i==9){gB=Math.round(Float.parseFloat(cell));}
-		            		if(cell.equals(name)){
-		            			if(i<9){colour="a";}
-		            			if(i>8){colour="b";}
-		            		}
-		            		i++;
-		            	}
-		        		if(colour!=null){
-		        			List<Object> game = new ArrayList<Object>();
-		        			Date d = formatter.parse(date);
-		        			game.add(d);
-							int gFor = ("a".equals(colour)?gA:gB);
-							int gAgainst = ("a".equals(colour)?gB:gA);
-							int pointsM = ((gFor>gAgainst)?3:((gFor<gAgainst)?1:2));
-		        			points += pointsM;
-		        			game.add(points);
-		        			playerData.add(game);
-		        		}else{
-		        			continue;
+				if(user==null || user.equals(name)){
+	    			int points = 0;
+	            	List<List<Object>> playerData = new ArrayList<List<Object>>();
+	    			for(List<String> row : seasonMatches.getValue()){
+		    			if(isRowEmpty(row)) break;
+		        		if(row.contains(name)){
+			        		int i=0;
+			        		int gA=0,gB=0;
+			        		String date = null;
+			        		String colour=null;
+			        		for(String cell : row){
+			        			if(i==0){date=cell;}
+			        			if(i==8){gA=Math.round(Float.parseFloat(cell));}
+			        			if(i==9){gB=Math.round(Float.parseFloat(cell));}
+			            		if(cell.equals(name)){
+			            			if(i<9){colour="a";}
+			            			if(i>8){colour="b";}
+			            		}
+			            		i++;
+			            	}
+			        		if(colour!=null){
+			        			List<Object> game = new ArrayList<Object>();
+			        			Date d = formatter.parse(date);
+			        			game.add(d);
+								int gFor = ("a".equals(colour)?gA:gB);
+								int gAgainst = ("a".equals(colour)?gB:gA);
+								int pointsM = ((gFor>gAgainst)?3:((gFor<gAgainst)?1:2));
+			        			points += pointsM;
+			        			game.add(points);
+			        			playerData.add(game);
+			        		}else{
+			        			continue;
+			        		}
 		        		}
-	        		}
-	        		
-	        	}
-
-            	//Hack to add current points at current day to the current season
-    			if( season.contains(Integer.toString(Calendar.getInstance().get(Calendar.YEAR))) ){
-    	        	Integer maxPts = (Integer) playerData.get(playerData.size()-1).get(1);
-    				List<Object> game = new ArrayList<Object>();
-    				game.add(today);
-    				game.add(maxPts);
-    				playerData.add(game);
-    			}
-    			
-            	Map<String, Object> e = new HashMap<String, Object>();
-            	e.put("name", name);
-            	e.put("data", playerData);
-        		data.get(season).add(e);
+		        		
+		        	}
+	
+	            	//Hack to add current points at current day to the current season
+	    			if( season.contains(Integer.toString(Calendar.getInstance().get(Calendar.YEAR))) ){
+	    	        	Integer maxPts = (Integer) playerData.get(playerData.size()-1).get(1);
+	    				List<Object> game = new ArrayList<Object>();
+	    				game.add(today);
+	    				game.add(maxPts);
+	    				playerData.add(game);
+	    			}
+	    			
+	            	Map<String, Object> e = new HashMap<String, Object>();
+	            	e.put("name", name);
+	            	e.put("data", playerData);
+	        		data.get(season).add(e);
+        		
+				}
     			
     		}
         	
