@@ -23,12 +23,12 @@
     
     <title>Futbol 7 San Jerónimo</title>
   
+	<%if(!minimized){%>
 	<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" />
 	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.9.1/bootstrap-table.min.css" />
 	<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
 	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.9.0/css/bootstrap-slider.min.css" />
 	
-	<%if(!minimized){%>
 	<link rel="stylesheet" type="text/css" href="resources/styles/main.css" />
 	<%}else{%>
 	<link rel="stylesheet" type="text/css" href="resources/styles/merged.min.css" />
@@ -46,15 +46,17 @@
 
 	</script>
 	<%}%>
+	<script>
 	<%
 	Object user = session.getAttribute("user");
 	if(user!=null){
 		%>
-	<script>
 		var user = '<%=((org.bson.Document) user).get("nameweb")%>';
-	</script>
 	<%}%>
+		var options = <%=request.getAttribute("options")%>;
+	</script>
 	
+	<%if(!minimized){%>
 	<script src="https://apis.google.com/js/platform.js"></script>
 	<script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
@@ -64,11 +66,11 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-timeago/1.6.1/jquery.timeago.min.js"></script>
 	<script src="https://code.highcharts.com/highcharts.js"></script>
 <!-- 	<script src="https://code.highcharts.com/highcharts-more.js"></script> -->
-	<%if(!minimized){%>
+
 	<script src="resources/scripts/main.js"></script>
 	<script src="resources/scripts/login.js"></script>
 	<%}else{%>
-	<script src="resources/scripts/merged.min.js"></script>
+	<script src="resources/scripts/merged.js"></script>
 	<%}%>
 	
 <!-- 	<link rel="shortcut icon" href="resources/images/logo.ico" /> -->

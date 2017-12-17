@@ -8,7 +8,16 @@
   <body>
   
   <script>
-
+	var fullRanking = <%=request.getAttribute("fullRanking")%>;
+	var permanentsRanking = <%=request.getAttribute("permanentsRanking")%>;
+	var substitutesRanking = <%=request.getAttribute("substitutesRanking")%>;
+	var playersPictures = <%=request.getAttribute("playersPictures")%>;
+	var vs = <%=request.getAttribute("vs")%>;
+	var pair = <%=request.getAttribute("pair")%>;
+	var scorers = <%=request.getAttribute("scorers")%>;
+	var matches = <%=request.getAttribute("matches")%>;
+	var players = <%=request.getAttribute("players")%>;
+	var pointsSeries = <%=request.getAttribute("userPointsSeries")%>;
   </script>
 
 	<%@ include file="nav.jsp" %>

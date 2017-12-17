@@ -27,6 +27,7 @@ public class Futbol7Servlet extends HttpServlet {
 	private static final Logger logger = Logger.getLogger(Futbol7Servlet.class.getName());
 	private static String configurationFile = null;
 	private static Map<String,Object> config = null;
+	private static APIUtil api;
     
     /**
      * 
@@ -35,9 +36,17 @@ public class Futbol7Servlet extends HttpServlet {
     public void init(final ServletConfig config) throws ServletException {
     	if(configurationFile==null) configurationFile = config.getServletContext().getInitParameter("configurationFile");
     	refreshConfig();
+    	if(api==null){ api = new APIUtil(getConfig()); }
     }
     
-    public static Map<String,Object> getConfig(){
+    /**
+	 * @return the api
+	 */
+	public static APIUtil getApi() {
+		return api;
+	}
+
+	public static Map<String,Object> getConfig(){
     	return config;
     }
     

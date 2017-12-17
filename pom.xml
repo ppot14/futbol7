@@ -104,18 +104,39 @@
 	              
 	              <cssSourceDir>../webapp/resources/styles</cssSourceDir>
 	              <cssTargetDir>/resources/styles</cssTargetDir>
-	              <cssTargetDir>../../src/main/webapp/resources/styles</cssTargetDir>
+<!-- 	              <cssTargetDir>../../src/main/webapp/resources/styles</cssTargetDir> -->
 	              <cssSourceIncludes>
-	                <cssSourceInclude>**</cssSourceInclude>
+					<cssSourceInclude>lib/bootstrap.min.css</cssSourceInclude>
+					<cssSourceInclude>lib/bootstrap-table.min.css</cssSourceInclude>
+					<cssSourceInclude>lib/font-awesome.min.css</cssSourceInclude>
+					<cssSourceInclude>lib/bootstrap-slider.min.css</cssSourceInclude>
+					<cssSourceInclude>main.css</cssSourceInclude>
 	              </cssSourceIncludes>
+	              <cssSourceExcludes>
+	                <cssSourceExclude>merged.css</cssSourceExclude>
+	                <cssSourceExclude>merged.min.css</cssSourceExclude>
+	              </cssSourceExcludes>
 	              <cssFinalFile>merged.css</cssFinalFile>
 	              
 	              <jsSourceDir>../webapp/resources/scripts</jsSourceDir>
 	              <jsTargetDir>/resources/scripts</jsTargetDir>
-	              <jsTargetDir>../../src/main/webapp/resources/scripts</jsTargetDir>
+<!-- 	              <jsTargetDir>../../src/main/webapp/resources/scripts</jsTargetDir> -->
 	              <jsSourceIncludes>
-	                <jsSourceInclude>**</jsSourceInclude>
-	              </jsSourceIncludes>             
+              		<jsSourceInclude>lib/platform.js</jsSourceInclude>
+					<jsSourceInclude>lib/jquery-1.11.3.min.js</jsSourceInclude>
+					<jsSourceInclude>lib/bootstrap.min.js</jsSourceInclude>
+					<jsSourceInclude>lib/bootstrap-table.min.js</jsSourceInclude>
+					<jsSourceInclude>lib/bootstrap-table-es-ES.min.js</jsSourceInclude>
+					<jsSourceInclude>lib/bootstrap-slider.min.js</jsSourceInclude>
+					<jsSourceInclude>lib/jquery.timeago.min.js</jsSourceInclude>
+					<jsSourceInclude>lib/highcharts.js</jsSourceInclude>
+					<jsSourceInclude>main.js</jsSourceInclude>
+					<jsSourceInclude>login.js</jsSourceInclude>
+	              </jsSourceIncludes>   
+	              <jsSourceExcludes>
+	                <jsSourceExclude>merged.js</jsSourceExclude>
+	                <jsSourceExclude>merged.min.js</jsSourceExclude>
+	              </jsSourceExcludes>         
 	              <jsFinalFile>merged.js</jsFinalFile>
 	              
 	              <jsEngine>CLOSURE</jsEngine>

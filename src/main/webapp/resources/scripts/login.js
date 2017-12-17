@@ -2,11 +2,11 @@
  * login.js
  */
 var nameweb;
-var playersPictures;
 var usertype;
 var pollingLimit = 4*24*60*60*1000 + 12*60*60*1000;//4 days and half. Friday at midday
 var pollingReady = 23*60*60*1000;//Polling ready at 23:00
 var matchScores;
+var t2;
 
 function facebookStatusChangeCallback(response) {
 	if(response.status && response.status == 'connected'){
@@ -32,7 +32,7 @@ function googleStatusChangeCallback(){
 function loggedOut(){
   	$('#notification-score-button').slideUp();
   	$('#logout-button').slideUp(function (){ $('#login-button').slideDown() });
-  	$('#player-name').slideUp();
+  	$('#user-menu-item').slideUp();
   	$('#player-picture').slideUp();
   	$( "td:contains('"+nameweb+"')" ).css( "font-weight", "normal" );
 	$( "tr:contains('"+nameweb+"')" ).removeClass( "info" );
@@ -49,6 +49,8 @@ function updateUserName(){
 }
 
 function loggedIn(response,loginType) {
+	var t0 = performance.now();
+//	console.log("StatusChange, loggedIn " + (t0 - t2) + "ms");
     if (response && !response.error) {
     	
     	var data = {};
@@ -67,7 +69,7 @@ function loggedIn(response,loginType) {
   	  $('.user-name').text(data.name);
   	  $('.user-picture').attr("src",data.picture);
   	  $('#login-button').slideUp(function() {$('#logout-button').slideDown();});
-  	  $('#player-name').slideDown();
+  	  $('#user-menu-item').slideDown();
   	  $('#player-picture').slideDown();
 	  $('#login-selector').modal('hide');
   	  
@@ -76,6 +78,7 @@ function loggedIn(response,loginType) {
 			JSON.stringify(data), 
 			function( data ) {
 				if(data && data.nameweb){
+				  	$('.user-name').text(data.nameweb);
 					
 					var waiter = setInterval(waitForMain, 1000);
 						
@@ -90,9 +93,9 @@ function loggedIn(response,loginType) {
 		    				
 		    				
 		    				//verify if match played and no score and current date<last match date + 5
-		    				console.log("Played? "+JSON.stringify(selectedSeasonMatches[numMatches-1].data).includes(nameweb));
-		    				console.log("Valid period to vote? "+(selectedSeasonMatches[numMatches-1].day+pollingLimit>new Date().getTime()));
-		    				console.log("Now is after Match? "+(selectedSeasonMatches[numMatches-1].day+pollingReady<new Date().getTime()));
+//		    				console.log("Played? "+JSON.stringify(selectedSeasonMatches[numMatches-1].data).includes(nameweb));
+//		    				console.log("Valid period to vote? "+(selectedSeasonMatches[numMatches-1].day+pollingLimit>new Date().getTime()));
+//		    				console.log("Now is after Match? "+(selectedSeasonMatches[numMatches-1].day+pollingReady<new Date().getTime()));
 		    				
 		    				if(JSON.stringify(selectedSeasonMatches[numMatches-1].data).includes(nameweb) && //Has played
 		    						(selectedSeasonMatches[numMatches-1].day+pollingLimit>new Date().getTime()) && //Expired 5 days to vote
@@ -103,21 +106,24 @@ function loggedIn(response,loginType) {
 						    			JSON.stringify({name:nameweb,date:selectedSeasonMatches[numMatches-1].day,season:season}), 
 						    			function( data ) {
 		//									console.log("Played has voted? "+JSON.stringify(data));
+						    				var t1 = performance.now();
+//						    				console.log("loggedIn " + (t1 - t0) + "ms");
 						    				if(!data){
 						    					$('#notification-score-button').slideDown();
 						    				}else{
-							  					$('#notification-bar').text('Resultados del partido del lunes disponibles '+$.timeago(selectedSeasonMatches[numMatches-1].day+pollingLimit));
+							  					$('#notification-bar').removeClass("alert-success").addClass("alert-info").text('Resultados del partido del lunes disponibles '+$.timeago(selectedSeasonMatches[numMatches-1].day+pollingLimit));
 							  					$('#notification-bar').slideDown().delay(10000).slideUp();
 						    				}
 						    			}
 						    	);
 		    				}
 
-							console.log('Finished waiting for selectedSeasonMatches');
+		    				var t1 = performance.now();
+//		    				console.log("Finished waiting for selectedSeasonMatches, loggedIn " + (t1 - t0) + "ms");
 		    				clearInterval(waiter);
 	    				
 						}else{
-							console.log('Waiting for selectedSeasonMatches...');
+//							console.log('Waiting for selectedSeasonMatches...');
 						}
 					
 					}
@@ -210,20 +216,10 @@ function addBadges(x, data, pValueAvg, max, min){
 	}else if(pValueAvg==min){
 		html += '<div class="player-badge" data-toggle="tooltip" data-placement="bottom" title="Título al Cabra"><i class="fa fa-thumbs-down" aria-hidden="true"></i></div>';
 	}
-	if(dataX.trompito){
-		html += '<div class="player-badge" data-toggle="tooltip" data-placement="bottom" title="Título al más chupón"><i class="fa fa-undo" aria-hidden="true"></i></div>';
-	}
-	if(dataX.dandy){
-		html += '<div class="player-badge" data-toggle="tooltip" data-placement="bottom" title="Título al jugador con más clase y elegante"><i class="fa fa-glass" aria-hidden="true"></i></div>';
-	}
-	if(dataX.frances){
-		html += '<div class="player-badge" data-toggle="tooltip" data-placement="bottom" title="Título al más guarro"><i class="fa fa-wheelchair-alt" aria-hidden="true"></i></div>';
-	}
-	if(dataX.sillegas){
-		html += '<div class="player-badge" data-toggle="tooltip" data-placement="bottom" title="Título al más impuntual e impresentable"><i class="fa fa-clock-o" aria-hidden="true"></i></div>';
-	}
-	if(dataX.porculero){
-		html += '<div class="player-badge" data-toggle="tooltip" data-placement="bottom" title="Título al más protestón y bocazas"><i class="fa fa-bullhorn" aria-hidden="true"></i></div>';
+	for(i in titles){
+		if(dataX[titles[i].id]){
+			html += '<div class="player-badge" data-toggle="tooltip" data-placement="bottom" title="'+titles[i].desc+'"><i class="fa fa-'+titles[i].icon+'" aria-hidden="true"></i></div>';
+		}
 	}
 	if(matchScores[data[x].key]>2){//killer
 		html += '<div class="player-badge" data-toggle="tooltip" data-placement="bottom" title="Título al Killer (3 o más goles)"><i class="fa fa-futbol-o" aria-hidden="true"></i></div>';
@@ -249,6 +245,7 @@ function addPlayerToResult(x, data){
 	$('<div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">'+
 		'<h3 class="player-name">'+data[x].key+'</h3>'+
 		'<img class="player-picture img-rounded" alt="'+data[x].key+' picture" src="'+((pValue.image)?pValue.image:'resources/images/unknown-player.jpg')+'"/>'+
+		'<i class="fa fa-shield fa-2x text-'+data[x].value.team+'-team '+data[x].value.team+'-team-background team-shield" aria-hidden="true"></i>'+
 		'<span class="player-score pull-right">'+pValue.avg.toFixed(2)+'</span>'+
 		'<div class="badges pull-right">'+addBadges(x, data, pValue.avg, max, min)+'</div>'+
 	'</div>').appendTo(row.find('.panel-body'));
@@ -270,6 +267,7 @@ function addPlayerToResult(x, data){
 				  '<div class="panel-heading" role="tab" id="heading-'+id+'-'+j+'">'+
 				      '<h4 class="panel-title">'+
 				        '<a role="button" data-toggle="collapse" data-parent="#accordion-'+id+'" href="#collapse-'+id+'-'+j+'" aria-expanded="true" aria-controls="collapse-'+id+'-'+j+'">'+
+				            ((pValue.punctuations[j].comment!='')?'<i class="fa fa-comment" aria-hidden="true"></i>&nbsp; ':'')+
 				        	pValue.punctuations[j].voter+' <span class="voter-score pull-right">'+pValue.punctuations[j].score+'</span></a>'+
 				       '</h4>'+
 				   '</div>'+
@@ -301,7 +299,7 @@ function createPollingForm(){
 				'<div class="col-md-4">'+
 					'<img id="blue-player-picture-'+i+'" alt="'+selectedSeasonMatches[numMatches-1].data[i].blue+' picture" class="player-picture img-rounded" style="height: 100px;width: 100px;" src="'+
 					(playersPictures[selectedSeasonMatches[numMatches-1].data[i].blue]?playersPictures[selectedSeasonMatches[numMatches-1].data[i].blue]:'resources/images/unknown-player.jpg')+'"/>'+
-					'<i class="fa fa-flag fa-2x text-primary flag-blue" aria-hidden="true"></i>'+
+					'<i class="fa fa-shield fa-2x text-blue-team blue-team-background team-shield" aria-hidden="true"></i>'+
 			    '</div>'+
 				'<div class="col-md-8">'+
 					'<h4 id="blue-player-name-'+i+'" class="player-name">'+selectedSeasonMatches[numMatches-1].data[i].blue+'</h4>'+
@@ -320,7 +318,7 @@ function createPollingForm(){
 				'<div class="col-md-4">'+
 					'<img id="white-player-picture-'+i+'" alt="'+selectedSeasonMatches[numMatches-1].data[i].white+' picture" class="player-picture img-rounded" style="height: 100px;width: 100px;" src="'+
 					(playersPictures[selectedSeasonMatches[numMatches-1].data[i].white]?playersPictures[selectedSeasonMatches[numMatches-1].data[i].white]:'resources/images/unknown-player.jpg')+'"/>'+
-					'<i class="fa fa-flag-o fa-2x flag-white" aria-hidden="true"></i>'+
+					'<i class="fa fa-shield fa-2x text-white-team white-team-background team-shield" aria-hidden="true"></i>'+
 			    '</div>'+
 				'<div class="col-md-8">'+
 					'<h4 id="white-player-name-'+i+'" class="player-name">'+selectedSeasonMatches[numMatches-1].data[i].white+'</h4>'+
@@ -355,30 +353,17 @@ function createPollingForm(){
 			$('#white-player-punctuation-number-'+i).hide();
 		}
 	}
-	$('<div class="form-group polling-form-group"><div id="title-selector" class="row">'+
-			'<div class="col-md-1"></div>'+
-			'<div class="col-md-2">'+
-				'<h4 data-toggle="tooltip" data-placement="top" title="Título al más chupón">El Trompito <div class="player-badge" ><i class="fa fa-undo" aria-hidden="true"></i></div></h4>'+
-				'<select id="trompito-selector" class="matchtitle-selector form-control"></select>'+
-			'</div>'+
-			'<div class="col-md-2">'+
-				'<h4 data-toggle="tooltip" data-placement="top" title="Título al jugador con más clase y elegante">El Dandy <div class="player-badge"><i class="fa fa-glass" aria-hidden="true"></i></div></h4>'+
-				'<select id="dandy-selector" class="matchtitle-selector form-control"></select>'+
-			'</div>'+
-			'<div class="col-md-2">'+
-				'<h4 data-toggle="tooltip" data-placement="top" title="Título al más guarro">El Francés <div class="player-badge"><i class="fa fa-wheelchair-alt" aria-hidden="true"></i></div></h4>'+
-				'<select id="frances-selector" class="matchtitle-selector form-control"></select>'+
-			'</div>'+
-			'<div class="col-md-2">'+
-				'<h4 data-toggle="tooltip" data-placement="top" title="Título al más impuntual e impresentable">El Sillegas <div class="player-badge"><i class="fa fa-clock-o" aria-hidden="true"></i></div></h4>'+
-				'<select id="sillegas-selector" class="matchtitle-selector form-control"></select>'+
-			'</div>'+
-			'<div class="col-md-2">'+
-				'<h4 data-toggle="tooltip" data-placement="top" title="Título al más protestón y bocazas">El Porculero <div class="player-badge"><i class="fa fa-bullhorn" aria-hidden="true"></i></div></h4>'+
-				'<select id="porculero-selector" class="matchtitle-selector form-control"></select>'+
-			'</div>'+
-			'<div class="col-md-1"></div>'+
-	'</div></div>').prependTo("#polling-form");
+	var titleSelectorDiv='<div class="form-group polling-form-group"><div id="title-selector" class="row">'+
+								'<div class="col-md-1"></div>';
+	for(i in titles){
+		titleSelectorDiv+='<div class="col-md-2">'+
+							'<h4 data-toggle="tooltip" data-placement="top" title="'+titles[i].desc+'">'+titles[i].name+' <div class="player-badge" ><i class="fa fa-'+titles[i].icon+'" aria-hidden="true"></i></div></h4>'+
+							'<select id="'+titles[i].id+'-selector" class="matchtitle-selector form-control"></select>'+
+						  '</div>';
+	}
+	titleSelectorDiv+='<div class="col-md-1"></div>'+
+					'</div></div>';
+	$(titleSelectorDiv).prependTo("#polling-form");
 	var select = $("select.matchtitle-selector");
 	matchPlayerNames.sort(function (a, b) {return a.localeCompare(b);});
 	matchPlayerNames.reverse();
@@ -423,11 +408,11 @@ function createPollingForm(){
 	  			JSON.stringify(request), 
 	  			function( data2 ) {
 	  				if(!data2 || !data2.error){
-	  					ga('send', 'event', { eventCategory: 'form', eventAction: 'submit', eventLabel: 'vote'});
+	  					if(ga){ ga('send', 'event', { eventCategory: 'form', eventAction: 'submit', eventLabel: 'vote'}); }
 	  					$('#polling-form button[type="submit"]').prop("disabled","disabled");
 	  					$('#notification-score-button').slideUp();
 	  					$('#polling').modal('hide');
-	  					$('#notification-bar').text('Votación realizada. Resultados disponibles el '+
+	  					$('#notification-bar').removeClass("alert-info").addClass("alert-success").text('Votación realizada. Resultados disponibles el '+
 	  							new Date(selectedSeasonMatches[numMatches-1].day+pollingLimit).toLocaleString('es-ES',{ day:'numeric',weekday: 'long', hour:'numeric',minute:'numeric' }));
 	  					$('#notification-bar').slideDown().delay(10000).slideUp();
 	  				}else{
@@ -444,6 +429,7 @@ function createPollingForm(){
 }
 
 $(function () {
+	t2 = performance.now();
 	window.fbAsyncInit = function() {
 	  FB.init({
         appId      : '1606586212720990',

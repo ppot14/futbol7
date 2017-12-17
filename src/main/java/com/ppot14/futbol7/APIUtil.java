@@ -41,6 +41,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.ArrayNode;
 import org.codehaus.jackson.node.JsonNodeFactory;
 import org.codehaus.jackson.node.ObjectNode;
+import org.mortbay.log.Log;
 
 public class APIUtil {
 	
@@ -171,107 +172,138 @@ public class APIUtil {
 		return fullScorers;
 	}
 
-	public Map<String,List<Map<String, Object>>> getResults() throws ParseException {
-		Map<String,List<Map<String, Object>>> res = new HashMap<String,List<Map<String,Object>>>();
+	public Map<String,List<Map<String, Object>>> getResults() {
 		
-		for(Entry<String, List<List<String>>> seasonMatches: rawMatches.entrySet()){
-			List<Map<String, Object>> res1 = new ArrayList<Map<String,Object>>();
-			for(List<String> match : seasonMatches.getValue()){
-				if(isRowEmpty(match)) break;
-				Map<String, Object> formattedMatch = new HashMap<String, Object>();
-				
-				formattedMatch.put("day", formatter.parse(match.get(0)));
-				formattedMatch.put("scoreBlues", match.get(8));
-				formattedMatch.put("scoreWhites", match.get(9));
-				formattedMatch.put("remarks", match.size()>17?match.get(17):"");
-				List<Map<String,String>> teams = new ArrayList<Map<String,String>>();
-				for(int i=1;i<8;i++){
-					Map<String,String> r = new HashMap<String, String>();
-					r.put("blue", match.get(i));
-					r.put("white", match.get(i+9));
-					teams.add(r);
+		Map<String,List<Map<String, Object>>> res = new HashMap<String,List<Map<String,Object>>>();
+
+		try{
+			for(Entry<String, List<List<String>>> seasonMatches: rawMatches.entrySet()){
+				List<Map<String, Object>> res1 = new ArrayList<Map<String,Object>>();
+				for(List<String> match : seasonMatches.getValue()){
+					if(isRowEmpty(match)) break;
+					Map<String, Object> formattedMatch = new HashMap<String, Object>();
+					
+					formattedMatch.put("day", formatter.parse(match.get(0)));
+					formattedMatch.put("scoreBlues", match.get(8));
+					formattedMatch.put("scoreWhites", match.get(9));
+					formattedMatch.put("remarks", match.size()>17?match.get(17):"");
+					List<Map<String,String>> teams = new ArrayList<Map<String,String>>();
+					for(int i=1;i<8;i++){
+						Map<String,String> r = new HashMap<String, String>();
+						r.put("blue", match.get(i));
+						r.put("white", match.get(i+9));
+						teams.add(r);
+					}
+					formattedMatch.put("data", teams);
+					res1.add(formattedMatch);
 				}
-				formattedMatch.put("data", teams);
-				res1.add(formattedMatch);
+				res.put(seasonMatches.getKey(), res1);
 			}
-			res.put(seasonMatches.getKey(), res1);
+		}catch(Exception e){
+			Log.warn("Error getting results: "+e.getMessage());
+			e.printStackTrace();
 		}
 		
 		return res;
 	}
 
-	public Map<String,List<Map<String, Object>>> getPointsSeries() throws ParseException {
+	public Map<String,List<Map<String, Object>>> getPointsSeries() {
 		return getPointsSeries(null);
 	}
-	public Map<String,List<Map<String, Object>>> getPointsSeries(String user) throws ParseException {
+	public Map<String,List<Map<String, Object>>> getPointsSeries(String user) {
 		Date today = new Date();
 		Map<String,List<Map<String, Object>>> data = new HashMap<String,List<Map<String,Object>>>();
+		
+		try{
 
-		for(Entry<String, List<List<String>>> seasonMatches: rawMatches.entrySet()){
-			String season = seasonMatches.getKey();
-			data.put(season, new ArrayList<Map<String, Object>>());
-			for(String name : players.get(season)){
-				if(user==null || user.equals(name)){
-	    			int points = 0;
-	            	List<List<Object>> playerData = new ArrayList<List<Object>>();
-	    			for(List<String> row : seasonMatches.getValue()){
-		    			if(isRowEmpty(row)) break;
-		        		if(row.contains(name)){
-			        		int i=0;
-			        		int gA=0,gB=0;
-			        		String date = null;
-			        		String colour=null;
-			        		for(String cell : row){
-			        			if(i==0){date=cell;}
-			        			if(i==8){gA=Math.round(Float.parseFloat(cell));}
-			        			if(i==9){gB=Math.round(Float.parseFloat(cell));}
-			            		if(cell.equals(name)){
-			            			if(i<9){colour="a";}
-			            			if(i>8){colour="b";}
-			            		}
-			            		i++;
-			            	}
-			        		if(colour!=null){
-			        			List<Object> game = new ArrayList<Object>();
-			        			Date d = formatter.parse(date);
-			        			game.add(d);
-								int gFor = ("a".equals(colour)?gA:gB);
-								int gAgainst = ("a".equals(colour)?gB:gA);
-								int pointsM = ((gFor>gAgainst)?3:((gFor<gAgainst)?1:2));
-			        			points += pointsM;
-			        			game.add(points);
-			        			playerData.add(game);
-			        		}else{
-			        			continue;
+			for(Entry<String, List<List<String>>> seasonMatches: rawMatches.entrySet()){
+				String season = seasonMatches.getKey();
+				data.put(season, new ArrayList<Map<String, Object>>());
+				for(String name : players.get(season)){
+					if(user==null || user.equals(name)){
+		    			int points = 0;
+		            	List<List<Object>> playerData = new ArrayList<List<Object>>();
+		            	List<List<Object>> playerData2 = new ArrayList<List<Object>>();
+		    			for(List<String> row : seasonMatches.getValue()){
+			    			if(isRowEmpty(row)) break;
+			        		if(row.contains(name)){
+				        		int i=0;
+				        		int gA=0,gB=0;
+				        		String date = null;
+				        		String colour=null;
+				        		for(String cell : row){
+				        			if(i==0){date=cell;}
+				        			if(i==8){gA=Math.round(Float.parseFloat(cell));}
+				        			if(i==9){gB=Math.round(Float.parseFloat(cell));}
+				            		if(cell.equals(name)){
+				            			if(i<9){colour="a";}
+				            			if(i>8){colour="b";}
+				            		}
+				            		i++;
+				            	}
+				        		if(colour!=null){
+				        			List<Object> game = new ArrayList<Object>();
+				        			Date d = formatter.parse(date);
+				        			game.add(d);
+									int gFor = ("a".equals(colour)?gA:gB);
+									int gAgainst = ("a".equals(colour)?gB:gA);
+									int pointsM = ((gFor>gAgainst)?3:((gFor<gAgainst)?1:2));
+				        			points += pointsM;
+				        			game.add(points);
+				        			playerData.add(game);
+				        			if(name.equals(user)){
+					        			List<Object> score = new ArrayList<Object>();
+					        			score.add(d);
+					        			score.add( (scorersByDate.get(season)!=null && 
+													scorersByDate.get(season).get(date)!=null && 
+													scorersByDate.get(season).get(date).get(user)!=null)?
+													scorersByDate.get(season).get(date).get(user): 0);
+					        			playerData2.add(score);
+				        			}
+				        		}else{
+				        			continue;
+				        		}
 			        		}
+			        		
+			        	}
+		
+		            	//Hack to add current points at current day to the current season
+		    			if(user==null && season.contains(Integer.toString(Calendar.getInstance().get(Calendar.YEAR))) ){
+		    	        	Integer maxPts = (Integer) playerData.get(playerData.size()-1).get(1);
+		    				List<Object> game = new ArrayList<Object>();
+		    				game.add(today);
+		    				game.add(maxPts);
+		    				playerData.add(game);
+		    			}
+		    			
+		            	Map<String, Object> e = new HashMap<String, Object>();
+		            	e.put("name", name);
+		            	e.put("data", playerData);
+		        		if(name.equals(user)){
+			            	e.put("name", "Puntos "+name);
+			            	Map<String, Object> e2 = new HashMap<String, Object>();
+			            	e2.put("name", "Goles");
+			            	e2.put("data", playerData2);
+			            	e2.put("yAxis", 1);
+			            	e2.put("type", "column");
+			        		data.get(season).add(e2);
 		        		}
-		        		
-		        	}
-	
-	            	//Hack to add current points at current day to the current season
-	    			if( season.contains(Integer.toString(Calendar.getInstance().get(Calendar.YEAR))) ){
-	    	        	Integer maxPts = (Integer) playerData.get(playerData.size()-1).get(1);
-	    				List<Object> game = new ArrayList<Object>();
-	    				game.add(today);
-	    				game.add(maxPts);
-	    				playerData.add(game);
-	    			}
+		        		data.get(season).add(e);
+					}
 	    			
-	            	Map<String, Object> e = new HashMap<String, Object>();
-	            	e.put("name", name);
-	            	e.put("data", playerData);
-	        		data.get(season).add(e);
-        		
-				}
-    			
-    		}
-        	
-        }
+	    		}
+	        	
+	        }
+		
+		}catch(Exception e){
+			Log.warn("Error getting point series: "+e.getMessage());
+			e.printStackTrace();
+		}
         
 		return data;
 	}
 
-	public Map<String,List<Map<String,String>>> getVS() throws java.text.ParseException {
+	public Map<String,List<Map<String,String>>> getVS() {
 		Map<String,List<Map<String,String>>> data = new TreeMap<String,List<Map<String,String>>>();
 
 		for(Entry<String, List<List<String>>> seasonMatches: rawMatches.entrySet()){
@@ -302,7 +334,7 @@ public class APIUtil {
 		
 	}
 
-	public Map<String,List<Map<String,String>>> getPair() throws java.text.ParseException {
+	public Map<String,List<Map<String,String>>> getPair() {
 		Map<String,List<Map<String,String>>> data = new TreeMap<String,List<Map<String,String>>>();
 
 		for(Entry<String, List<List<String>>> seasonMatches: rawMatches.entrySet()){
@@ -394,33 +426,35 @@ public class APIUtil {
 			scorers.remove("Fecha");
 			scorers.remove("TOTAL");
 			scorers.remove("CHECK");
-//			rawScorers.get(seasonScorerName).remove(0);
-//			rawScorers.get(seasonScorerName).remove(0);
-//			Iterator<List<String>> it = rawScorers.get(seasonScorerName).iterator();
-			for(int i = 3; i<scorers.size(); i++){//Ignore 3 first columns
+			logger.fine(seasonScorerName+", scorers: "+scorers.size());
+			for(int i = 0; i<scorers.size(); i++){//Ignore 3 first columns
+				String scorer = scorers.get(i);
 				Iterator<List<String>> it = rawScorers.get(seasonScorerName).iterator();
 				if(it.hasNext()){it.next();}if(it.hasNext()){it.next();}//ignore first 2 rows
 				int sumScore = 0;
+				//Score by Dates
 				while(it.hasNext()){
 					List<String> l = it.next();
-					if(l.size()<=i){ continue; }
-					String cell = l.get(i);
+					if(l.isEmpty() || l.get(0)==null || "".equals(l.get(0))){ break; }
+					if(l.size()<=i+3){ continue; }
+					String cell = l.get(i+3);
 					String date = l.get(0);
-					if(i==3){
+					if(i==0){
 						scorersByDate.get(seasonName).put(date, new HashMap<String,Integer>());
 					} 
 					if(cell!=null && !"".equals(cell)){
 						float cellFloat = Float.parseFloat(cell);
 						sumScore += cellFloat;
-						scorersByDate.get(seasonName).get(date).put(scorers.get(i-3), (int)cellFloat);
+						scorersByDate.get(seasonName).get(date).put(scorer, (int)cellFloat);
 					}
 				}
-				if(sumScore>0 && !scorers.get(i-3).contains("Propia")){
+				//Score by Players
+				if(sumScore>0 && !scorer.contains("Propia")){
 					Map<String,String> mName = new HashMap<String,String>();
-					mName.put("name", scorers.get(i-3));
+					mName.put("name", scorer);
 					mName.put("scores", ""+sumScore);
 					fullScorers.get(seasonName).add(mName);
-					scorersByName.get(seasonName).put(scorers.get(i-3), sumScore);
+					scorersByName.get(seasonName).put(scorer, sumScore);
 				}
 			}
 			logger.fine(seasonScorerName+": "+fullScorers.get(seasonName));
@@ -758,6 +792,13 @@ public class APIUtil {
 			String date = formatter2.format(new Date(dateL));
 			String date2 = formatter.format(new Date(dateL));
 			String season = jsonNode.get("season").asText();
+			List<String> teamBlue = new ArrayList<String>(), teamWhite = new ArrayList<String>();
+			if(jsonNode.get("match").get("data")!=null){
+				for(JsonNode teamPair : jsonNode.get("match").get("data")){
+					teamWhite.add(teamPair.get("white").asText());
+					teamBlue.add(teamPair.get("blue").asText());
+				}
+			}
 			Document votes = DBConnector.getVotes(season, date);
 			if(votes==null){ 
 //				logger.warning("getVotes didn't return any result for season "+season+", date "+date); 
@@ -786,6 +827,7 @@ public class APIUtil {
 						Map<String,Object> punctuationData = new HashMap<String,Object>();
 						punctuationData.put("punctuations", punctuations);
 						punctuationData.put("avgList", avgList);
+						punctuationData.put("team", teamBlue.contains(voted)?"blue":teamWhite.contains(voted)?"white":"");
 //						punctuationData.put("avg", (double)scoreI);
 						if(playersPictures.containsKey(voted)){ punctuationData.put("image", playersPictures.get(voted)); }
 						if(scorersByDate!=null && scorersByDate.get(season)!=null && 
@@ -940,54 +982,62 @@ public class APIUtil {
 		return DBConnector.getPlayersPictures();
 	}
 
-	public Object getUserMatches(String user) throws ParseException {
+	public Object getUserMatches(String user) {
 		Map<String,List<Map<String, String>>> res = new HashMap<String,List<Map<String,String>>>();
 		
-		for(Entry<String, List<List<String>>> seasonMatches: rawMatches.entrySet()){
-			String season = seasonMatches.getKey();
-			List<Map<String, String>> res1 = new ArrayList<Map<String,String>>();
-			for(List<String> match : seasonMatches.getValue()){
-				if(isRowEmpty(match)) break;
-				
-				Map<String, String> formattedMatch = new HashMap<String, String>();
-				String date = match.get(0);
-				formattedMatch.put("date", formatter2.format(formatter.parse(date)));
-				formattedMatch.put("team", "");
-				for(int i=1;i<8;i++){
-					if(user.equals(match.get(i))){
-						formattedMatch.put("team", "blue");
-						break;
-					}
-					if(user.equals(match.get(i+9))){
-						formattedMatch.put("team", "white");
-						break;
-					}
-				}
-				
-				formattedMatch.put("result",  match.get(8)+","+match.get(9) );
-				formattedMatch.put("goals", (scorersByDate.get(season)!=null && 
-											scorersByDate.get(season).get(date)!=null && 
-											scorersByDate.get(season).get(date).get(user)!=null)?
-											scorersByDate.get(season).get(date).get(user)+"": "");
-				ObjectNode jsonNode = new ObjectNode(JsonNodeFactory.instance);
-				jsonNode.put("season", season);
-				ObjectNode day = new ObjectNode(JsonNodeFactory.instance);
-				day.put("day", formatter.parse(date).getTime());
-				jsonNode.put("match", day);
-				List<Map.Entry<String,Map<String,Object>>> o = (List<Entry<String, Map<String, Object>>>) getLastMatchResult(jsonNode);
-				if(o!=null){
-					for(Map.Entry<String,Map<String,Object>> e : o){
-						if(user.equals(e.getKey())){
-							formattedMatch.put("score", String.format("%,.2f",e.getValue().get("avg")));
-							formattedMatch.put("titles",  "" );
+		try{
+		
+			for(Entry<String, List<List<String>>> seasonMatches: rawMatches.entrySet()){
+				String season = seasonMatches.getKey();
+				List<Map<String, String>> res1 = new ArrayList<Map<String,String>>();
+				for(List<String> match : seasonMatches.getValue()){
+					if(isRowEmpty(match)) break;
+					
+					Map<String, String> formattedMatch = new HashMap<String, String>();
+					String date = match.get(0);
+					formattedMatch.put("date", formatter2.format(formatter.parse(date)));
+					formattedMatch.put("team", "");
+					for(int i=1;i<8;i++){
+						if(user.equals(match.get(i))){
+							formattedMatch.put("team", "blue");
+							break;
+						}
+						if(user.equals(match.get(i+9))){
+							formattedMatch.put("team", "white");
 							break;
 						}
 					}
+					
+					formattedMatch.put("result",  match.get(8)+","+match.get(9) );
+					formattedMatch.put("goals", (scorersByDate.get(season)!=null && 
+												scorersByDate.get(season).get(date)!=null && 
+												scorersByDate.get(season).get(date).get(user)!=null)?
+												scorersByDate.get(season).get(date).get(user)+"": "");
+					ObjectNode jsonNode = new ObjectNode(JsonNodeFactory.instance);
+					jsonNode.put("season", season);
+					ObjectNode day = new ObjectNode(JsonNodeFactory.instance);
+					day.put("day", formatter.parse(date).getTime());
+					jsonNode.put("match", day);
+					List<Map.Entry<String,Map<String,Object>>> o = (List<Entry<String, Map<String, Object>>>) getLastMatchResult(jsonNode);
+					if(o!=null){
+						for(Map.Entry<String,Map<String,Object>> e : o){
+							if(user.equals(e.getKey())){
+								formattedMatch.put("score", String.format("%,.2f",e.getValue().get("avg")));
+								formattedMatch.put("titles",  "" );
+								break;
+							}
+						}
+					}
+					res1.add(0,formattedMatch);
 				}
-				res1.add(0,formattedMatch);
+				res.put(season, res1);
 			}
-			res.put(season, res1);
+		
+		}catch(Exception e){
+			Log.warn("Error getting user matches: "+e.getMessage());
+			e.printStackTrace();
 		}
+	
 		return res;
 	}
 }

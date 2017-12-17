@@ -1,11 +1,29 @@
 /**
  * main.js
  */
+
+/*
+ * Variables and Constants
+ */
 var options;
 var season;
 var selectedSeasonMatches, numMatches, currentMatch;
 var chart;
+var titles = [{
+		id: 'trompito', icon: 'undo', name:'El Trompito', title:'Título al más chupón', desc:'El Trompito. Título al más chupón del partido, ese que es capaz de recorrer los cuatro corners con el balon en los pies antes de tirar a puerta. Homenaje del Sr Bordas al Sr Rivera'
+	},{
+		id: 'dandy', icon: 'glass', name:'El Dandy', title:'Título al jugador con más clase y elegante', desc:'El Dandy. Título al jugador con más clase y elegancia, ese que no necesita la posesión y deja unas asistencias a la derecha mirando a la izquierda que más quisiera Michael Laudrup. Homenaje a Sr Revuelta'
+	},{
+		id: 'frances', icon: 'wheelchair-alt', name:'El Francés', title:'TTítulo al más guarro', desc:'El Francés. Título al más guarro, ese que es capaz de dejarte un cardenal del tamaño del obispo de Jerez durante temporada y media y encima dice que no es falta. En honor al Sr Mativet'
+	},{
+		id: 'sillegas', icon: 'clock-o', name:'El Sillegas', title:'Título al más impuntual e impresentable', desc:'El Sillegas. Título al más impuntual e impresentable, ese que es capaz de buscar atascos en Google Maps para no llegar a su hora aunque trabaje menos que un funcionario de la junta. Homenaje a Sr Pozo y Sr Villegas'
+	},{
+		id: 'porculero', icon: 'bullhorn', name:'El Porculero', title:'Título al más protestón y bocazas', desc:'El Porculero. Título al más protestón y bocazas, ese que es capaz de pelearse hasta con los del equipo contrario, que protesta hasta cuando tiene el balón o que tiene a su equipo desquiciado aúnque ganen 10-0. Honorífico a los Sr Bordas, Sr Tristán y Sr Rivera'
+	}];
 
+/*
+ * Static Utility Functions
+ */
 function parseDate(s){
 	var parts = s.split("/");
 	return new Date(parseInt(parts[2], 10),
@@ -41,15 +59,24 @@ function lastMatchesFormat(value) {
 function teamFormatter(value) {
 	var ret = '-';
 	if(value=='blue'){
-		ret = '<div class="team-bullet blue-team"><i class="fa fa-shield" aria-hidden="true"></i></div>';
+		ret = '<div class="team-bullet blue-team-background"><i class="fa fa-shield text-blue-team" aria-hidden="true"></i></div>';
 	}else if(value=='white'){
-		ret = '<div class="team-bullet white-team"><i class="fa fa-shield" aria-hidden="true"></i></div>';
+		ret = '<div class="team-bullet white-team-background"><i class="fa fa-shield text-white-team" aria-hidden="true"></i></div>';
 	}
 	return ret;
 }
 function scoreFormatter(value,row,index) {
 	var res = value.split(',');
-	return '<div class="team-bullet blue-team"><i class="fa fa-shield" aria-hidden="true"></i></div><div class="result">'+parseInt(res[0])+' - '+parseInt(res[1])+'</div><div class="team-bullet white-team"><i class="fa fa-shield" aria-hidden="true"></i></div>';
+	return '<div class="team-bullet blue-team-background"><i class="fa fa-shield text-blue-team" aria-hidden="true"></i></div><div class="result">'+parseInt(res[0])+' - '+parseInt(res[1])+'</div><div class="team-bullet white-team-background"><i class="fa fa-shield text-white-team" aria-hidden="true"></i></div>';
+}
+function goalsFormatter(value,row,index){
+	var scores ='';
+	for(var i=0; i<value; i++){ scores+='<i class="fa fa-futbol-o" aria-hidden="true"></i>'; }
+	return scores;
+}
+function userScoreFormatter(value,row,index){
+	return ( (parseDateToLong(row.date)+pollingLimit)>=new Date().getTime() )?
+			'<i class="fa fa-ban" aria-hidden="true"></i>' : value;
 }
 function scoreStyle(value, row, index, field){
 	var res = row.result.split(',');
@@ -78,6 +105,9 @@ function dateSort(sortName, sortOrder){
 	return r>0?1:r<0?-1:0;
 }
 
+/*
+ * Admin Functions
+ */
 function showAdmin(){
 
 	if(window.location.pathname.includes('/me')){
@@ -94,19 +124,15 @@ function showAdmin(){
 		    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'loses');
 		    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'matches');
 		    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'goalsFor');
-	//	    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'goalsAgainst');
 		    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'pointsAVG');
 		    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'goalsForAVG');
-	//	    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'goalsAgainstAVG');
 		    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'scoreAVG');
 		
 		    	$('#row1').show();
 		    	$('#row3').show();
 		    	$('#row4').show();
 		    	
-		    	$.getJSON(window.location.pathname+'api/pointsSeries.request', function (pointsSeries) {
-		    		createChart(pointsSeries, 'container-graph');
-		    	});
+	    		createChart(pointsSeries, 'container-graph');
 			}
 		}	
 		
@@ -125,10 +151,8 @@ function hideAdmin(){
 		$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('hideColumn', 'loses');
 		$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('hideColumn', 'matches');
 		$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('hideColumn', 'goalsFor');
-	//	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('hideColumn', 'goalsAgainst');
 		$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('hideColumn', 'pointsAVG');
 		$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('hideColumn', 'goalsForAVG');
-	//	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('hideColumn', 'goalsAgainstAVG');
 		$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('hideColumn', 'scoreAVG');
 	
 		$('#row1').hide();
@@ -159,17 +183,26 @@ var createChart = function(pointsSeries, id){
                 text: 'Dia'
             }
         },
-        yAxis: {
+        yAxis: [{
             title: {
                 text: 'Puntos'
             },
             min: 0
-        },
+        },{
+            title: {
+                text: 'Goles'
+            },
+            min: 0,
+            opposite: true
+        }],
 
         series: pointsSeries[season]
     });
 }
   
+/*
+ * Initialization
+ */
 $(function () {
 		  
 	$.timeago.settings.strings = {
@@ -191,7 +224,7 @@ $(function () {
 	};
 	$.timeago.settings.allowFuture= true;
     
-    var playersFunction = function(players) {
+    var playersFunction = function() {
     	var num = players[season].length;
     	players[season].sort(function (a, b) {return a.localeCompare(b);});
     	$('#player-one,#player-two').empty();
@@ -201,27 +234,14 @@ $(function () {
     }
     
     //Matches AJAX request data
-    var matchesFunction = function(matches) {
+    var matchesFunction = function() {
     	
     	selectedSeasonMatches = matches[season];
 	    
 	    numMatches = selectedSeasonMatches.length;
 	    currentMatch = numMatches-1;
 	    var lastMatch = selectedSeasonMatches[numMatches-1].data;
-	    var remarks = (selectedSeasonMatches[numMatches-1].remarks.indexOf('RD') > -1) ?' (Número de goles desconocido, por defecto 1-0 o 0-0)':'';
-
-		//Receive players pictures
-		$.getJSON(window.location.pathname+'api/playersPictures.request', function(data) {
-	    	if(data){ playersPictures = data }
-	    	else{ console.warn('Pictures from players not received')};
-	    });	    
-    	
-    	if((selectedSeasonMatches[currentMatch].day+pollingLimit<new Date().getTime()) &&
-    			(selectedSeasonMatches[currentMatch].day+pollingLimit+24*60*60*1000>new Date().getTime())){
-    		setTimeout(function(){
-        		$('#last-match-winner-button').removeClass('btn-default').addClass('btn-success');
-    		},3000);
-    	}	    
+	    var remarks = (selectedSeasonMatches[numMatches-1].remarks.indexOf('RD') > -1) ?' (Número de goles desconocido, por defecto 1-0 o 0-0)':'';   
 	    
 	    $('#table-results').bootstrapTable({
 	        data: lastMatch,
@@ -277,12 +297,7 @@ $(function () {
     	season=newSeason;
 
   		if(window.location.pathname.includes('/me')){
-  			
-		    $.getJSON(window.location.pathname+'/api/matches.request', function(matches){
-		    	selectedSeasonMatches = matches[season];
-			    numMatches = selectedSeasonMatches.length;
-			    currentMatch = numMatches-1;
-		    });
+		    
 		    $.getJSON(window.location.pathname+'api/userStats.request?season='+season, function(data) {
 		    	if(data){
 		    		$("#points").text(data.points+' ('+data.realPoints+')');
@@ -296,139 +311,106 @@ $(function () {
 		    		$("#avg-goals").text(parseFloat(data.goalsForAVG).toFixed(2));
 		    	}
 		    });
+  			
+	    	selectedSeasonMatches = matches[season];
+		    numMatches = selectedSeasonMatches.length;
+		    currentMatch = numMatches-1;
 
-		    $.getJSON(window.location.pathname+'api/userMatches.request', function(data) {
-			    $('#table-player-matches').bootstrapTable('load', data[season]);
-		    });
-	    	$.getJSON(window.location.pathname+'api/userPointsSeries.request', function (pointsSeries) {
-				createChart(pointsSeries, 'container-player-graph');
-		    });
+		    $('#table-player-matches').bootstrapTable('load', userMatches[season]);
+			createChart(pointsSeries, 'container-player-graph');
+	    	$('#points[data-toggle="tooltip"]').tooltip();
 		    
   		}else{
   			
-		    $.getJSON(window.location.pathname+'api/full.request', function(full) {
-		    	$('#table-full').bootstrapTable('load', full[season]);
-		    });
-		    $.getJSON(window.location.pathname+'api/permanents.request', function(permanents) {
-		    	$('#table-permanents').bootstrapTable('load', permanents[season]);
-		    });
-		    $.getJSON(window.location.pathname+'api/substitutes.request', function(substitutes) {
-			    $('#table-substitutes').bootstrapTable('load', substitutes[season]);
-		    });
-		    $.getJSON(window.location.pathname+'api/vs.request', function(vs) {
-			    $('#table-vs').bootstrapTable('load', vs[season]);
-		    });
-		    $.getJSON(window.location.pathname+'api/pair.request', function(pair) {
-				$('#table-pair').bootstrapTable('load', pair[season]);
-		    });
+	    	$('#table-full').bootstrapTable('load', fullRanking[season]);
+	    	$('#table-permanents').bootstrapTable('load', permanentsRanking[season]);
+		    $('#table-substitutes').bootstrapTable('load', substitutesRanking[season]);
+			$('#table-vs').bootstrapTable('load', vs[season]);
+			$('#table-pair').bootstrapTable('load', pair[season]);
 		    chart.destroy();
-	    	$.getJSON(window.location.pathname+'api/pointsSeries.request', function (pointsSeries) {
-				createChart(pointsSeries, 'container-graph');
-		    });
-		    $.getJSON(window.location.pathname+'api/matches.request', matchesFunction);
-		    $.getJSON(window.location.pathname+'api/players.request', playersFunction);
-		    $.getJSON(window.location.pathname+'api/scorers.request', function(scorers) {
-				$('#table-scorers').bootstrapTable('load', scorers[season]);
-		    });	
+			createChart(pointsSeries, 'container-graph');
+		    matchesFunction();
+		    playersFunction();
+			$('#table-scorers').bootstrapTable('load', scorers[season]);
 		    
   	    }
     	
     };
   
-  	$.getJSON(window.location.pathname+'api/options.request', function(data) {
-  		options = data;
-  		var select = $("#season-selector");
-  		for (var prop in options.permanents) {
-  			select.prepend($('<option '+(prop=='2017-2018'?' selected="selected"':'')+'/>').val(prop).text("Temporada "+prop));
-  		}
-  		season = $("#season-selector").val();
-  		select.on('change', function() {
-  			changeSeason(this.value);
-  		});
+	var select = $("#season-selector");
+	for (var prop in options.permanents) {
+		select.prepend($('<option '+(prop=='2017-2018'?' selected="selected"':'')+'/>').val(prop).text("Temporada "+prop));
+	}
+	season = $("#season-selector").val();
+	select.on('change', function() {
+		changeSeason(this.value);
+	});
+    
+	if(window.location.pathname.includes('/me')){
+		
+	    $.getJSON(window.location.pathname+'api/userStats.request?season='+season, function(data) {
+	    	if(data){
+	    		$("#points").text(data.points+' ('+data.realPoints+')');
+	    		$("#win").text(data.wins);
+	    		$("#draw").text(data.draws);
+	    		$("#lose").text(data.loses);
+	    		$("#goals").text(data.goalsFor);
+	    		$("#matches").text(data.matches);
+	    		$("#avg-points").text(parseFloat(data.pointsAVG).toFixed(2));
+	    		$("#avg-scores").text(parseFloat(data.scoreAVG).toFixed(2));
+	    		$("#avg-goals").text(parseFloat(data.goalsForAVG).toFixed(2));
+	    	}
+	    });
 	    
-  		if(window.location.pathname.includes('/me')){
-
-  		    $.getJSON(window.location.pathname+'/api/matches.request', function(matches){
-		    	selectedSeasonMatches = matches[season];
-			    numMatches = selectedSeasonMatches.length;
-			    currentMatch = numMatches-1;
-		    });
-		    $.getJSON(window.location.pathname+'api/userStats.request?season='+season, function(data) {
-		    	if(data){
-		    		$("#points").text(data.points+' ('+data.realPoints+')');
-		    		$("#win").text(data.wins);
-		    		$("#draw").text(data.draws);
-		    		$("#lose").text(data.loses);
-		    		$("#goals").text(data.goalsFor);
-		    		$("#matches").text(data.matches);
-		    		$("#avg-points").text(parseFloat(data.pointsAVG).toFixed(2));
-		    		$("#avg-scores").text(parseFloat(data.scoreAVG).toFixed(2));
-		    		$("#avg-goals").text(parseFloat(data.goalsForAVG).toFixed(2));
-		    	}
-		    });
-
-		    $.getJSON(window.location.pathname+'api/userMatches.request', function(data) {
-		    	if(data){
-				    $('#table-player-matches').bootstrapTable({
-				        data: data[season],
-				        locale:'es-ES'
-				    });
-		    	}
-		    });
-	    	$.getJSON(window.location.pathname+'api/userPointsSeries.request', function (pointsSeries) {
-	    		if(pointsSeries){ createChart(pointsSeries, 'container-player-graph'); }
-		    });
-  		    
-  		}else{
-
-  		    $.getJSON(window.location.pathname+'api/matches.request', matchesFunction);
-		    $.getJSON(window.location.pathname+'api/players.request', playersFunction);
-	    	
-		    $.getJSON(window.location.pathname+'api/full.request', function(full) {
-			    $('#table-full').bootstrapTable({
-			        data: full[season],
-			        locale:'es-ES',
-			        onAll: function(name, args){ updateUserName() }
-			    });
-		    });
-		    $.getJSON(window.location.pathname+'api/permanents.request', function(permanents) {
-			    $('#table-permanents').bootstrapTable({
-			        data: permanents[season],
-			        locale:'es-ES',
-			        onAll: function(name, args){ updateUserName() }
-			    });
-		    });
-		    $.getJSON(window.location.pathname+'api/substitutes.request', function(substitutes) {
-			    $('#table-substitutes').bootstrapTable({
-			        data: substitutes[season],
-			        locale:'es-ES',
-			        onAll: function(name, args){ updateUserName() }
-			    });
-		    });
-		    $.getJSON(window.location.pathname+'api/vs.request', function(vs) {
-			    $('#table-vs').bootstrapTable({
-			        data: vs[season],
-			        locale:'es-ES',
-			        onAll: function(name, args){ updateUserName() }
-			    });
-		    });
-		    $.getJSON(window.location.pathname+'api/pair.request', function(pair) {
-			    $('#table-pair').bootstrapTable({
-			        data: pair[season],
-			        locale:'es-ES',
-			        onAll: function(name, args){ updateUserName() }
-			    });
-		    });
-		    $.getJSON(window.location.pathname+'api/scorers.request', function(scorers) {
-			    $('#table-scorers').bootstrapTable({
-			        data: scorers[season],
-			        locale:'es-ES',
-			        onAll: function(name, args){ updateUserName() }
-			    });
-		    });
-  			
-  		}
-  	});
+    	selectedSeasonMatches = matches[season];
+	    numMatches = selectedSeasonMatches.length;
+	    currentMatch = numMatches-1;
+	    
+	    $('#table-player-matches').bootstrapTable({
+	        data: userMatches[season],
+	        locale:'es-ES'
+	    });
+		if(pointsSeries){ createChart(pointsSeries, 'container-player-graph'); }
+    	$('#points[data-toggle="tooltip"]').tooltip();
+	    
+	}else{
+		
+	    matchesFunction();
+	    playersFunction();
+    	
+	    $('#table-full').bootstrapTable({
+	        data: fullRanking[season],
+	        locale:'es-ES',
+	        onAll: function(name, args){ updateUserName() }
+	    });
+	    $('#table-permanents').bootstrapTable({
+	        data: permanentsRanking[season],
+	        locale:'es-ES',
+	        onAll: function(name, args){ updateUserName() }
+	    });
+	    $('#table-substitutes').bootstrapTable({
+	        data: substitutesRanking[season],
+	        locale:'es-ES',
+	        onAll: function(name, args){ updateUserName() }
+	    });
+		    
+	    $('#table-vs').bootstrapTable({
+	        data: vs[season],
+	        locale:'es-ES',
+	        onAll: function(name, args){ updateUserName() }
+	    });
+	    $('#table-pair').bootstrapTable({
+	        data: pair[season],
+	        locale:'es-ES',
+	        onAll: function(name, args){ updateUserName() }
+	    });
+	    $('#table-scorers').bootstrapTable({
+	        data: scorers[season],
+	        locale:'es-ES',
+	        onAll: function(name, args){ updateUserName() }
+	    });
+		
+	}
     
     $('#player-one,#player-two').change(function() {
     	var playerOne = $( "#player-one option:selected" ).text();

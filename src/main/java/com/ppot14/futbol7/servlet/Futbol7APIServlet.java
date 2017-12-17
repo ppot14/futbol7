@@ -26,8 +26,6 @@ public class Futbol7APIServlet extends Futbol7Servlet {
 	
 	private static final long serialVersionUID = 1L;
 	private static final Logger logger = Logger.getLogger(Futbol7APIServlet.class.getName());
-
-	private APIUtil api;
 	
     /**
      * Default constructor. 
@@ -43,9 +41,7 @@ public class Futbol7APIServlet extends Futbol7Servlet {
     public void init(final ServletConfig config) throws ServletException {
 		long startTime = System.currentTimeMillis();
 		
-//		super.init(config);
-    	
-    	api = new APIUtil(super.getConfig());
+		super.init(config);
 
 		long endTime = System.currentTimeMillis();
     	logger.info("Futbol7APIServlet init ("+(endTime - startTime)+"ms)");
@@ -64,47 +60,42 @@ public class Futbol7APIServlet extends Futbol7Servlet {
     	Object reply = null;
     	boolean refresh = requestPath.contains("api/refresh.request");
     	if(refresh){ refreshConfig(); }
-    	boolean processed = api.processData(refresh, getConfig());
+    	boolean processed = getApi().processData(refresh, getConfig());
     	
-    	try {
-			if(refresh){
-				reply = processed; 
-    		}else if(requestPath.contains("api/full.request")){
-	    		reply = api.getFullRanking(); 
-			}else if(requestPath.contains("api/pair.request")){
-	    		reply = api.getPair(); 
-			}else if(requestPath.contains("api/permanents.request")){
-	    		reply = api.getRankingPermanents(); 
-			}else if(requestPath.contains("api/substitutes.request")){
-	    		reply = api.getRankingSubstitutes(); 
-			}else if(requestPath.contains("api/vs.request")){
-	    		reply = api.getVS(); 
-			}else if(requestPath.contains("api/pointsSeries.request")){
-	    		reply = api.getPointsSeries();
-			}else if(requestPath.contains("api/userPointsSeries.request")){
-	    		reply = session.getAttribute("user")!=null?api.getPointsSeries((String)((Document)session.getAttribute("user")).get("nameweb")):null;
-			}else if(requestPath.contains("api/matches.request")){
-    	    	reply = api.getResults(); 
-			}else if(requestPath.contains("api/players.request")){
-    	    	reply = api.getPlayers(); 
-			}else if(requestPath.contains("api/options.request")){
-    	    	reply = api.getPermanents(); 
-			}else if(requestPath.contains("api/scorers.request")){
-	    		reply = api.getFullScorers(); 
-			}else if(requestPath.contains("api/playersPictures.request")){
-	    		reply = api.getPlayersPictures(); 
-			}else if(requestPath.contains("api/logout.request")){
-				session.removeAttribute("user");
-			}else if(requestPath.contains("api/userStats.request")){
-	    		reply = session.getAttribute("user")!=null?api.getUserStats(parameters.get("season")[0],(String)((Document)session.getAttribute("user")).get("nameweb")):null; 
-			}else if(requestPath.contains("api/userMatches.request")){
-	    		reply = session.getAttribute("user")!=null?api.getUserMatches((String)((Document)session.getAttribute("user")).get("nameweb")):null; 
-			}else{
-				logger.warning("Request path not found: "+requestPath);
-			}
-		} catch (ParseException e) {
-			logger.severe(e.getMessage());
-			e.printStackTrace();
+		if(refresh){
+			reply = processed; 
+//    		}else if(requestPath.contains("api/full.request")){
+//	    		reply = getApi().getFullRanking(); 
+//			}else if(requestPath.contains("api/pair.request")){
+//	    		reply = getApi().getPair(); 
+//			}else if(requestPath.contains("api/permanents.request")){
+//	    		reply = getApi().getRankingPermanents(); 
+//			}else if(requestPath.contains("api/substitutes.request")){
+//	    		reply = getApi().getRankingSubstitutes(); 
+//			}else if(requestPath.contains("api/vs.request")){
+//	    		reply = getApi().getVS(); 
+//			}else if(requestPath.contains("api/pointsSeries.request")){
+//	    		reply = getApi().getPointsSeries();
+//			}else if(requestPath.contains("api/userPointsSeries.request")){
+//	    		reply = session.getAttribute("user")!=null?getApi().getPointsSeries((String)((Document)session.getAttribute("user")).get("nameweb")):null;
+//			}else if(requestPath.contains("api/matches.request")){
+//    	    	reply = getApi().getResults(); 
+//			}else if(requestPath.contains("api/players.request")){
+//    	    	reply = getApi().getPlayers(); 
+//			}else if(requestPath.contains("api/options.request")){
+//    	    	reply = getApi().getPermanents(); 
+//			}else if(requestPath.contains("api/scorers.request")){
+//	    		reply = getApi().getFullScorers(); 
+//			}else if(requestPath.contains("api/playersPictures.request")){
+//	    		reply = getApi().getPlayersPictures(); 
+		}else if(requestPath.contains("api/logout.request")){
+			session.removeAttribute("user");
+		}else if(requestPath.contains("api/userStats.request")){
+    		reply = session.getAttribute("user")!=null?getApi().getUserStats(parameters.get("season")[0],(String)((Document)session.getAttribute("user")).get("nameweb")):null; 
+//			}else if(requestPath.contains("api/userMatches.request")){
+//	    		reply = session.getAttribute("user")!=null?getApi().getUserMatches((String)((Document)session.getAttribute("user")).get("nameweb")):null; 
+		}else{
+			logger.warning("Request path not found: "+requestPath);
 		}
 
 		response.setContentType("application/json");
@@ -129,21 +120,21 @@ public class Futbol7APIServlet extends Futbol7Servlet {
 
     	try {
 			if(requestPath.contains("api/comparison.request")){
-		    	reply = api.getComparison(jsonNode);
+		    	reply = getApi().getComparison(jsonNode);
 			}else if(requestPath.contains("api/login.request")){
-				Object o = api.login(jsonNode);
+				Object o = getApi().login(jsonNode);
 				if(o!=null){
 					session.setAttribute("user", o);
 				}
 				reply = o;
 			}else if(requestPath.contains("api/player-has-voted.request")){
-				reply = api.hasVoted(jsonNode);
+				reply = getApi().hasVoted(jsonNode);
 			}else if(requestPath.contains("api/last-match-result.request")){
-				reply = api.getLastMatchResult(jsonNode);
+				reply = getApi().getLastMatchResult(jsonNode);
 			}else if(requestPath.contains("api/match-scorers.request")){
-				reply = api.getMatchScorers(jsonNode);
+				reply = getApi().getMatchScorers(jsonNode);
 			}else if(requestPath.contains("api/save-polling.request")){
-				reply = api.savePolling(jsonNode);
+				reply = getApi().savePolling(jsonNode);
 			}else{
 				logger.warning("Request path not found: "+requestPath);
 			}

@@ -1,9 +1,34 @@
+/*!
+ *  futbol7.pro main style
+ *  MIT License
+ */
+
+/**
+*	Common
+*/
+.text-blue-team {
+    color: royalblue;
+}
+.text-white-team {
+    color: white;
+}
+.blue-team-background{
+	background-color: white;
+}
+.white-team-background{
+	background-color: darkgray;
+}
+.team-shield{
+    border-radius: 4px 4px 12px 12px;
+    width: 24px;
+    text-align: center;
+}
 textarea.form-control {
     overflow: hidden;
 }
-
-.navbar-header{
-	float: none;
+.navbar-link{
+	cursor: pointer;
+	padding-right:15px;
 }
 img#logo{
 	position: absolute;    
@@ -13,59 +38,36 @@ a#web-name.navbar-brand{
 	margin-left: 85px;
     color: white;
 }
-select#season-selector{
-	width: 200px
-}
 th.column-name{
-	min-width: 122px;
+	min-width: 137px;
 }
 th[data-field="lastMatches"]{
-	min-width: 118px;
+	min-width: 117px;
 }
 #player-picture{
-/* 	margin-top: 8px; */
-/*     margin-right: 10px; */
     height: 34px;
-}
-#player-name{
-/*     color: white;     */
-/*     line-height: 34px; */
-/*     margin: 0px; */
+    position: relative;
+    top: -7px;
+    margin-bottom: -15px;
+    margin-right: 5px;    
 }
 h3.player-name{
 	margin-top: 10px;
     text-align: center;
 }
-.navbar-form button,
-.navbar-form select,
-.navbar-form img,
-.navbar-form p{
-	margin-right: 0px !important;
-	margin-left: 10px !important;
-}
 @media (max-width: 767px) { 
-	.navbar-form {
-		margin-top: 50px;
-	    margin-right: 0px;
-	    margin-left: 0px;
-	    margin-bottom: 0px;
-    	border: none;
-	}
-	.navbar-form p, 
-	.navbar-form select{
-	    display: inline-block;
-	}
-	.navbar-form button,
-	.navbar-form select,
-	.navbar-form img,
-	.navbar-form p{    
-		margin-bottom: 5px;
-    	margin-top: 5px;
+	.panel-body {
+	    padding: 5px;
 	}
 }
-
 .punctuation-row .panel-group{
 	margin-bottom: 0px;
+}
+@media (max-width: 767px) { 
+	.punctuation-row .panel-group{
+		margin-bottom: 10px;
+	    margin-top: 15px;
+	}
 }
 .player-goals i.fa-futbol-o{
 	margin-right: 5px;
@@ -94,27 +96,12 @@ ul.white-scorers li{
     display: inline-block;
    	width: 20px;
 }
-#polling .form-horizontal .form-group {
-    margin-right: 15px;
-    margin-left: 15px;
-}
 .player-punctuation-number{
     font-size: 16px;
     font-weight: 900;
 }
 .player-score{
     font-weight: 900;
-}
-.polling-form-group .flag-white,
-.polling-form-group .flag-blue{
-	position: absolute;
-	left: 10px;
-}
-@media (min-width: 768px) { 
-	.polling-form-group .flag-white,
-	.polling-form-group .flag-blue{
-		display: none;
-	}
 }
 div.player-badge{
     background-color: lightgoldenrodyellow;
@@ -139,7 +126,35 @@ div.player-badge:hover{
 div.player-badge:hover i{
     color: IndianRed;
 }
-/*Polling*/
+
+/**
+*	Polling
+*/
+#polling .form-horizontal .form-group {
+    margin-right: 15px;
+    margin-left: 15px;
+}
+.polling-form-group .team-shield{
+	display: none;
+}
+@media (max-width: 767px) { 
+	.polling-form-group h4.player-name{
+		text-align: center;
+	}
+	.polling-form-group .team-shield{
+		position: absolute;
+		display: block;
+	    left: calc(50% - 47px);
+	    text-align: center;
+	    top: 3px;
+	    border-radius: 4px 4px 12px 12px;
+	    width: 24px;
+	}
+	.polling-form-group .player-picture{
+	    margin: 0px auto;
+	    display: block;
+	}
+}
 #polling .player-badge{
 	float: right;
     margin-top: -5px;
@@ -155,7 +170,10 @@ div.player-badge:hover i{
 		width: 20%;
 	}
 }
-/*Last Match Winner*/ 
+
+/**
+*	Last Match Winner
+*/ 
 #last-match-winner .player-picture{
 	height: 100px;
 	width: 100px;
@@ -167,8 +185,15 @@ div.player-badge:hover i{
 #last-match-winner .player-score{
 	font-size: xx-large;
 }
+#last-match-winner .punctuation-row .team-shield{
+    left: 18px;
+    position: absolute;
+    top: 50px;
+}
 
-/*PAGE - me*/
+/**
+*	PAGE - me
+*/
 #user-picture{
 	height: 100px;
 }
@@ -186,27 +211,16 @@ div.player-badge:hover i{
 	display: inline-block;
 }
 .team-bullet{
-    height: 15px;
-    width: 15px;
+    height: 17px;
+    width: 17px;
     text-align: center;
     display: inline-table;
     border-radius: 2px 2px 8px 8px;
 }
-.blue-team{
-	background-color: white;
-}
-.white-team{
-	background-color: darkgray;
-}
-.team-bullet i{
-    display: table-cell;
-    font-size: 16px;
-}
-.blue-team i{
-	color: blue;
-}
-.white-team i{
-	color: white;
+.team-bullet i{    
+	display: table-cell;
+    font-size: 15px;
+    line-height: 17px;
 }
 @media (max-width: 767px) { 
 	#user-picture{
@@ -214,6 +228,8 @@ div.player-badge:hover i{
     	display: block;
 	}	
 	#user-name{
-		text-align: center;
+		text-align: center;    
+		line-height: 48px;
+    	margin-bottom: 15px;
 	}
 }

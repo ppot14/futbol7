@@ -9,11 +9,11 @@
 	      <div class="modal-body">
 	      	<div class="row">
 	      		<div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-	      			<h3>Azules <span class="pull-right blue-score"></span></h3>
+	      			<h3><i class="fa fa-shield fa text-blue-team blue-team-background team-shield" aria-hidden="true"></i> Azules <span class="pull-right blue-score"></span></h3>
 					<ul class="blue-scorers"></ul>     		
 	      		</div>
 	      		<div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-	      			<h3 style="text-align: right;"><span class="pull-left white-score"></span> Blancos</h3>
+	      			<h3 style="text-align: right;"><span class="pull-left white-score"></span> Blancos <i class="fa fa-shield fa text-white-team white-team-background team-shield" aria-hidden="true"></i></h3>
 					<ul class="white-scorers"></ul>
 	      		</div>
 	      	</div>

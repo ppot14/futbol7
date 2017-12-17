@@ -8,7 +8,9 @@
   <body>
   
   <script>
-
+	var matches = <%=request.getAttribute("matches")%>;
+	var userMatches = <%=request.getAttribute("userMatches")%>;
+	var pointsSeries = <%=request.getAttribute("userPointsSeries")%>;
   </script>
 
 	<%@ include file="nav.jsp" %>
@@ -31,7 +33,7 @@
 			</div>
 			<div class="col-xs-6 col-sm-6 col-md-2 col-lg-2">
 				<ul class="list-unstyled">
-					<li>Puntos <span id="points" class="pull-right"></span></li>
+					<li>Puntos <span id="points" class="pull-right"  data-toggle="tooltip" data-placement="bottom" title="Puntuación: Ganado = 3pts, Empatado = 2pts, Perdido = 1pts, No jugado = 0pts (Puntuación real entre paréntesis 3-1-0-0)"></span></li>
 					<li>P. Ganados <span id="win" class="pull-right"></span></li>
 					<li>P. Empatados <span id="draw" class="pull-right"></span></li>
 					<li>P. Perdidos <span id="lose" class="pull-right"></span></li>
@@ -61,8 +63,8 @@
 									<th data-field="date" data-sortable="true" data-sorter="dateSort" data-align="left">Fecha</th>
 									<th data-field="team" data-formatter="teamFormatter" data-sortable="false" data-align="center">Equipo</th>
 									<th data-field="result" data-formatter="scoreFormatter" data-cell-style="scoreStyle" data-align="center">Resultado</th>
-									<th data-field="goals" data-sortable="true" data-align="right">Goles</th>
-									<th data-field="score" data-sortable="true" data-align="right">Puntuación</th>
+									<th data-field="goals" data-formatter="goalsFormatter" data-sortable="true" data-align="right">Goles</th>
+									<th data-field="score" data-formatter="userScoreFormatter" data-sortable="true" data-align="right">Puntuación</th>
 <!-- 									<th data-field="titles" data-align="center">Títulos</th> -->
 								</tr>
 							</thead>
