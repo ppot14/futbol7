@@ -70,7 +70,7 @@
 	<script src="resources/scripts/main.js"></script>
 	<script src="resources/scripts/login.js"></script>
 	<%}else{%>
-	<script src="resources/scripts/merged.js"></script>
+	<script src="resources/scripts/merged.min.js"></script>
 	<%}%>
 	
 <!-- 	<link rel="shortcut icon" href="resources/images/logo.ico" /> -->

@@ -322,11 +322,13 @@ public class APIUtil {
 			
 			data.put(seasonMatches.getKey(), new ArrayList<Map<String,String>>());
 	        for(Entry<Set<String>, Integer> row : vs.entrySet()){
-	        	Map<String, String> e = new HashMap<String, String>();
-	        	e.put("player1", (String)row.getKey().toArray()[0]);
-	        	e.put("player2", (String)row.getKey().toArray()[1]);
-	        	e.put("vs", row.getValue().toString());
-				data.get(seasonMatches.getKey()).add(e);
+	        	if(row.getValue()>1){
+		        	Map<String, String> e = new HashMap<String, String>();
+		        	e.put("player1", (String)row.getKey().toArray()[0]);
+		        	e.put("player2", (String)row.getKey().toArray()[1]);
+		        	e.put("vs", row.getValue().toString());
+					data.get(seasonMatches.getKey()).add(e);
+	        	}
 	        }
 		}
 		
@@ -358,11 +360,13 @@ public class APIUtil {
 
 			data.put(seasonMatches.getKey(), new ArrayList<Map<String,String>>());
 	        for(Entry<Set<String>, Integer> row : vs.entrySet()){
-	        	Map<String, String> e = new HashMap<String, String>();
-	        	e.put("player1", (String)row.getKey().toArray()[0]);
-	        	e.put("player2", (String)row.getKey().toArray()[1]);
-	        	e.put("pair", row.getValue().toString());
-				data.get(seasonMatches.getKey()).add(e);
+	        	if(row.getValue()>1){
+		        	Map<String, String> e = new HashMap<String, String>();
+		        	e.put("player1", (String)row.getKey().toArray()[0]);
+		        	e.put("player2", (String)row.getKey().toArray()[1]);
+		        	e.put("pair", row.getValue().toString());
+					data.get(seasonMatches.getKey()).add(e);
+	        	}
 	        }
 		}
 		return data;

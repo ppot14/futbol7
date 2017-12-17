@@ -104,7 +104,7 @@
 	              
 	              <cssSourceDir>../webapp/resources/styles</cssSourceDir>
 	              <cssTargetDir>/resources/styles</cssTargetDir>
-<!-- 	              <cssTargetDir>../../src/main/webapp/resources/styles</cssTargetDir> -->
+	              <cssTargetDir>../../src/main/webapp/resources/styles</cssTargetDir>
 	              <cssSourceIncludes>
 					<cssSourceInclude>lib/bootstrap.min.css</cssSourceInclude>
 					<cssSourceInclude>lib/bootstrap-table.min.css</cssSourceInclude>
@@ -120,26 +120,29 @@
 	              
 	              <jsSourceDir>../webapp/resources/scripts</jsSourceDir>
 	              <jsTargetDir>/resources/scripts</jsTargetDir>
-<!-- 	              <jsTargetDir>../../src/main/webapp/resources/scripts</jsTargetDir> -->
-	              <jsSourceIncludes>
-              		<jsSourceInclude>lib/platform.js</jsSourceInclude>
-					<jsSourceInclude>lib/jquery-1.11.3.min.js</jsSourceInclude>
-					<jsSourceInclude>lib/bootstrap.min.js</jsSourceInclude>
-					<jsSourceInclude>lib/bootstrap-table.min.js</jsSourceInclude>
-					<jsSourceInclude>lib/bootstrap-table-es-ES.min.js</jsSourceInclude>
-					<jsSourceInclude>lib/bootstrap-slider.min.js</jsSourceInclude>
-					<jsSourceInclude>lib/jquery.timeago.min.js</jsSourceInclude>
-					<jsSourceInclude>lib/highcharts.js</jsSourceInclude>
-					<jsSourceInclude>main.js</jsSourceInclude>
-					<jsSourceInclude>login.js</jsSourceInclude>
-	              </jsSourceIncludes>   
-	              <jsSourceExcludes>
-	                <jsSourceExclude>merged.js</jsSourceExclude>
-	                <jsSourceExclude>merged.min.js</jsSourceExclude>
-	              </jsSourceExcludes>         
+	              <jsTargetDir>../../src/main/webapp/resources/scripts</jsTargetDir>
+	              <jsSourceFiles>
+              		<jsSourceFile>lib/platform.js</jsSourceFile>
+					<jsSourceFile>lib/jquery-1.11.3.min.js</jsSourceFile>
+					<jsSourceFile>lib/bootstrap.min.js</jsSourceFile>
+					<jsSourceFile>lib/bootstrap-table.min.js</jsSourceFile>
+					<jsSourceFile>lib/bootstrap-table-es-ES.min.js</jsSourceFile>
+					<jsSourceFile>lib/bootstrap-slider.min.js</jsSourceFile>
+					<jsSourceFile>lib/jquery.timeago.min.js</jsSourceFile>
+					<jsSourceFile>lib/highcharts.js</jsSourceFile>
+					<jsSourceFile>main.js</jsSourceFile>
+					<jsSourceFile>login.js</jsSourceFile>
+	              </jsSourceFiles>   
+<!-- 	              <jsSourceExcludes> -->
+<!-- 	                <jsSourceExclude>merged.js</jsSourceExclude> -->
+<!-- 	                <jsSourceExclude>merged.min.js</jsSourceExclude> -->
+<!-- 	              </jsSourceExcludes>          -->
 	              <jsFinalFile>merged.js</jsFinalFile>
 	              
 	              <jsEngine>CLOSURE</jsEngine>
+<!-- 	              <verbose>true</verbose> -->
+<!-- 	              <closureSortDependencies>false</closureSortDependencies> -->
+				<closureCompilationLevel>ADVANCED_OPTIMIZATIONS</closureCompilationLevel>
 	            </configuration>
 	            <goals>
 	              <goal>minify</goal>
