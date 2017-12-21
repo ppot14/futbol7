@@ -24,14 +24,14 @@
     <title>Futbol 7 San Jerónimo</title>
   
 	<%if(!minimized){%>
-	<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" />
-	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.9.1/bootstrap-table.min.css" />
-	<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
-	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.9.0/css/bootstrap-slider.min.css" />
+	<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" media="all"/>
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.9.1/bootstrap-table.min.css" media="all"/>
+	<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" media="all"/>
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.9.0/css/bootstrap-slider.min.css" media="all"/>
 	
-	<link rel="stylesheet" type="text/css" href="resources/styles/main.css" />
+	<link rel="stylesheet" type="text/css" href="resources/styles/main.css" media="all"/>
 	<%}else{%>
-	<link rel="stylesheet" type="text/css" href="resources/styles/merged.min.css" />
+	<link rel="stylesheet" type="text/css" href="resources/styles/merged.min.css" media="all"/>
 	<%}%>
 	
 	<%if(production){%>
@@ -57,20 +57,20 @@
 	</script>
 	
 	<%if(!minimized){%>
-	<script src="https://apis.google.com/js/platform.js"></script>
+	<script src="https://apis.google.com/js/platform.js" defer></script>
 	<script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
-	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.9.1/bootstrap-table.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.9.1/locale/bootstrap-table-es-ES.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.9.0/bootstrap-slider.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-timeago/1.6.1/jquery.timeago.min.js"></script>
-	<script src="https://code.highcharts.com/highcharts.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" defer></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.9.1/bootstrap-table.min.js" defer></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.9.1/locale/bootstrap-table-es-ES.min.js" defer></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.9.0/bootstrap-slider.min.js" defer></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-timeago/1.6.1/jquery.timeago.min.js" defer></script>
+	<script src="https://code.highcharts.com/highcharts.js" defer></script>
 <!-- 	<script src="https://code.highcharts.com/highcharts-more.js"></script> -->
 
-	<script src="resources/scripts/main.js"></script>
-	<script src="resources/scripts/login.js"></script>
+	<script src="resources/scripts/main.js" defer></script>
+	<script src="resources/scripts/login.js" defer></script>
 	<%}else{%>
-	<script src="resources/scripts/merged.min.js"></script>
+	<script src="resources/scripts/merged.min.js" defer></script>
 	<%}%>
 	
 <!-- 	<link rel="shortcut icon" href="resources/images/logo.ico" /> -->

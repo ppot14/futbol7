@@ -9,6 +9,7 @@ var options;
 var season;
 var selectedSeasonMatches, numMatches, currentMatch;
 var chart;
+var nameweb;
 var titles = [{
 		id: 'trompito', icon: 'undo', name:'El Trompito', title:'Título al más chupón', desc:'El Trompito. Título al más chupón del partido, ese que es capaz de recorrer los cuatro corners con el balon en los pies antes de tirar a puerta. Homenaje del Sr Bordas al Sr Rivera'
 	},{
@@ -103,6 +104,14 @@ function rowStyle(row, index){
 function dateSort(sortName, sortOrder){
 	var r = parseDateToLong(sortName)-parseDateToLong(sortOrder);
 	return r>0?1:r<0?-1:0;
+}
+
+
+function updateUserName(){
+	if(nameweb){
+		$( "td:contains('"+nameweb+"')" ).css( "font-weight", "bold" );
+		$( "tr:contains('"+nameweb+"')" ).addClass( "info" );
+	}
 }
 
 /*

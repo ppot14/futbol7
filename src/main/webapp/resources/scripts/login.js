@@ -1,7 +1,6 @@
 /**
  * login.js
  */
-var nameweb;
 var usertype;
 var pollingLimit = 4*24*60*60*1000 + 12*60*60*1000;//4 days and half. Friday at midday
 var pollingReady = 23*60*60*1000;//Polling ready at 23:00
@@ -39,13 +38,6 @@ function loggedOut(){
 	hideAdmin();
 	nameweb = null;
 	usertype = null;
-}
-
-function updateUserName(){
-	if(nameweb){
-		$( "td:contains('"+nameweb+"')" ).css( "font-weight", "bold" );
-		$( "tr:contains('"+nameweb+"')" ).addClass( "info" );
-	}
 }
 
 function loggedIn(response,loginType) {
