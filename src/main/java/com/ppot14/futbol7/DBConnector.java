@@ -46,7 +46,7 @@ public class DBConnector {
 			Bson filter = exists("permanents");
 			FindIterable<Document> result = configCollection.find(filter);
 			if(result!=null && result.first()!=null){
-				logger.info(result.first().toString());
+				logger.info(""+(result.first()!=null));
 				return (Document) result.first();
 			}
 		} catch (Exception e) {
@@ -66,13 +66,13 @@ public class DBConnector {
 			if(result!=null && result.first()!=null){
 				Bson update = set("picture", jsonNode.get("picture").asText());
 				configCollection.updateOne(filter,update);
-				logger.info("player exists: "+result.first());
+				logger.info("player exists: "+result.first().getString("name")+" ("+result.first().getString("nameweb")+")");
 				return (Document) result.first();
 			}else{
 				((ObjectNode)jsonNode).put("created", new Date().getTime());
 				ObjectMapper mapper = new ObjectMapper();
 				configCollection.insertOne(new Document((Map<String, Object>) mapper.convertValue(jsonNode, Map.class)));
-				logger.info("new player: "+jsonNode);
+				logger.info("new player: "+jsonNode.get("name").asText());
 				return new Document("newuser",true);
 			}
 		} catch (Exception e) {

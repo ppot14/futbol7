@@ -47,6 +47,7 @@ public class Futbol7HTMLServlet extends Futbol7Servlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		long startTime = System.currentTimeMillis();
 		HttpSession session = request.getSession();
+		String user = session.getAttribute("user")!=null?(String)((Document)session.getAttribute("user")).get("nameweb"):null;
 		ObjectMapper mapper = new ObjectMapper();
 		getApi().processData(false, getConfig());
 		
@@ -68,15 +69,13 @@ public class Futbol7HTMLServlet extends Futbol7Servlet {
 			request.setAttribute("userPointsSeries", mapper.writeValueAsString(getApi().getPointsSeries()) );
 		}else if("/me".equals(requestPath)){
 			request.setAttribute("matches", mapper.writeValueAsString(getApi().getResults()) );
-			request.setAttribute("userMatches", mapper.writeValueAsString(session.getAttribute("user")!=null?
-												getApi().getUserMatches((String)((Document)session.getAttribute("user")).get("nameweb")):null ));
-			request.setAttribute("userPointsSeries", mapper.writeValueAsString(session.getAttribute("user")!=null?
-												getApi().getPointsSeries((String)((Document)session.getAttribute("user")).get("nameweb")):null ));
+			request.setAttribute("userMatches", mapper.writeValueAsString(user!=null? getApi().getUserMatches(user): null ));
+			request.setAttribute("userPointsSeries", mapper.writeValueAsString(user!=null? getApi().getPointsSeries(user): null ));
 		}
 		requestPath = requestPath.length() > 1 ? requestPath + ".jsp" : "/index.jsp";
 		
 		long endTime = System.currentTimeMillis();
-    	LOG.info("RequestURI ("+(endTime - startTime)+"ms): "+requestPath);
+    	LOG.info("RequestURI ("+(endTime - startTime)+"ms): "+requestPath+" ("+(user!=null?user:"")+")");
     	request.getRequestDispatcher(requestPath).forward(request, response);
 	}
 

@@ -51,8 +51,9 @@ public class Futbol7APIServlet extends Futbol7Servlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		HttpSession session = request.getSession();
 		long startTime = System.currentTimeMillis();
+		HttpSession session = request.getSession();
+		String user = session.getAttribute("user")!=null?(String)((Document)session.getAttribute("user")).get("nameweb"):null;
 		final String requestPath = request.getRequestURI();
 		Map<String, String[]> parameters = request.getParameterMap();
     	ObjectMapper mapper = new ObjectMapper();
@@ -64,36 +65,10 @@ public class Futbol7APIServlet extends Futbol7Servlet {
     	
 		if(refresh){
 			reply = processed; 
-//    		}else if(requestPath.contains("api/full.request")){
-//	    		reply = getApi().getFullRanking(); 
-//			}else if(requestPath.contains("api/pair.request")){
-//	    		reply = getApi().getPair(); 
-//			}else if(requestPath.contains("api/permanents.request")){
-//	    		reply = getApi().getRankingPermanents(); 
-//			}else if(requestPath.contains("api/substitutes.request")){
-//	    		reply = getApi().getRankingSubstitutes(); 
-//			}else if(requestPath.contains("api/vs.request")){
-//	    		reply = getApi().getVS(); 
-//			}else if(requestPath.contains("api/pointsSeries.request")){
-//	    		reply = getApi().getPointsSeries();
-//			}else if(requestPath.contains("api/userPointsSeries.request")){
-//	    		reply = session.getAttribute("user")!=null?getApi().getPointsSeries((String)((Document)session.getAttribute("user")).get("nameweb")):null;
-//			}else if(requestPath.contains("api/matches.request")){
-//    	    	reply = getApi().getResults(); 
-//			}else if(requestPath.contains("api/players.request")){
-//    	    	reply = getApi().getPlayers(); 
-//			}else if(requestPath.contains("api/options.request")){
-//    	    	reply = getApi().getPermanents(); 
-//			}else if(requestPath.contains("api/scorers.request")){
-//	    		reply = getApi().getFullScorers(); 
-//			}else if(requestPath.contains("api/playersPictures.request")){
-//	    		reply = getApi().getPlayersPictures(); 
 		}else if(requestPath.contains("api/logout.request")){
 			session.removeAttribute("user");
 		}else if(requestPath.contains("api/userStats.request")){
-    		reply = session.getAttribute("user")!=null?getApi().getUserStats(parameters.get("season")[0],(String)((Document)session.getAttribute("user")).get("nameweb")):null; 
-//			}else if(requestPath.contains("api/userMatches.request")){
-//	    		reply = session.getAttribute("user")!=null?getApi().getUserMatches((String)((Document)session.getAttribute("user")).get("nameweb")):null; 
+    		reply = user!=null?getApi().getUserStats(parameters.get("season")[0],user):null; 
 		}else{
 			logger.warning("Request path not found: "+requestPath);
 		}
@@ -109,8 +84,8 @@ public class Futbol7APIServlet extends Futbol7Servlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		HttpSession session = request.getSession();
 		long startTime = System.currentTimeMillis();
+		HttpSession session = request.getSession();
 		final String requestPath = request.getRequestURI();
     	ObjectMapper mapper = new ObjectMapper();
 		final String requestBody = getBody(request);
@@ -125,6 +100,7 @@ public class Futbol7APIServlet extends Futbol7Servlet {
 				Object o = getApi().login(jsonNode);
 				if(o!=null){
 					session.setAttribute("user", o);
+					logger.info("User set in session: "+session.getId());
 				}
 				reply = o;
 			}else if(requestPath.contains("api/player-has-voted.request")){

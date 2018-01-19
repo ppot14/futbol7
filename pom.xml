@@ -60,7 +60,7 @@
 	    <dependency>
 	      <groupId>com.google.apis</groupId>
 	      <artifactId>google-api-services-drive</artifactId>
-	      <version>v3-rev7-1.21.0</version>
+	      <version>v3-rev97-1.23.0</version>
 	    </dependency>
 		
 		<dependency>
