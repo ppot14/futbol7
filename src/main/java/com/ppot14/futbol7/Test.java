@@ -9,14 +9,34 @@ import java.util.logging.Logger;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 
-public class Main {
+public class Test {
 	
-	private static final Logger logger = Logger.getLogger(Main.class.getName());
+	private static final Logger logger = Logger.getLogger(Test.class.getName());
 	
 	protected static APIUtil a;
 
 	public static void main(String[] args) throws Exception {
 		
+//		testAPI();
+		Map<String,Object> config = DBConnector.getConfig();
+		
+//		testDownloadSpreadsheet(config);
+		
+		testUploadFile(config);
+		
+		System.exit(0);
+		
+	}
+	
+	static void testUploadFile(Map<String,Object> config) throws Exception{
+		GoogleImporter.uploadToGoogleDrive(config, "C:\\Users\\Pepe\\Google Drive\\Web\\Futbol7\\backup\\dump-2018-01-12.tar.gz", (String)config.get("backup-folder-google-drive-id"));
+	}
+	
+	static void testDownloadSpreadsheet(Map<String,Object> config) throws Exception{
+		GoogleImporter.importFromGoogleDrive(config, null);
+	}
+	
+	static void testAPI() throws InterruptedException{
 		long startTime = System.currentTimeMillis();
 		
 		a = new APIUtil(null);
@@ -46,9 +66,9 @@ public class Main {
 		JsonNode jsonNode = mapper.valueToTree(map);
 		
 //		Main m = new Main();
-		Worker worker1 = new Main().new Worker(jsonNode);
-		Worker worker2 = new Main().new Worker(jsonNode);
-		Worker worker3 = new Main().new Worker(jsonNode);
+		Worker worker1 = new Test().new Worker(jsonNode);
+		Worker worker2 = new Test().new Worker(jsonNode);
+		Worker worker3 = new Test().new Worker(jsonNode);
         worker1.start();
         worker2.start();
         worker3.start();
@@ -60,9 +80,6 @@ public class Main {
 		long duration = (endTime - startTime);  
 		
 		logger.info("Futbol7 executed in "+duration/1000+"s");
-		
-		System.exit(0);
-		
 	}
 	
 	class Worker extends Thread  {
