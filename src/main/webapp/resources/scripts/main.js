@@ -25,6 +25,9 @@ var titles = [{
 /*
  * Static Utility Functions
  */
+function ID() {
+	  return Math.random().toString(36).substr(2, 8);
+}
 function parseDate(s){
 	var parts = s.split("/");
 	return new Date(parseInt(parts[2], 10),

@@ -6,6 +6,7 @@ var pollingLimit = 4*24*60*60*1000 + 12*60*60*1000;//4 days and half. Friday at 
 var pollingReady = 23*60*60*1000;//Polling ready at 23:00
 var matchScores;
 var t2;
+var hasVoted = false;
 
 function facebookStatusChangeCallback(response) {
 	if(response.status && response.status == 'connected'){
@@ -38,6 +39,7 @@ function loggedOut(){
 	hideAdmin();
 	nameweb = null;
 	usertype = null;
+	hasVoted = false;
 }
 
 function loggedIn(response,loginType) {
@@ -102,8 +104,10 @@ function loggedIn(response,loginType) {
 //						    				console.log("loggedIn " + (t1 - t0) + "ms");
 						    				if(!data){
 						    					$('#notification-score-button').slideDown();
+						    					hasVoted = false;
 						    				}else{
-							  					$('#notification-bar').removeClass("alert-success").addClass("alert-info").text('Resultados del partido del lunes disponibles '+$.timeago(selectedSeasonMatches[numMatches-1].day+pollingLimit));
+						    					hasVoted = true;
+							  					$('#notification-bar').removeClass("alert-success").addClass("alert-info").text('Resultados definitivos y cierre de votación del partido del lunes '+$.timeago(selectedSeasonMatches[numMatches-1].day+pollingLimit));
 							  					$('#notification-bar').slideDown().delay(10000).slideUp();
 						    				}
 						    			}
@@ -224,7 +228,7 @@ function addPlayerToResult(x, data){
 	var pValue = data[x].value;
 	var max = data[0].value.avg;
 	var min = data[l-1].value.avg;
-	var id = Date.now();
+	var id = ID();
 	var row = $('<div class="row punctuation-row"><div class="row-wrap col-xs-12 col-sm-12 col-md-12 col-lg-12">'+
 					'<div class="panel panel-default '+(pValue.avg==max?'panel-success':pValue.avg==min?'panel-danger':nameweb==data[x].key?'panel-info':'')+'">'+
 						'<div class="panel-body '+(pValue.avg==max?'bg-success':pValue.avg==min?'bg-danger':nameweb==data[x].key?'bg-info':'')+'">'+
@@ -400,13 +404,15 @@ function createPollingForm(){
 	  			JSON.stringify(request), 
 	  			function( data2 ) {
 	  				if(!data2 || !data2.error){
-	  					if(ga){ ga('send', 'event', { eventCategory: 'form', eventAction: 'submit', eventLabel: 'vote'}); }
+	  					if(typeof ga === "function"){ ga('send', 'event', { eventCategory: 'form', eventAction: 'submit', eventLabel: 'vote'}); }
 	  					$('#polling-form button[type="submit"]').prop("disabled","disabled");
 	  					$('#notification-score-button').slideUp();
 	  					$('#polling').modal('hide');
-	  					$('#notification-bar').removeClass("alert-info").addClass("alert-success").text('Votación realizada. Resultados disponibles el '+
+	  					$('#notification-bar').removeClass("alert-info").addClass("alert-success").text('Votación realizada. Resultados definitivos disponibles el '+
 	  							new Date(selectedSeasonMatches[numMatches-1].day+pollingLimit).toLocaleString('es-ES',{ day:'numeric',weekday: 'long', hour:'numeric',minute:'numeric' }));
 	  					$('#notification-bar').slideDown().delay(10000).slideUp();
+	  					hasVoted = true;
+	  					setTimeout(function(){ $('#last-match-winner-button').click(); }, 3000);
 	  				}else{
 	  					if(data2.error){
 	  						console.error(data2.error);
@@ -513,7 +519,7 @@ $(function () {
 				  lastMatchResult = matchDay;
 			  }
 		}else if("last-match-winner-button"==id){
-			  if( selectedSeasonMatches[numMatches-1].day+pollingLimit<new Date().getTime() || usertype == 'admin'){
+			  if( selectedSeasonMatches[numMatches-1].day+pollingLimit<new Date().getTime() || usertype == 'admin' || hasVoted){
 				  lastMatchResult = numMatches-1;
 			  }else{
 				  lastMatchResult = numMatches-2;
