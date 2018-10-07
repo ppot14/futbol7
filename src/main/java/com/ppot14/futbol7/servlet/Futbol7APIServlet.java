@@ -52,7 +52,7 @@ public class Futbol7APIServlet extends Futbol7Servlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		long startTime = System.currentTimeMillis();
-		HttpSession session = request.getSession();
+		HttpSession session = request.getSession(true);
 		String user = session.getAttribute("user")!=null?(String)((Document)session.getAttribute("user")).get("nameweb"):null;
 		final String requestPath = request.getRequestURI();
 		Map<String, String[]> parameters = request.getParameterMap();
@@ -85,7 +85,7 @@ public class Futbol7APIServlet extends Futbol7Servlet {
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		long startTime = System.currentTimeMillis();
-		HttpSession session = request.getSession();
+		HttpSession session = request.getSession(true);
 		final String requestPath = request.getRequestURI();
     	ObjectMapper mapper = new ObjectMapper();
 		final String requestBody = getBody(request);

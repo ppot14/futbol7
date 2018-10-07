@@ -125,28 +125,26 @@ function showAdmin(){
 	if(window.location.pathname.includes('/me')){
 		
 	}else{
-	
-		if(season){
-			var seasonLastYear = season.substring(5);
-			if(nameweb && (usertype == 'admin' || new Date()>new Date(seasonLastYear,6))){//All data public after 1st July at the end of the season
-				$('#refresh').slideDown();
-		    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'realPoints');
-		    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'wins');
-		    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'draws');
-		    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'loses');
-		    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'matches');
-		    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'goalsFor');
-		    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'pointsAVG');
-		    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'goalsForAVG');
-		    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'scoreAVG');
 		
-		    	$('#row1').show();
-		    	$('#row3').show();
-		    	$('#row4').show();
-		    	
-	    		createChart(pointsSeries, 'container-graph');
-			}
+		if(nameweb && usertype == 'admin' ){
+			$('#refresh').slideDown();
 		}	
+		
+    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'realPoints');
+    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'wins');
+    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'draws');
+    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'loses');
+    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'matches');
+    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'goalsFor');
+    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'pointsAVG');
+    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'goalsForAVG');
+    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'scoreAVG');
+
+    	$('#row1').show();
+    	$('#row3').show();
+    	$('#row4').show();
+    	
+		createChart(pointsSeries, 'container-graph');
 		
 	}
 }
@@ -351,7 +349,7 @@ $(function () {
   
 	var select = $("#season-selector");
 	for (var prop in options.permanents) {
-		select.prepend($('<option '+(prop=='2017-2018'?' selected="selected"':'')+'/>').val(prop).text("Temporada "+prop));
+		select.prepend($('<option '+(prop=='2018-2019'?' selected="selected"':'')+'/>').val(prop).text("Temporada "+prop));
 	}
 	season = $("#season-selector").val();
 	select.on('change', function() {

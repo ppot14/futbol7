@@ -85,34 +85,7 @@ function loggedIn(response,loginType) {
 		    				showAdmin();
 		    				updateUserName();
 		    				
-		    				
-		    				//verify if match played and no score and current date<last match date + 5
-//		    				console.log("Played? "+JSON.stringify(selectedSeasonMatches[numMatches-1].data).includes(nameweb));
-//		    				console.log("Valid period to vote? "+(selectedSeasonMatches[numMatches-1].day+pollingLimit>new Date().getTime()));
-//		    				console.log("Now is after Match? "+(selectedSeasonMatches[numMatches-1].day+pollingReady<new Date().getTime()));
-		    				
-		    				if(JSON.stringify(selectedSeasonMatches[numMatches-1].data).includes(nameweb) && //Has played
-		    						(selectedSeasonMatches[numMatches-1].day+pollingLimit>new Date().getTime()) && //Expired 5 days to vote
-		    						(selectedSeasonMatches[numMatches-1].day+pollingReady<new Date().getTime())){//No vote before the match, vote after 23h of the match day
-		    					//Has scored?
-						      	$.post(
-						    			window.location.pathname+'api/player-has-voted.request', 
-						    			JSON.stringify({name:nameweb,date:selectedSeasonMatches[numMatches-1].day,season:season}), 
-						    			function( data ) {
-		//									console.log("Played has voted? "+JSON.stringify(data));
-						    				var t1 = performance.now();
-//						    				console.log("loggedIn " + (t1 - t0) + "ms");
-						    				if(!data){
-						    					$('#notification-score-button').slideDown();
-						    					hasVoted = false;
-						    				}else{
-						    					hasVoted = true;
-							  					$('#notification-bar').removeClass("alert-success").addClass("alert-info").text('Resultados definitivos y cierre de votación del partido del lunes '+$.timeago(selectedSeasonMatches[numMatches-1].day+pollingLimit));
-							  					$('#notification-bar').slideDown().delay(10000).slideUp();
-						    				}
-						    			}
-						    	);
-		    				}
+		    				checkAndEnableVoteButton();
 
 		    				var t1 = performance.now();
 //		    				console.log("Finished waiting for selectedSeasonMatches, loggedIn " + (t1 - t0) + "ms");
@@ -132,6 +105,37 @@ function loggedIn(response,loginType) {
 			}
 	    );
     }
+}
+
+
+function checkAndEnableVoteButton(){
+	//verify if match played and no score and current date<last match date + 5
+	//console.log("Played? "+JSON.stringify(selectedSeasonMatches[numMatches-1].data).includes(nameweb));
+	//console.log("Valid period to vote? "+(selectedSeasonMatches[numMatches-1].day+pollingLimit>new Date().getTime()));
+	//console.log("Now is after Match? "+(selectedSeasonMatches[numMatches-1].day+pollingReady<new Date().getTime()));
+	
+	if(JSON.stringify(selectedSeasonMatches[numMatches-1].data).includes(nameweb) && //Has played
+			(selectedSeasonMatches[numMatches-1].day+pollingLimit>new Date().getTime()) && //Expired 5 days to vote
+			(selectedSeasonMatches[numMatches-1].day+pollingReady<new Date().getTime())){//No vote before the match, vote after 23h of the match day
+		//Has scored?
+	  	$.post(
+				window.location.pathname+'api/player-has-voted.request', 
+				JSON.stringify({name:nameweb,date:selectedSeasonMatches[numMatches-1].day,season:season}), 
+				function( data ) {
+	//									console.log("Played has voted? "+JSON.stringify(data));
+					var t1 = performance.now();
+	//				console.log("loggedIn " + (t1 - t0) + "ms");
+					if(!data){
+						$('#notification-score-button').slideDown();
+						hasVoted = false;
+					}else{
+						hasVoted = true;
+	  					$('#notification-bar').removeClass("alert-success").addClass("alert-info").text('Resultados definitivos y cierre de votación del partido del lunes '+$.timeago(selectedSeasonMatches[numMatches-1].day+pollingLimit));
+	  					$('#notification-bar').slideDown().delay(10000).slideUp();
+					}
+				}
+		);
+	}
 }
 
 function updateListTeamScorers(match){
@@ -534,5 +538,12 @@ $(function () {
 		  
 		  lastMatchResultRequest(lastMatchResult);
 			  
+	});
+	
+	var select = $("#season-selector");
+	select.on('change', function() {
+		if(selectedSeasonMatches && nameweb){
+			checkAndEnableVoteButton();
+		}
 	});
 });

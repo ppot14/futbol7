@@ -46,7 +46,7 @@ public class Futbol7HTMLServlet extends Futbol7Servlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		long startTime = System.currentTimeMillis();
-		HttpSession session = request.getSession();
+		HttpSession session = request.getSession(true);
 		String user = session.getAttribute("user")!=null?(String)((Document)session.getAttribute("user")).get("nameweb"):null;
 		ObjectMapper mapper = new ObjectMapper();
 		getApi().processData(false, getConfig());
@@ -84,6 +84,7 @@ public class Futbol7HTMLServlet extends Futbol7Servlet {
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		long startTime = System.currentTimeMillis();
+		HttpSession session = request.getSession(true);
 		final String requestPath = request.getServletPath().replace(".html", ".jsp");
 		long endTime = System.currentTimeMillis();
     	LOG.info("RequestURI ("+(endTime - startTime)+"ms): "+requestPath);
