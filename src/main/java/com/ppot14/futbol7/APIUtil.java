@@ -247,7 +247,7 @@ public class APIUtil {
 				        			game.add(d);
 									int gFor = ("a".equals(colour)?gA:gB);
 									int gAgainst = ("a".equals(colour)?gB:gA);
-									int pointsM = ((gFor>gAgainst)?3:((gFor<gAgainst)?1:2));
+									int pointsM = ((gFor>gAgainst)?3:((gFor<gAgainst)?0:1));
 				        			points += pointsM;
 				        			game.add(points);
 				        			playerData.add(game);

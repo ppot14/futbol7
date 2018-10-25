@@ -33,7 +33,7 @@
 			</div>
 			<div class="col-xs-6 col-sm-6 col-md-2 col-lg-2">
 				<ul class="list-unstyled">
-					<li>Puntos <span id="points" class="pull-right"  data-toggle="tooltip" data-placement="bottom" title="Puntuación: Ganado = 3pts, Empatado = 2pts, Perdido = 1pts, No jugado = 0pts (Puntuación real entre paréntesis 3-1-0-0)"></span></li>
+					<li>Puntos <span id="points" class="pull-right"  data-toggle="tooltip" data-placement="bottom" title="Puntuación: Ganado = 3pts, Empatado = 1pts, Perdido = 0pts, No jugado = 0pts (Puntuación antigua entre paréntesis 3-2-1-0)"></span></li>
 					<li>P. Ganados <span id="win" class="pull-right"></span></li>
 					<li>P. Empatados <span id="draw" class="pull-right"></span></li>
 					<li>P. Perdidos <span id="lose" class="pull-right"></span></li>

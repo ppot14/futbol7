@@ -130,7 +130,7 @@ function showAdmin(){
 			$('#refresh').slideDown();
 		}	
 		
-    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'realPoints');
+    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'points');
     	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'wins');
     	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'draws');
     	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'loses');
@@ -155,7 +155,7 @@ function hideAdmin(){
 	if(window.location.pathname.includes('/me')){
 		
 	}else{
-		$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('hideColumn', 'realPoints');
+		$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('hideColumn', 'points');
 		$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('hideColumn', 'wins');
 		$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('hideColumn', 'draws');
 		$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('hideColumn', 'loses');
@@ -310,7 +310,7 @@ $(function () {
 		    
 		    $.getJSON(window.location.pathname+'api/userStats.request?season='+season, function(data) {
 		    	if(data){
-		    		$("#points").text(data.points+' ('+data.realPoints+')');
+		    		$("#points").text(data.realPoints+' ('+data.points+')');
 		    		$("#win").text(data.wins);
 		    		$("#draw").text(data.draws);
 		    		$("#lose").text(data.loses);
@@ -337,7 +337,7 @@ $(function () {
 		    $('#table-substitutes').bootstrapTable('load', substitutesRanking[season]);
 			$('#table-vs').bootstrapTable('load', vs[season]);
 			$('#table-pair').bootstrapTable('load', pair[season]);
-		    chart.destroy();
+		    try{ chart.destroy(); }catch(e){console.warn(e.message)};
 			createChart(pointsSeries, 'container-graph');
 		    matchesFunction();
 		    playersFunction();
@@ -360,7 +360,7 @@ $(function () {
 		
 	    $.getJSON(window.location.pathname+'api/userStats.request?season='+season, function(data) {
 	    	if(data){
-	    		$("#points").text(data.points+' ('+data.realPoints+')');
+	    		$("#points").text(data.realPoints+' ('+data.points+')');
 	    		$("#win").text(data.wins);
 	    		$("#draw").text(data.draws);
 	    		$("#lose").text(data.loses);

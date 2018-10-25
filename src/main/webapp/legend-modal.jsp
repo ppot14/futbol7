@@ -10,8 +10,8 @@
 	      <h4>Leyenda</h4>
 	      <ul>
 	      	<li>UP - Últimos partidos ('V' Victoria, 'E' Empate, 'D' Derrota y '-' No ha jugado)</li>
-	      	<li>Pts - Puntos (3 puntos victoria, 2 empate, 1 derrota y  0 no jugados)</li>
-	      	<li>Pts* - Puntos (3 puntos victoria, 1 empate, 0 derrota y no jugados)</li>
+	      	<li>Pts - Puntos (3 puntos victoria, 1 empate, 0 derrota y no jugados)</li>
+	      	<li>Pts* - Puntos (3 puntos victoria, 2 empate, 1 derrota y  0 no jugados)</li>
 	      	<li>G - Partidos Ganados</li>
 	      	<li>E - Partidos Empatados</li>
 	      	<li>P - Partidos Perdidos</li>

@@ -7,7 +7,7 @@
 	        <span class="icon-bar"></span>
 	        <span class="icon-bar"></span>
 	      </button>
-	      <img id="logo" alt="Futbol7.pro logo" src="resources/images/logo50.png"/>
+	      <img id="logo" alt="Futbol7.pro logo" title="Futbol7.pro logo" src="resources/images/logo50.png"/>
 	      <a id="web-name" class="navbar-brand" href="<%=request.getContextPath()+"/"%>">Futbol 7</a>
 <!-- 	      <form class="navbar-form navbar-right" role="search"> -->
 <!-- 	        <div class="form-group"> -->

@@ -1,7 +1,7 @@
 {
 	"short_name": "Futbol 7",
-    "name": "Futbol 7 San Jerónimo",
-	"description": "Futbol 7 San Jerónimo, página de la hermandad de las eternas promesas que dieronse a la cerveza",
+    "name": "Futbol 7 Tabladilla (Ex-San Jerónimo)",
+	"description": "Futbol 7 Tabladilla (Ex-San Jerónimo), página de la hermandad de las eternas promesas que dieronse a la cerveza",
     "icons": [
         {
             "src": "resources/images/favicon16.png",
@@ -49,7 +49,8 @@
             "type": "image/png"
         }
     ],
-    "start_url": "index.html/?utm_source=homescreen",
+    "start_url": "/?utm_source=homescreen",
+    "scope": "/",
     "theme_color": "#222",
     "background_color": "#ffffff",
     "display": "standalone"

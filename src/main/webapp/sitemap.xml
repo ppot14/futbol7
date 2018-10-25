@@ -5,12 +5,12 @@
             http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
 
 	<url>
-		<loc>http://futbol7.pro/</loc>
+		<loc>https://www.futbol7.pro/</loc>
 		<changefreq>weekly</changefreq>
 		<priority>1.00</priority>
 	</url>
 	<url>
-		<loc>http://futbol7.pro/me</loc>
+		<loc>https://www.futbol7.pro/me</loc>
 		<changefreq>weekly</changefreq>
 		<priority>0.80</priority>
 	</url>

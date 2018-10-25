@@ -6,22 +6,23 @@
     <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-	<meta name="description" content="Futbol 7 San Jerónimo, página de la hermandad de las eternas promesas que dieronse a la cerveza">
-	<meta content="futbol7, san jeronimo" name="keywords"/>
+	<meta name="description" content="Futbol 7 Tabladilla (Ex-San Jerónimo), página de la hermandad de las eternas promesas que dieronse a la cerveza">
+	<meta content="futbol7, san jeronimo, tabladilla" name="keywords"/>
 	
-	<meta property="og:title" content="Futbol 7 San Jerónimo" />
+	<meta property="fb:app_id" content="1606586212720990"/>
+	<meta property="og:title" content="Futbol 7 Tabladilla (Ex-San Jerónimo)" />
 	<meta property="og:type" content="website" />
-	<meta property="og:description" content="Futbol 7 San Jerónimo, página de la hermandad de las eternas promesas que dieronse a la cerveza... y Sí, el de arriba a la izquierda es Carlos Marchena y jugó con nosotros" />
+	<meta property="og:description" content="Futbol 7 Tabladilla (Ex-San Jerónimo), página de la hermandad de las eternas promesas que dieronse a la cerveza... y Sí, el de arriba a la izquierda es Carlos Marchena y jugó con nosotros" />
 	<meta property="og:locale" content="es_ES" />
-	<meta property="og:url" content="http://futbol7.pro" />
-	<meta property="og:image" content="http://futbol7.pro/resources/images/marchena.jpg" />
+	<meta property="og:url" content="https://www.futbol7.pro" />
+	<meta property="og:image" content="https://www.futbol7.pro/resources/images/marchena.jpg" />
 	<meta property="og:image:type" content="image/jpeg" />
 	<meta property="og:image:width" content="1439" />
 	<meta property="og:image:height" content="920" />
 	
 <!-- 	<meta name="google-signin-client_id" content="517911210517-uupk9pfrbcsnce7qblohvpmog4hc6bfu.apps.googleusercontent.com"> -->
     
-    <title>Futbol 7 San Jerónimo</title>
+    <title>Futbol 7 Tabladilla (Ex-San Jerónimo)</title>
   
 	<%if(!minimized){%>
 	<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" media="all"/>
@@ -75,6 +76,7 @@
 	
 <!-- 	<link rel="shortcut icon" href="resources/images/logo.ico" /> -->
 	<link rel="apple-touch-icon" sizes="120x120" href="resources/images/favicon120.png">
+	<link rel="icon" type="image/png" sizes="120x120" href="resources/images/favicon120.png">
 	<link rel="icon" type="image/png" sizes="32x32" href="resources/images/favicon32.png">
 	<link rel="icon" type="image/png" sizes="16x16" href="resources/images/favicon16.png">
 	<link rel="manifest" href="/manifest.json">

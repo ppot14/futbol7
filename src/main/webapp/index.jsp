@@ -39,13 +39,13 @@
 				    <h3 class="panel-title">Clasificación Completa</h3>
 				  </div>
 				  <div class="panel-body">
-						<table id="table-full" data-sort-name=points data-sort-order="desc"  data-striped="true">
+						<table id="table-full" data-sort-name="realPoints" data-sort-order="desc"  data-striped="true">
 							<thead>
 								<tr>
 									<th data-field="name" data-sortable="true" class="column-name">Nombre</th>
 									<th data-field="lastMatches" data-formatter="lastMatchesFormat" data-sortable="false" data-align="center">UP</th>
-									<th data-field="points" data-sortable="true" data-align="right">Pts</th>
-									<th data-field="realPoints" data-sortable="true" data-align="right" data-visible="false">Pts*</th>
+									<th data-field="realPoints" data-sortable="true" data-align="right">Pts</th>
+									<th data-field="points" data-sortable="true" data-align="right" data-visible="false">Pts*</th>
 									<th data-field="wins" data-sortable="true" data-align="right" data-visible="false">G</th>
 									<th data-field="draws" data-sortable="true" data-align="right" data-visible="false">E</th>
 									<th data-field="loses" data-sortable="true" data-align="right" data-visible="false">P</th>
@@ -71,13 +71,13 @@
 				    <h3 class="panel-title">Titulares</h3>
 				  </div>
 				  <div class="panel-body">
-						<table id="table-permanents" data-sort-name="points" data-sort-order="desc" data-striped="true">
+						<table id="table-permanents" data-sort-name="realPoints" data-sort-order="desc" data-striped="true">
 							<thead>
 								<tr>
 									<th data-field="name" data-sortable="true" class="column-name">Nombre</th>
 									<th data-field="lastMatches" data-formatter="lastMatchesFormat" data-sortable="false" data-align="center">UP</th>
-									<th data-field="points" data-sortable="true" data-align="right">Pts</th>
-									<th data-field="realPoints" data-sortable="true" data-align="right" data-visible="false">Pts*</th>
+									<th data-field="realPoints" data-sortable="true" data-align="right">Pts</th>
+									<th data-field="points" data-sortable="true" data-align="right" data-visible="false">Pts*</th>
 									<th data-field="wins" data-sortable="true" data-align="right" data-visible="false">G</th>
 									<th data-field="draws" data-sortable="true" data-align="right" data-visible="false">E</th>
 									<th data-field="loses" data-sortable="true" data-align="right" data-visible="false">P</th>
@@ -129,13 +129,13 @@
 				    <h3 class="panel-title">Suplentes</h3>
 				  </div>
 				  <div class="panel-body">
-						<table id="table-substitutes" data-sort-name="points" data-sort-order="desc" data-striped="true">
+						<table id="table-substitutes" data-sort-name="realPoints" data-sort-order="desc" data-striped="true">
 							<thead>
 								<tr>
 									<th data-field="name" data-sortable="true" class="column-name">Nombre</th>
 									<th data-field="lastMatches" data-formatter="lastMatchesFormat" data-sortable="false" data-align="center">UP</th>
-									<th data-field="points" data-sortable="true" data-align="right">Pts</th>
-									<th data-field="realPoints" data-sortable="true" data-align="right" data-visible="false">Pts*</th>
+									<th data-field="realPoints" data-sortable="true" data-align="right">Pts</th>
+									<th data-field="points" data-sortable="true" data-align="right" data-visible="false">Pts*</th>
 									<th data-field="wins" data-sortable="true" data-align="right" data-visible="false">G</th>
 									<th data-field="draws" data-sortable="true" data-align="right" data-visible="false">E</th>
 									<th data-field="loses" data-sortable="true" data-align="right" data-visible="false">P</th>
@@ -251,6 +251,13 @@
 		</div>
 		
 	</div>
-		
+	
+	<script>
+		if('serviceWorker' in navigator) {
+		  navigator.serviceWorker
+		           .register('/sw.js')
+		           .then(function() { console.log("Service Worker Registered"); });
+		}
+	</script>
   </body>
 </html>
