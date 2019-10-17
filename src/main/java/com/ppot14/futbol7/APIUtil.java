@@ -164,12 +164,18 @@ public class APIUtil {
 	public Map<String,List<Map<String, String>>> getFullRanking() {
 		return fullRanking;
 	}
+	public List<Map<String, String>> getFullRanking(String season) {
+		return fullRanking.get(season);
+	}
 	
 	/**
 	 * @return the fullRanking
 	 */
 	public Map<String, List<Map<String, String>>> getFullScorers() {
 		return fullScorers;
+	}
+	public List<Map<String, String>> getFullScorers(String season) {
+		return fullScorers.get(season);
 	}
 
 	public Map<String,List<Map<String, Object>>> getResults() {
@@ -206,94 +212,91 @@ public class APIUtil {
 		
 		return res;
 	}
-
-	public Map<String,List<Map<String, Object>>> getPointsSeries() {
-		return getPointsSeries(null);
+	public List<Map<String, Object>> getResults(String season) {
+		return getResults().get(season);
 	}
-	public Map<String,List<Map<String, Object>>> getPointsSeries(String user) {
+
+	public List<Map<String, Object>> getPointsSeries(String season) {
+		return getPointsSeries(season, null);
+	}
+	public List<Map<String, Object>> getPointsSeries(String season, String user) {
 		Date today = new Date();
-		Map<String,List<Map<String, Object>>> data = new HashMap<String,List<Map<String,Object>>>();
+		List<Map<String, Object>> data = new ArrayList<Map<String,Object>>();
 		
 		try{
-
-			for(Entry<String, List<List<String>>> seasonMatches: rawMatches.entrySet()){
-				String season = seasonMatches.getKey();
-				data.put(season, new ArrayList<Map<String, Object>>());
-				for(String name : players.get(season)){
-					if(user==null || user.equals(name)){
-		    			int points = 0;
-		            	List<List<Object>> playerData = new ArrayList<List<Object>>();
-		            	List<List<Object>> playerData2 = new ArrayList<List<Object>>();
-		    			for(List<String> row : seasonMatches.getValue()){
-			    			if(isRowEmpty(row)) break;
-			        		if(row.contains(name)){
-				        		int i=0;
-				        		int gA=0,gB=0;
-				        		String date = null;
-				        		String colour=null;
-				        		for(String cell : row){
-				        			if(i==0){date=cell;}
-				        			if(i==8){gA=Math.round(Float.parseFloat(cell));}
-				        			if(i==9){gB=Math.round(Float.parseFloat(cell));}
-				            		if(cell.equals(name)){
-				            			if(i<9){colour="a";}
-				            			if(i>8){colour="b";}
-				            		}
-				            		i++;
-				            	}
-				        		if(colour!=null){
-				        			List<Object> game = new ArrayList<Object>();
-				        			Date d = formatter.parse(date);
-				        			game.add(d);
-									int gFor = ("a".equals(colour)?gA:gB);
-									int gAgainst = ("a".equals(colour)?gB:gA);
-									int pointsM = ((gFor>gAgainst)?3:((gFor<gAgainst)?0:1));
-				        			points += pointsM;
-				        			game.add(points);
-				        			playerData.add(game);
-				        			if(name.equals(user)){
-					        			List<Object> score = new ArrayList<Object>();
-					        			score.add(d);
-					        			score.add( (scorersByDate.get(season)!=null && 
-													scorersByDate.get(season).get(date)!=null && 
-													scorersByDate.get(season).get(date).get(user)!=null)?
-													scorersByDate.get(season).get(date).get(user): 0);
-					        			playerData2.add(score);
-				        			}
-				        		}else{
-				        			continue;
-				        		}
+			for(String name : players.get(season)){
+				if(user==null || user.equals(name)){
+	    			int points = 0;
+	            	List<List<Object>> playerData = new ArrayList<List<Object>>();
+	            	List<List<Object>> playerData2 = new ArrayList<List<Object>>();
+	    			for(List<String> row : rawMatches.get(season)){
+		    			if(isRowEmpty(row)) break;
+		        		if(row.contains(name)){
+			        		int i=0;
+			        		int gA=0,gB=0;
+			        		String date = null;
+			        		String colour=null;
+			        		for(String cell : row){
+			        			if(i==0){date=cell;}
+			        			if(i==8){gA=Math.round(Float.parseFloat(cell));}
+			        			if(i==9){gB=Math.round(Float.parseFloat(cell));}
+			            		if(cell.equals(name)){
+			            			if(i<9){colour="a";}
+			            			if(i>8){colour="b";}
+			            		}
+			            		i++;
+			            	}
+			        		if(colour!=null){
+			        			List<Object> game = new ArrayList<Object>();
+			        			Date d = formatter.parse(date);
+			        			game.add(d);
+								int gFor = ("a".equals(colour)?gA:gB);
+								int gAgainst = ("a".equals(colour)?gB:gA);
+								int pointsM = ((gFor>gAgainst)?3:((gFor<gAgainst)?0:1));
+			        			points += pointsM;
+			        			game.add(points);
+			        			playerData.add(game);
+			        			if(name.equals(user)){
+				        			List<Object> score = new ArrayList<Object>();
+				        			score.add(d);
+				        			score.add( (scorersByDate.get(season)!=null && 
+												scorersByDate.get(season).get(date)!=null && 
+												scorersByDate.get(season).get(date).get(user)!=null)?
+												scorersByDate.get(season).get(date).get(user): 0);
+				        			playerData2.add(score);
+			        			}
+			        		}else{
+			        			continue;
 			        		}
-			        		
-			        	}
-		
-		            	//Hack to add current points at current day to the current season
-		    			if(user==null && season.contains(Integer.toString(Calendar.getInstance().get(Calendar.YEAR))) ){
-		    	        	Integer maxPts = (Integer) playerData.get(playerData.size()-1).get(1);
-		    				List<Object> game = new ArrayList<Object>();
-		    				game.add(today);
-		    				game.add(maxPts);
-		    				playerData.add(game);
-		    			}
-		    			
-		            	Map<String, Object> e = new HashMap<String, Object>();
-		            	e.put("name", name);
-		            	e.put("data", playerData);
-		        		if(name.equals(user)){
-			            	e.put("name", "Puntos "+name);
-			            	Map<String, Object> e2 = new HashMap<String, Object>();
-			            	e2.put("name", "Goles");
-			            	e2.put("data", playerData2);
-			            	e2.put("yAxis", 1);
-			            	e2.put("type", "column");
-			        		data.get(season).add(e2);
 		        		}
-		        		data.get(season).add(e);
-					}
+		        		
+		        	}
+	
+	            	//Hack to add current points at current day to the current season
+	    			if(user==null && season.contains(Integer.toString(Calendar.getInstance().get(Calendar.YEAR))) ){
+	    	        	Integer maxPts = (Integer) playerData.get(playerData.size()-1).get(1);
+	    				List<Object> game = new ArrayList<Object>();
+	    				game.add(today);
+	    				game.add(maxPts);
+	    				playerData.add(game);
+	    			}
 	    			
-	    		}
-	        	
-	        }
+	            	Map<String, Object> e = new HashMap<String, Object>();
+	            	e.put("name", name);
+	            	e.put("data", playerData);
+	        		if(name.equals(user)){
+		            	e.put("name", "Puntos "+name);
+		            	Map<String, Object> e2 = new HashMap<String, Object>();
+		            	e2.put("name", "Goles");
+		            	e2.put("data", playerData2);
+		            	e2.put("yAxis", 1);
+		            	e2.put("type", "column");
+		        		data.add(e2);
+	        		}
+	        		data.add(e);
+				}
+    			
+    		}
 		
 		}catch(Exception e){
 			Log.warn("Error getting point series: "+e.getMessage());
@@ -335,6 +338,9 @@ public class APIUtil {
 		return data;
 		
 	}
+	public List<Map<String,String>> getVS(String season) {
+		return getVS().get(season);
+	}
 
 	public Map<String,List<Map<String,String>>> getPair() {
 		Map<String,List<Map<String,String>>> data = new TreeMap<String,List<Map<String,String>>>();
@@ -372,6 +378,9 @@ public class APIUtil {
 		return data;
 		
 	}
+	public List<Map<String,String>> getPair(String season) {
+		return getPair().get(season);
+	}
 	
 	public static String jsonToString(Object o) throws JsonGenerationException, JsonMappingException, IOException{
         ObjectMapper mapper = new ObjectMapper();
@@ -397,6 +406,9 @@ public class APIUtil {
         return permanents;
         
 	}
+	public List<Map<String,String>> getRankingPermanents(String season){
+		return getRankingPermanents().get(season);
+	}
 	
 	public Map<String,List<Map<String,String>>> getRankingSubstitutes(){
 		Map<String,List<Map<String,String>>> substitutes = new HashMap<String,List<Map<String,String>>>();
@@ -413,6 +425,9 @@ public class APIUtil {
 		}
         return substitutes;
 		
+	}
+	public List<Map<String,String>> getRankingSubstitutes(String season){
+		return getRankingSubstitutes().get(season);
 	}
 	
 	private void setScorers() throws java.text.ParseException {
@@ -701,6 +716,9 @@ public class APIUtil {
 
 	public Map<String, Set<String>> getPlayers() {		
 		return players;
+	}
+	public Set<String> getPlayers(String season) {		
+		return players.get(season);
 	}
 
 	public Map<String,Integer> getComparison(JsonNode jsonNode) {

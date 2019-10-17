@@ -89,68 +89,62 @@
     	<maven.compiler.target>1.8</maven.compiler.target>
   	</properties>	
   	
-<build>
-    <plugins>
-		<plugin>
-	        <groupId>com.samaxes.maven</groupId>
-	        <artifactId>minify-maven-plugin</artifactId>
-	        <version>1.7.6</version>
-	        <executions>
-	          <execution>
-	            <id>default-minify</id>
-	            <phase>package</phase>
-	            <configuration>
-	              <charset>UTF-8</charset>
+<!-- <build> -->
+<!--     <plugins> -->
+<!-- 		<plugin> -->
+<!-- 	        <groupId>com.samaxes.maven</groupId> -->
+<!-- 	        <artifactId>minify-maven-plugin</artifactId> -->
+<!-- 	        <version>1.7.6</version> -->
+<!-- 	        <executions> -->
+<!-- 	          <execution> -->
+<!-- 	            <id>default-minify</id> -->
+<!-- 	            <phase>package</phase> -->
+<!-- 	            <configuration> -->
+<!-- 	              <charset>UTF-8</charset> -->
 	              
-	              <cssSourceDir>../webapp/resources/styles</cssSourceDir>
-	              <cssTargetDir>/resources/styles</cssTargetDir>
-	              <cssTargetDir>../../src/main/webapp/resources/styles</cssTargetDir>
-	              <cssSourceIncludes>
-					<cssSourceInclude>lib/bootstrap.min.css</cssSourceInclude>
-					<cssSourceInclude>lib/bootstrap-table.min.css</cssSourceInclude>
-					<cssSourceInclude>lib/font-awesome.min.css</cssSourceInclude>
-					<cssSourceInclude>lib/bootstrap-slider.min.css</cssSourceInclude>
-					<cssSourceInclude>main.css</cssSourceInclude>
-	              </cssSourceIncludes>
-	              <cssSourceExcludes>
-	                <cssSourceExclude>merged.css</cssSourceExclude>
-	                <cssSourceExclude>merged.min.css</cssSourceExclude>
-	              </cssSourceExcludes>
-	              <cssFinalFile>merged.css</cssFinalFile>
+<!-- 	              <cssSourceDir>../webapp/resources/styles</cssSourceDir> -->
+<!-- 	              <cssTargetDir>/resources/styles</cssTargetDir> -->
+<!-- 	              <cssTargetDir>../../src/main/webapp/resources/styles</cssTargetDir> -->
+<!-- 	              <cssSourceIncludes> -->
+<!-- 					<cssSourceInclude>lib/bootstrap.min.css</cssSourceInclude> -->
+<!-- 					<cssSourceInclude>lib/bootstrap-table.min.css</cssSourceInclude> -->
+<!-- 					<cssSourceInclude>lib/font-awesome.min.css</cssSourceInclude> -->
+<!-- 					<cssSourceInclude>lib/bootstrap-slider.min.css</cssSourceInclude> -->
+<!-- 					<cssSourceInclude>main.css</cssSourceInclude> -->
+<!-- 	              </cssSourceIncludes> -->
+<!-- 	              <cssSourceExcludes> -->
+<!-- 	                <cssSourceExclude>merged.css</cssSourceExclude> -->
+<!-- 	                <cssSourceExclude>merged.min.css</cssSourceExclude> -->
+<!-- 	              </cssSourceExcludes> -->
+<!-- 	              <cssFinalFile>merged.css</cssFinalFile> -->
 	              
-	              <jsSourceDir>../webapp/resources/scripts</jsSourceDir>
-	              <jsTargetDir>/resources/scripts</jsTargetDir>
-	              <jsTargetDir>../../src/main/webapp/resources/scripts</jsTargetDir>
-	              <jsSourceFiles>
-              		<jsSourceFile>lib/platform.js</jsSourceFile>
-					<jsSourceFile>lib/jquery-1.11.3.min.js</jsSourceFile>
-					<jsSourceFile>lib/bootstrap.min.js</jsSourceFile>
-					<jsSourceFile>lib/bootstrap-table.min.js</jsSourceFile>
-					<jsSourceFile>lib/bootstrap-table-es-ES.min.js</jsSourceFile>
-					<jsSourceFile>lib/bootstrap-slider.min.js</jsSourceFile>
-					<jsSourceFile>lib/jquery.timeago.min.js</jsSourceFile>
-					<jsSourceFile>lib/highcharts.js</jsSourceFile>
-					<jsSourceFile>main.js</jsSourceFile>
-					<jsSourceFile>login.js</jsSourceFile>
-	              </jsSourceFiles>   
-<!-- 	              <jsSourceExcludes> -->
-<!-- 	                <jsSourceExclude>merged.js</jsSourceExclude> -->
-<!-- 	                <jsSourceExclude>merged.min.js</jsSourceExclude> -->
-<!-- 	              </jsSourceExcludes>          -->
-	              <jsFinalFile>merged.js</jsFinalFile>
+<!-- 	              <jsSourceDir>../webapp/resources/scripts</jsSourceDir> -->
+<!-- 	              <jsTargetDir>/resources/scripts</jsTargetDir> -->
+<!-- 	              <jsTargetDir>../../src/main/webapp/resources/scripts</jsTargetDir> -->
+<!-- 	              <jsSourceFiles> -->
+<!--               		<jsSourceFile>lib/platform.js</jsSourceFile> -->
+<!-- 					<jsSourceFile>lib/jquery-1.11.3.min.js</jsSourceFile> -->
+<!-- 					<jsSourceFile>lib/bootstrap.min.js</jsSourceFile> -->
+<!-- 					<jsSourceFile>lib/bootstrap-table.min.js</jsSourceFile> -->
+<!-- 					<jsSourceFile>lib/bootstrap-table-es-ES.min.js</jsSourceFile> -->
+<!-- 					<jsSourceFile>lib/bootstrap-slider.min.js</jsSourceFile> -->
+<!-- 					<jsSourceFile>lib/jquery.timeago.min.js</jsSourceFile> -->
+<!-- 					<jsSourceFile>lib/highcharts.js</jsSourceFile> -->
+<!-- 					<jsSourceFile>main.js</jsSourceFile> -->
+<!-- 					<jsSourceFile>login.js</jsSourceFile> -->
+<!-- 	              </jsSourceFiles> -->
+<!-- 	              <jsFinalFile>merged.js</jsFinalFile> -->
 	              
-	              <jsEngine>CLOSURE</jsEngine>
-<!-- 	              <verbose>true</verbose> -->
-<!-- 	              <closureSortDependencies>false</closureSortDependencies> -->
-				<closureCompilationLevel>ADVANCED_OPTIMIZATIONS</closureCompilationLevel>
-	            </configuration>
-	            <goals>
-	              <goal>minify</goal>
-	            </goals>
-	          </execution>
-	        </executions>
-		</plugin>
-	</plugins>
-  </build>	
+<!-- 	              <jsEngine>CLOSURE</jsEngine> -->
+<!-- 				<closureCompilationLevel>ADVANCED_OPTIMIZATIONS</closureCompilationLevel> -->
+<!-- 	            </configuration> -->
+<!-- 	            <goals> -->
+<!-- 	              <goal>minify</goal> -->
+<!-- 	            </goals> -->
+<!-- 	          </execution> -->
+<!-- 	        </executions> -->
+<!-- 		</plugin> -->
+<!-- 	</plugins> -->
+<!--   </build>	 -->
     	
 </project>

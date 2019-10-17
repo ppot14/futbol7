@@ -51,26 +51,43 @@ public class Futbol7HTMLServlet extends Futbol7Servlet {
 		ObjectMapper mapper = new ObjectMapper();
 		getApi().processData(false, getConfig());
 		
+		String league = request.getParameter("league");
+		String player = request.getParameter("player");
+		
 		request.setAttribute("minimized", getConfig().get("minimized"));
 		request.setAttribute("production", getConfig().get("production"));
+		request.setAttribute("enableVote", getConfig().get("enableVote"));
 		request.setAttribute("options", mapper.writeValueAsString(getApi().getPermanents())); //Only Permanents for now
 		
 		String requestPath = request.getServletPath();
-		if("".equals(requestPath)){
-			request.setAttribute("fullRanking", mapper.writeValueAsString(getApi().getFullRanking()) ); 
-			request.setAttribute("permanentsRanking", mapper.writeValueAsString(getApi().getRankingPermanents()) ); 
-			request.setAttribute("substitutesRanking", mapper.writeValueAsString(getApi().getRankingSubstitutes()) );
-			request.setAttribute("playersPictures", mapper.writeValueAsString(getApi().getPlayersPictures()) );
-			request.setAttribute("vs", mapper.writeValueAsString(getApi().getVS()) ); 
-			request.setAttribute("pair", mapper.writeValueAsString(getApi().getPair()) );
-			request.setAttribute("scorers", mapper.writeValueAsString(getApi().getFullScorers()) );
-			request.setAttribute("matches", mapper.writeValueAsString(getApi().getResults()) ); 
-			request.setAttribute("players", mapper.writeValueAsString(getApi().getPlayers()) );
-			request.setAttribute("userPointsSeries", mapper.writeValueAsString(getApi().getPointsSeries()) );
+		if("/liga".equals(requestPath)){
+			if(league!=null) {
+				request.setAttribute("fullRanking", mapper.writeValueAsString(getApi().getFullRanking(league)) ); 
+				request.setAttribute("permanentsRanking", mapper.writeValueAsString(getApi().getRankingPermanents(league)) ); 
+				request.setAttribute("substitutesRanking", mapper.writeValueAsString(getApi().getRankingSubstitutes(league)) ); 
+				request.setAttribute("playersPictures", mapper.writeValueAsString(getApi().getPlayersPictures()) );
+				request.setAttribute("vs", mapper.writeValueAsString(getApi().getVS(league)) ); 
+				request.setAttribute("pair", mapper.writeValueAsString(getApi().getPair(league)) );
+				request.setAttribute("scorers", mapper.writeValueAsString(getApi().getFullScorers(league)) );
+				request.setAttribute("matches", mapper.writeValueAsString(getApi().getResults(league)) ); 
+				request.setAttribute("players", mapper.writeValueAsString(getApi().getPlayers(league)) );
+				request.setAttribute("userPointsSeries", mapper.writeValueAsString(getApi().getPointsSeries(league)) );
+			}else {
+				request.setAttribute("fullRanking", mapper.writeValueAsString(getApi().getFullRanking()) ); 
+				request.setAttribute("permanentsRanking", mapper.writeValueAsString(getApi().getRankingPermanents()) ); 
+				request.setAttribute("substitutesRanking", mapper.writeValueAsString(getApi().getRankingSubstitutes()) );
+				request.setAttribute("playersPictures", mapper.writeValueAsString(getApi().getPlayersPictures()) );
+				request.setAttribute("vs", mapper.writeValueAsString(getApi().getVS()) ); 
+				request.setAttribute("pair", mapper.writeValueAsString(getApi().getPair()) );
+				request.setAttribute("scorers", mapper.writeValueAsString(getApi().getFullScorers()) );
+				request.setAttribute("matches", mapper.writeValueAsString(getApi().getResults()) ); 
+				request.setAttribute("players", mapper.writeValueAsString(getApi().getPlayers()) );
+				request.setAttribute("userPointsSeries", mapper.writeValueAsString(getApi().getPointsSeries(league)) );
+			}
 		}else if("/me".equals(requestPath)){
 			request.setAttribute("matches", mapper.writeValueAsString(getApi().getResults()) );
 			request.setAttribute("userMatches", mapper.writeValueAsString(user!=null? getApi().getUserMatches(user): null ));
-			request.setAttribute("userPointsSeries", mapper.writeValueAsString(user!=null? getApi().getPointsSeries(user): null ));
+			request.setAttribute("userPointsSeries", mapper.writeValueAsString(user!=null? getApi().getPointsSeries(league,user): null ));
 		}
 		requestPath = requestPath.length() > 1 ? requestPath + ".jsp" : "/index.jsp";
 		

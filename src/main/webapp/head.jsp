@@ -32,7 +32,7 @@
 	
 	<link rel="stylesheet" type="text/css" href="resources/styles/main.css" media="all"/>
 	<%}else{%>
-	<link rel="stylesheet" type="text/css" href="resources/styles/merged.min.css" media="all"/>
+<!-- 	<link rel="stylesheet" type="text/css" href="resources/styles/merged.min.css" media="all"/> -->
 	<%}%>
 	
 	<%if(production){%>
@@ -71,7 +71,7 @@
 	<script src="resources/scripts/main.js" defer></script>
 	<script src="resources/scripts/login.js" defer></script>
 	<%}else{%>
-	<script src="resources/scripts/merged.min.js" defer></script>
+<!-- 	<script src="resources/scripts/merged.min.js" defer></script> -->
 	<%}%>
 	
 <!-- 	<link rel="shortcut icon" href="resources/images/logo.ico" /> -->

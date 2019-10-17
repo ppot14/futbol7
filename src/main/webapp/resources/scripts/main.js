@@ -108,6 +108,11 @@ function dateSort(sortName, sortOrder){
 	var r = parseDateToLong(sortName)-parseDateToLong(sortOrder);
 	return r>0?1:r<0?-1:0;
 }
+function getParameter(name) {
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)");
+    var results = regex.exec(location.search);
+    return results == null? null: decodeURIComponent(results[1].replace(/\+/g, " "));
+}
 
 
 function updateUserName(){
@@ -121,58 +126,24 @@ function updateUserName(){
  * Admin Functions
  */
 function showAdmin(){
-
 	if(window.location.pathname.includes('/me')){
-		
 	}else{
-		
 		if(nameweb && usertype == 'admin' ){
 			$('#refresh').slideDown();
-		}	
-		
-    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'points');
-    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'wins');
-    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'draws');
-    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'loses');
-    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'matches');
-    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'goalsFor');
-    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'pointsAVG');
-    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'goalsForAVG');
-    	$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('showColumn', 'scoreAVG');
-
-    	$('#row1').show();
-    	$('#row3').show();
-    	$('#row4').show();
-    	
+		}
 		createChart(pointsSeries, 'container-graph');
-		
 	}
 }
 
 function hideAdmin(){
 	$('#refresh').slideUp();
-
 	if(window.location.pathname.includes('/me')){
-		
 	}else{
-		$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('hideColumn', 'points');
-		$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('hideColumn', 'wins');
-		$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('hideColumn', 'draws');
-		$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('hideColumn', 'loses');
-		$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('hideColumn', 'matches');
-		$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('hideColumn', 'goalsFor');
-		$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('hideColumn', 'pointsAVG');
-		$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('hideColumn', 'goalsForAVG');
-		$('#table-full, #table-permanents, #table-substitutes').bootstrapTable('hideColumn', 'scoreAVG');
-	
-		$('#row1').hide();
-		$('#row3').hide();
-		$('#row4').hide();
-		
 		try{ chart.destroy(); }catch(e){console.warn(e.message)};
 	}
 }
 
+//create players chart 
 var createChart = function(pointsSeries, id){
 	chart = new Highcharts.Chart({
         chart: {
@@ -206,7 +177,7 @@ var createChart = function(pointsSeries, id){
             opposite: true
         }],
 
-        series: pointsSeries[season]
+        series: pointsSeries
     });
 }
   
@@ -235,18 +206,18 @@ $(function () {
 	$.timeago.settings.allowFuture= true;
     
     var playersFunction = function() {
-    	var num = players[season].length;
-    	players[season].sort(function (a, b) {return a.localeCompare(b);});
+    	var num = players.length;
+    	players.sort(function (a, b) {return a.localeCompare(b);});
     	$('#player-one,#player-two').empty();
     	for(var i=0; i<num; i++) {
-    	    $('#player-one,#player-two').append($('<option/>').val(players[season][i]).text(players[season][i]));
+    	    $('#player-one,#player-two').append($('<option/>').val(players[i]).text(players[i]));
     	};
     }
     
-    //Matches AJAX request data
+    //Matches Panel
     var matchesFunction = function() {
     	
-    	selectedSeasonMatches = matches[season];
+    	selectedSeasonMatches = matches;
 	    
 	    numMatches = selectedSeasonMatches.length;
 	    currentMatch = numMatches-1;
@@ -302,60 +273,9 @@ $(function () {
 	    	}
 	    });
     }
-	  
-    var changeSeason = function(newSeason){
-    	season=newSeason;
-
-  		if(window.location.pathname.includes('/me')){
-		    
-		    $.getJSON(window.location.pathname+'api/userStats.request?season='+season, function(data) {
-		    	if(data){
-		    		$("#points").text(data.realPoints+' ('+data.points+')');
-		    		$("#win").text(data.wins);
-		    		$("#draw").text(data.draws);
-		    		$("#lose").text(data.loses);
-		    		$("#goals").text(data.goalsFor);
-		    		$("#matches").text(data.matches);
-		    		$("#avg-points").text(parseFloat(data.pointsAVG).toFixed(2));
-		    		$("#avg-scores").text(parseFloat(data.scoreAVG).toFixed(2));
-		    		$("#avg-goals").text(parseFloat(data.goalsForAVG).toFixed(2));
-		    	}
-		    });
-  			
-	    	selectedSeasonMatches = matches[season];
-		    numMatches = selectedSeasonMatches.length;
-		    currentMatch = numMatches-1;
-
-		    $('#table-player-matches').bootstrapTable('load', userMatches[season]);
-			createChart(pointsSeries, 'container-player-graph');
-	    	$('#points[data-toggle="tooltip"]').tooltip();
-		    
-  		}else{
-  			
-	    	$('#table-full').bootstrapTable('load', fullRanking[season]);
-	    	$('#table-permanents').bootstrapTable('load', permanentsRanking[season]);
-		    $('#table-substitutes').bootstrapTable('load', substitutesRanking[season]);
-			$('#table-vs').bootstrapTable('load', vs[season]);
-			$('#table-pair').bootstrapTable('load', pair[season]);
-		    try{ chart.destroy(); }catch(e){console.warn(e.message)};
-			createChart(pointsSeries, 'container-graph');
-		    matchesFunction();
-		    playersFunction();
-			$('#table-scorers').bootstrapTable('load', scorers[season]);
-		    
-  	    }
-    	
-    };
-  
-	var select = $("#season-selector");
-	for (var prop in options.permanents) {
-		select.prepend($('<option '+(prop=='2018-2019'?' selected="selected"':'')+'/>').val(prop).text("Temporada "+prop));
-	}
-	season = $("#season-selector").val();
-	select.on('change', function() {
-		changeSeason(this.value);
-	});
     
+	//Prepare page
+    season = getParameter('league');
 	if(window.location.pathname.includes('/me')){
 		
 	    $.getJSON(window.location.pathname+'api/userStats.request?season='+season, function(data) {
@@ -383,45 +303,66 @@ $(function () {
 		if(pointsSeries){ createChart(pointsSeries, 'container-player-graph'); }
     	$('#points[data-toggle="tooltip"]').tooltip();
 	    
-	}else{
+	}else if(window.location.pathname.includes('/liga')){
+		
+		$('#title').html(season);
 		
 	    matchesFunction();
 	    playersFunction();
     	
 	    $('#table-full').bootstrapTable({
-	        data: fullRanking[season],
+	        data: fullRanking,
 	        locale:'es-ES',
 	        onAll: function(name, args){ updateUserName() }
 	    });
 	    $('#table-permanents').bootstrapTable({
-	        data: permanentsRanking[season],
+	        data: permanentsRanking,
 	        locale:'es-ES',
 	        onAll: function(name, args){ updateUserName() }
 	    });
 	    $('#table-substitutes').bootstrapTable({
-	        data: substitutesRanking[season],
+	        data: substitutesRanking,
 	        locale:'es-ES',
 	        onAll: function(name, args){ updateUserName() }
 	    });
 		    
 	    $('#table-vs').bootstrapTable({
-	        data: vs[season],
+	        data: vs,
 	        locale:'es-ES',
 	        onAll: function(name, args){ updateUserName() }
 	    });
 	    $('#table-pair').bootstrapTable({
-	        data: pair[season],
+	        data: pair,
 	        locale:'es-ES',
 	        onAll: function(name, args){ updateUserName() }
 	    });
 	    $('#table-scorers').bootstrapTable({
-	        data: scorers[season],
+	        data: scorers,
 	        locale:'es-ES',
 	        onAll: function(name, args){ updateUserName() }
 	    });
 		
+	//index page
+	}else{
+		var todayDate = new Date();
+		var year = todayDate.getFullYear();
+		var month = todayDate.getMonth();//Starting in 0
+		var thisSeason = (month>7?year:year-1);//7 is August
+		for (var prop in options.permanents) {
+			var rowId = prop.substring(4,0)==thisSeason?'current-season-row':'past-season-row';
+			var body = "Titulares: ";
+			options.permanents[prop].forEach(function (value, i) {
+				body += value + (i<options.permanents[prop].length-1?', ':'.');
+			});
+			var leaguePanel = $('<a href="/liga?league='+prop+'"><div class="col-xs-12 col-sm-6 col-md-4 col-lg-3"><div id="" class="panel panel-default" style="min-height: 180px;">'+
+					'<div class="panel-heading">'+
+						'<h3 class="panel-title">'+prop+'</h3>'+
+				'</div><div class="panel-body">'+body+'</div>'+
+			'</div></div></a>').prependTo('#'+rowId);	
+		}
 	}
     
+	//player comparison on change update data
     $('#player-one,#player-two').change(function() {
     	var playerOne = $( "#player-one option:selected" ).text();
     	var playerTwo = $( "#player-two option:selected" ).text();
@@ -450,6 +391,7 @@ $(function () {
     	);
     });
     
+    //refresh and process data, only for admin
     $('#refresh').click(function(){
     	$.getJSON(window.location.pathname+'api/refresh.request', function (data) {
     		if(data=='true' || data==true){

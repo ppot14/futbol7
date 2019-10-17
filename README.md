@@ -7,3 +7,4 @@ The configuration need it before compile and build the project are in the config
 Once the webapp is compiled, built and running in a server we will see the ranking, matches, some individual stats and graphs... you don't see it... something is wrong and probably my fault.
 ##It's not working man
 Man... it's free... what do you expect? Feel free to modify my beloved uncommented code or write me an email with the question which, depending on the arrangement of the stars and mostly your education writting the email, I will reply or not
+
