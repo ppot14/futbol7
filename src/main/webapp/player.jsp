@@ -11,20 +11,24 @@
 	var matches = <%=request.getAttribute("matches")%>;
 	var userMatches = <%=request.getAttribute("userMatches")%>;
 	var pointsSeries = <%=request.getAttribute("userPointsSeries")%>;
+	var playersPictures = <%=request.getAttribute("playersPictures")%>;
   </script>
 
 	<%@ include file="nav.jsp" %>
 	
-	<%@ include file="legend-modal.jsp" %>
+<%-- 	<%@ include file="legend-modal.jsp" %> --%>
 	
 	<%@ include file="login-modal.jsp" %>
 	
-	<%@ include file="last-match-winner-modal.jsp" %>
+<%-- 	<%@ include file="last-match-winner-modal.jsp" %> --%>
 	
-	<%@ include file="polling-modal.jsp" %>
+<%-- 	<%@ include file="polling-modal.jsp" %> --%>
 	
 	<div id="me-page" class="container-fluid">
 		<div id="row1" class="row">
+			<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+				<h2 id="title" style="text-align: center;"></h2>
+			</div>
 			<div class="col-xs-12 col-sm-3 col-md-2 col-lg-2">
 				<img id="user-picture" class="user-picture img-rounded">
 			</div>
@@ -64,7 +68,7 @@
 									<th data-field="team" data-formatter="teamFormatter" data-sortable="false" data-align="center">Equipo</th>
 									<th data-field="result" data-formatter="scoreFormatter" data-cell-style="scoreStyle" data-align="center">Resultado</th>
 									<th data-field="goals" data-formatter="goalsFormatter" data-sortable="true" data-align="right">Goles</th>
-									<th data-field="score" data-formatter="userScoreFormatter" data-sortable="true" data-align="right">Puntuación</th>
+<!-- 									<th data-field="score" data-formatter="userScoreFormatter" data-sortable="true" data-align="right">Puntuación</th> -->
 <!-- 									<th data-field="titles" data-align="center">Títulos</th> -->
 								</tr>
 							</thead>

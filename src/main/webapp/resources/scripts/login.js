@@ -60,19 +60,19 @@ function loggedIn(response,loginType) {
 			data.picture = response.picture;
 		}
 		
-  	  $('.user-name').text(data.name);
-  	  $('.user-picture').attr("src",data.picture);
+  	  $('#player-name').text(data.name);
+  	  $('#player-picture').attr("src",data.picture);
   	  $('#login-button').slideUp(function() {$('#logout-button').slideDown();});
   	  $('#user-menu-item').slideDown();
   	  $('#player-picture').slideDown();
 	  $('#login-selector').modal('hide');
   	  
 	  $.post(
-			window.location.pathname+'api/login.request', 
+			'api/login.request', 
 			JSON.stringify(data), 
 			function( data ) {
 				if(data && data.nameweb){
-				  	$('.user-name').text(data.nameweb);
+				  	$('#player-name').text(data.nameweb);
 					
 					var waiter = setInterval(waitForMain, 1000);
 						

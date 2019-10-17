@@ -6,7 +6,7 @@
  * Variables and Constants
  */
 var options;
-var season;
+var season, player;
 var selectedSeasonMatches, numMatches, currentMatch;
 var chart;
 var nameweb;
@@ -81,6 +81,9 @@ function goalsFormatter(value,row,index){
 function userScoreFormatter(value,row,index){
 	return ( (parseDateToLong(row.date)+pollingLimit)>=new Date().getTime() )?
 			'<i class="fa fa-ban" aria-hidden="true"></i>' : value;
+}
+function nameFormatter(value,row,index){
+	return '<a href="'+window.location.origin+'/player?player='+value+'&league='+season+'">'+value+'</a>';
 }
 function scoreStyle(value, row, index, field){
 	var res = row.result.split(',');
@@ -214,6 +217,28 @@ $(function () {
     	};
     }
     
+    //Update scores for players in matches panel
+    var updateTeamScorers = function(match){
+    	$.post(
+  			'api/match-scorers.request', 
+  			JSON.stringify({season: season, match: match}), 
+  			function( matchScores ) {
+  				if(matchScores){
+  					for (var name in matchScores) {
+  					  var score= matchScores[name];
+  					  var icons='';
+  					  for(var i=0;i<score;i++){
+  						icons += '<i class="fa fa-futbol-o" aria-hidden="true"></i>';
+  					  }
+  					  $( "#table-results td:contains('"+name+"')" ).append(icons);
+  					}
+  				}else{
+					console.warn("Unknown exception updating team scorers: "+matchScores);
+  				}
+  			}
+	  	);
+	}
+    
     //Matches Panel
     var matchesFunction = function() {
     	
@@ -235,6 +260,8 @@ $(function () {
 	    $('#table-results thead tr:last th:last div.th-inner span').text(parseInt(selectedSeasonMatches[numMatches-1].scoreWhites));
 	    
 	    $('#next-match').addClass('disabled');
+	    updateUserName();
+	    updateTeamScorers(selectedSeasonMatches[currentMatch]);
 	    
 	    var updateResult = function(currentMatch){
 			$("#match-winner-button").removeClass("disabled");
@@ -249,6 +276,7 @@ $(function () {
 		    $('#table-results thead tr:last th:last div.th-inner span').text(parseInt(selectedSeasonMatches[currentMatch].scoreWhites));
 		    
 		    updateUserName();
+		    updateTeamScorers(selectedSeasonMatches[currentMatch]);
 		};
 		$('#next-match, #previous-match').unbind('click');
 	    $('#next-match').click(function(){
@@ -276,9 +304,22 @@ $(function () {
     
 	//Prepare page
     season = getParameter('league');
-	if(window.location.pathname.includes('/me')){
+    player = getParameter('player');
+	if(window.location.pathname.includes('/player')){
 		
-	    $.getJSON(window.location.pathname+'api/userStats.request?season='+season, function(data) {
+		$('#user-name').text(player);
+		$('#user-picture').on('error', function () {
+			console.warn('No se puede cargar fotos de '+player+': '+playersPictures[player]);
+			$('#user-picture').attr('src',window.location.origin+'/resources/images/unknown-player.jpg');
+		});
+		if(playersPictures[player]){
+			$('#user-picture').attr('src',playersPictures[player]);
+		}else{
+			$('#user-picture').attr('src',window.location.origin+'/resources/images/unknown-player.jpg');
+		}
+		$('#title').html('Liga '+season);
+		
+	    $.getJSON('api/userStats.request?season='+season+(player?'&player='+player:''), function(data) {
 	    	if(data){
 	    		$("#points").text(data.realPoints+' ('+data.points+')');
 	    		$("#win").text(data.wins);
@@ -292,20 +333,20 @@ $(function () {
 	    	}
 	    });
 	    
-    	selectedSeasonMatches = matches[season];
+    	selectedSeasonMatches = matches;
 	    numMatches = selectedSeasonMatches.length;
 	    currentMatch = numMatches-1;
 	    
 	    $('#table-player-matches').bootstrapTable({
-	        data: userMatches[season],
+	        data: userMatches,
 	        locale:'es-ES'
 	    });
 		if(pointsSeries){ createChart(pointsSeries, 'container-player-graph'); }
     	$('#points[data-toggle="tooltip"]').tooltip();
 	    
-	}else if(window.location.pathname.includes('/liga')){
+	}else if(window.location.pathname.includes('/league')){
 		
-		$('#title').html(season);
+		$('#title').html('Liga: '+season);
 		
 	    matchesFunction();
 	    playersFunction();
@@ -354,7 +395,7 @@ $(function () {
 			options.permanents[prop].forEach(function (value, i) {
 				body += value + (i<options.permanents[prop].length-1?', ':'.');
 			});
-			var leaguePanel = $('<a href="/liga?league='+prop+'"><div class="col-xs-12 col-sm-6 col-md-4 col-lg-3"><div id="" class="panel panel-default" style="min-height: 180px;">'+
+			var leaguePanel = $('<a href="/league?league='+prop+'"><div class="col-xs-12 col-sm-6 col-md-4 col-lg-3"><div id="" class="panel panel-default" style="min-height: 180px;">'+
 					'<div class="panel-heading">'+
 						'<h3 class="panel-title">'+prop+'</h3>'+
 				'</div><div class="panel-body">'+body+'</div>'+
@@ -367,7 +408,7 @@ $(function () {
     	var playerOne = $( "#player-one option:selected" ).text();
     	var playerTwo = $( "#player-two option:selected" ).text();
     	$.post(
-    			window.location.pathname+'api/comparison.request', 
+    			'api/comparison.request', 
     			JSON.stringify({season: season, 
     							playerOne: playerOne,
     							playerTwo: playerTwo}), 
@@ -393,7 +434,7 @@ $(function () {
     
     //refresh and process data, only for admin
     $('#refresh').click(function(){
-    	$.getJSON(window.location.pathname+'api/refresh.request', function (data) {
+    	$.getJSON('api/refresh.request', function (data) {
     		if(data=='true' || data==true){
     			location.reload();
     		}

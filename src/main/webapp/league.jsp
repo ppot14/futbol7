@@ -22,16 +22,16 @@
 
 	<%@ include file="nav.jsp" %>
 	
-	<%@ include file="legend-modal.jsp" %>
+<%-- 	<%@ include file="legend-modal.jsp" %> --%>
 	
 	<%@ include file="login-modal.jsp" %>
 	
-	<%@ include file="last-match-winner-modal.jsp" %>
+<%-- 	<%@ include file="last-match-winner-modal.jsp" %> --%>
 	
-	<%@ include file="polling-modal.jsp" %>
+<%-- 	<%@ include file="polling-modal.jsp" %> --%>
 	
 	<div id="home-page" class="container-fluid">
-		<h1 id="title"></h1>
+		<h1 id="title" style="text-align: center;"></h1>
 		<div id="row1" class="row">
 			<div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
 			
@@ -43,7 +43,7 @@
 						<table id="table-permanents" data-sort-name="realPoints" data-sort-order="desc" data-striped="true">
 							<thead>
 								<tr>
-									<th data-field="name" data-sortable="true" class="column-name">Nombre</th>
+									<th data-field="name" data-formatter="nameFormatter" data-sortable="true" class="column-name">Nombre</th>
 									<th data-field="lastMatches" data-formatter="lastMatchesFormat" data-sortable="false" data-align="center">UP</th>
 									<th data-field="realPoints" data-sortable="true" data-align="right">Pts</th>
 									<th data-field="points" data-sortable="true" data-align="right">Pts*</th>
@@ -54,7 +54,7 @@
 									<th data-field="goalsFor" data-sortable="true" data-align="right">Gol</th>
 									<th data-field="pointsAVG" data-sortable="true" data-align="right" data-formatter="decimal"><span style="text-decoration:overline">Pts</span></th>
 									<th data-field="goalsForAVG" data-sortable="true" data-align="right" data-formatter="decimal"><span style="text-decoration:overline">Gol</span></th>
-									<th data-field="scoreAVG" data-sortable="true" data-align="right" data-formatter="decimal"><span style="text-decoration:overline">Pun</span></th>
+<!-- 									<th data-field="scoreAVG" data-sortable="true" data-align="right" data-formatter="decimal"><span style="text-decoration:overline">Pun</span></th> -->
 								</tr>
 							</thead>
 						</table>
@@ -71,7 +71,7 @@
 						<table id="table-substitutes" data-sort-name="realPoints" data-sort-order="desc" data-striped="true">
 							<thead>
 								<tr>
-									<th data-field="name" data-sortable="true" class="column-name">Nombre</th>
+									<th data-field="name" data-formatter="nameFormatter" data-sortable="true" class="column-name">Nombre</th>
 									<th data-field="lastMatches" data-formatter="lastMatchesFormat" data-sortable="false" data-align="center">UP</th>
 									<th data-field="realPoints" data-sortable="true" data-align="right">Pts</th>
 									<th data-field="points" data-sortable="true" data-align="right">Pts*</th>
@@ -82,7 +82,7 @@
 									<th data-field="goalsFor" data-sortable="true" data-align="right">Gol</th>
 									<th data-field="pointsAVG" data-sortable="true" data-align="right" data-formatter="decimal"><span style="text-decoration:overline">Pts</span></th>
 									<th data-field="goalsForAVG" data-sortable="true" data-align="right" data-formatter="decimal"><span style="text-decoration:overline">Gol</span></th>
-									<th data-field="scoreAVG" data-sortable="true" data-align="right" data-formatter="decimal"><span style="text-decoration:overline">Pun</span></th>
+<!-- 									<th data-field="scoreAVG" data-sortable="true" data-align="right" data-formatter="decimal"><span style="text-decoration:overline">Pun</span></th> -->
 								</tr>
 							</thead>
 						</table>
@@ -102,7 +102,7 @@
 						<table id="table-full" data-sort-name="realPoints" data-sort-order="desc"  data-striped="true">
 							<thead>
 								<tr>
-									<th data-field="name" data-sortable="true" class="column-name">Nombre</th>
+									<th data-field="name" data-formatter="nameFormatter" data-sortable="true" class="column-name">Nombre</th>
 									<th data-field="lastMatches" data-formatter="lastMatchesFormat" data-sortable="false" data-align="center">UP</th>
 									<th data-field="realPoints" data-sortable="true" data-align="right">Pts</th>
 									<th data-field="points" data-sortable="true" data-align="right">Pts*</th>
@@ -113,7 +113,7 @@
 									<th data-field="goalsFor" data-sortable="true" data-align="right">Gol</th>
 									<th data-field="pointsAVG" data-sortable="true" data-align="right" data-formatter="decimal"><span style="text-decoration:overline">Pts</span></th>
 									<th data-field="goalsForAVG" data-sortable="true" data-align="right" data-formatter="decimal"><span style="text-decoration:overline">Gol</span></th>
-									<th data-field="scoreAVG" data-sortable="true" data-align="right" data-formatter="decimal"><span style="text-decoration:overline">Pun</span></th>
+<!-- 									<th data-field="scoreAVG" data-sortable="true" data-align="right" data-formatter="decimal"><span style="text-decoration:overline">Pun</span></th> -->
 								</tr>
 							</thead>
 						</table>
@@ -141,8 +141,8 @@
 									</th>
 								</tr>
 								<tr>
-									<th data-field="blue" >Equipo Azul <span class="pull-right"></span></th>
-									<th data-field="white" >Equipo Blanco <span class="pull-right"></span></th>
+									<th data-field="blue" data-formatter="nameFormatter" >Equipo Azul <span class="pull-right"></span></th>
+									<th data-field="white" data-formatter="nameFormatter" >Equipo Blanco <span class="pull-right"></span></th>
 								</tr>
 							</thead>
 							<tfoot>
@@ -166,7 +166,7 @@
 						<table id="table-scorers" data-sort-name="scores" data-sort-order="desc" data-striped="true" data-pagination="true">
 							<thead>
 								<tr>
-									<th data-field="name" data-sortable="true">Nombre</th>
+									<th data-field="name" data-formatter="nameFormatter" data-sortable="true">Nombre</th>
 									<th data-field="scores" data-sortable="true" data-align="right">Goles</th>
 								</tr>
 							</thead>
@@ -189,8 +189,8 @@
                data-pagination="true">
 							<thead>
 								<tr>
-									<th data-field="player1" data-sortable="true">Nombre</th>
-									<th data-field="player2" data-sortable="true">Nombre</th>
+									<th data-field="player1" data-formatter="nameFormatter" data-sortable="true">Nombre</th>
+									<th data-field="player2" data-formatter="nameFormatter" data-sortable="true">Nombre</th>
 									<th data-field="vs" data-sortable="true" data-align="right">J</th>
 								</tr>
 							</thead>
@@ -210,8 +210,8 @@
                data-pagination="true">
 							<thead>
 								<tr>
-									<th data-field="player1" data-sortable="true">Nombre</th>
-									<th data-field="player2" data-sortable="true">Nombre</th>
+									<th data-field="player1" data-formatter="nameFormatter" data-sortable="true">Nombre</th>
+									<th data-field="player2" data-formatter="nameFormatter" data-sortable="true">Nombre</th>
 									<th data-field="pair" data-sortable="true" data-align="right">J</th>
 								</tr>
 							</thead>

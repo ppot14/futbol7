@@ -1004,55 +1004,49 @@ public class APIUtil {
 		return DBConnector.getPlayersPictures();
 	}
 
-	public Object getUserMatches(String user) {
-		Map<String,List<Map<String, String>>> res = new HashMap<String,List<Map<String,String>>>();
+	public List<Map<String, String>> getUserMatches(String season, String user) {
+		List<Map<String, String>> res = new ArrayList<Map<String,String>>();
 		
 		try{
-		
-			for(Entry<String, List<List<String>>> seasonMatches: rawMatches.entrySet()){
-				String season = seasonMatches.getKey();
-				List<Map<String, String>> res1 = new ArrayList<Map<String,String>>();
-				for(List<String> match : seasonMatches.getValue()){
-					if(isRowEmpty(match)) break;
-					
-					Map<String, String> formattedMatch = new HashMap<String, String>();
-					String date = match.get(0);
-					formattedMatch.put("date", formatter2.format(formatter.parse(date)));
-					formattedMatch.put("team", "");
-					for(int i=1;i<8;i++){
-						if(user.equals(match.get(i))){
-							formattedMatch.put("team", "blue");
-							break;
-						}
-						if(user.equals(match.get(i+9))){
-							formattedMatch.put("team", "white");
-							break;
-						}
+			for(List<String> match : rawMatches.get(season)){
+				if(isRowEmpty(match)) break;
+				
+				Map<String, String> formattedMatch = new HashMap<String, String>();
+				String date = match.get(0);
+				formattedMatch.put("date", formatter2.format(formatter.parse(date)));
+				formattedMatch.put("team", "");
+				for(int i=1;i<8;i++){
+					if(user.equals(match.get(i))){
+						formattedMatch.put("team", "blue");
+						break;
 					}
-					
-					formattedMatch.put("result",  match.get(8)+","+match.get(9) );
-					formattedMatch.put("goals", (scorersByDate.get(season)!=null && 
-												scorersByDate.get(season).get(date)!=null && 
-												scorersByDate.get(season).get(date).get(user)!=null)?
-												scorersByDate.get(season).get(date).get(user)+"": "");
-					ObjectNode jsonNode = new ObjectNode(JsonNodeFactory.instance);
-					jsonNode.put("season", season);
-					ObjectNode day = new ObjectNode(JsonNodeFactory.instance);
-					day.put("day", formatter.parse(date).getTime());
-					jsonNode.put("match", day);
-					List<Map.Entry<String,Map<String,Object>>> o = (List<Entry<String, Map<String, Object>>>) getLastMatchResult(jsonNode);
-					if(o!=null){
-						for(Map.Entry<String,Map<String,Object>> e : o){
-							if(user.equals(e.getKey())){
-								formattedMatch.put("score", String.format("%,.2f",e.getValue().get("avg")));
-								formattedMatch.put("titles",  "" );
-								break;
-							}
-						}
+					if(user.equals(match.get(i+9))){
+						formattedMatch.put("team", "white");
+						break;
 					}
-					res1.add(0,formattedMatch);
 				}
-				res.put(season, res1);
+				
+				formattedMatch.put("result",  match.get(8)+","+match.get(9) );
+				formattedMatch.put("goals", (scorersByDate.get(season)!=null && 
+											scorersByDate.get(season).get(date)!=null && 
+											scorersByDate.get(season).get(date).get(user)!=null)?
+											scorersByDate.get(season).get(date).get(user)+"": "");
+				ObjectNode jsonNode = new ObjectNode(JsonNodeFactory.instance);
+				jsonNode.put("season", season);
+				ObjectNode day = new ObjectNode(JsonNodeFactory.instance);
+				day.put("day", formatter.parse(date).getTime());
+				jsonNode.put("match", day);
+				List<Map.Entry<String,Map<String,Object>>> o = (List<Entry<String, Map<String, Object>>>) getLastMatchResult(jsonNode);
+				if(o!=null){
+					for(Map.Entry<String,Map<String,Object>> e : o){
+						if(user.equals(e.getKey())){
+							formattedMatch.put("score", String.format("%,.2f",e.getValue().get("avg")));
+							formattedMatch.put("titles",  "" );
+							break;
+						}
+					}
+				}
+				res.add(0,formattedMatch);
 			}
 		
 		}catch(Exception e){

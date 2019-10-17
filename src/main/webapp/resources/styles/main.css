@@ -233,3 +233,14 @@ div.player-badge:hover i{
     	margin-bottom: 15px;
 	}
 }
+
+/**
+* PAGE league
+*/
+#table-results i.fa-futbol-o
+{
+	float: right;
+    line-height: 20px;
+    font-size: 10px;
+    margin-left: 2px;
+}
