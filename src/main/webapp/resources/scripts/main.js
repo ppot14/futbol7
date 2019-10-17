@@ -129,21 +129,13 @@ function updateUserName(){
  * Admin Functions
  */
 function showAdmin(){
-	if(window.location.pathname.includes('/me')){
-	}else{
-		if(nameweb && usertype == 'admin' ){
-			$('#refresh').slideDown();
-		}
-		createChart(pointsSeries, 'container-graph');
+	if(nameweb && usertype == 'admin' ){
+		$('#refresh').slideDown();
 	}
 }
 
 function hideAdmin(){
 	$('#refresh').slideUp();
-	if(window.location.pathname.includes('/me')){
-	}else{
-		try{ chart.destroy(); }catch(e){console.warn(e.message)};
-	}
 }
 
 //create players chart 
@@ -382,6 +374,7 @@ $(function () {
 	        locale:'es-ES',
 	        onAll: function(name, args){ updateUserName() }
 	    });
+		if(pointsSeries){ createChart(pointsSeries, 'container-graph'); }
 		
 	//index page
 	}else{
@@ -395,11 +388,12 @@ $(function () {
 			options.permanents[prop].forEach(function (value, i) {
 				body += value + (i<options.permanents[prop].length-1?', ':'.');
 			});
-			var leaguePanel = $('<a href="/league?league='+prop+'"><div class="col-xs-12 col-sm-6 col-md-4 col-lg-3"><div id="" class="panel panel-default" style="min-height: 180px;">'+
-					'<div class="panel-heading">'+
-						'<h3 class="panel-title">'+prop+'</h3>'+
-				'</div><div class="panel-body">'+body+'</div>'+
-			'</div></div></a>').prependTo('#'+rowId);	
+			var leaguePanel = $('<a href="/league?league='+prop+'"><div class="col-xs-12 col-sm-6 col-md-4 col-lg-3">'+
+									'<div id="" class="panel panel-default" style="min-height: 180px;">'+
+										'<div class="panel-heading">'+
+											'<h3 class="panel-title">'+prop+'</h3>'+
+									'</div><div class="panel-body">'+body+'</div>'+
+								'</div></div></a>').prependTo('#'+rowId);	
 		}
 	}
     

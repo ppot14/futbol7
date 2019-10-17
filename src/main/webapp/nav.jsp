@@ -26,7 +26,7 @@
 				<a class="navbar-link"><i class="fa fa-refresh" aria-hidden="true"></i>&nbsp; Actualizar datos</a>
 			</li>
 			<li id="user-menu-item" style="display:none">
-				<a class="navbar-link" href="me">
+				<a class="navbar-link">
 					<img id="player-picture" alt="player picture" class="user-picture img-rounded"/>&nbsp; 
 					<span id="player-name" class="user-name"></span>
 				</a>
