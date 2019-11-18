@@ -1,18 +1,20 @@
   <head>
 <% 
-	final boolean minimized = (Boolean) request.getAttribute("minimized"); 
-	final boolean production = (Boolean) request.getAttribute("production");
+	final boolean minimized = request!=null && request.getAttribute("minimized")!=null? (Boolean) request.getAttribute("minimized") : false; 
+	final boolean production = request!=null && request.getAttribute("production")!=null? (Boolean) request.getAttribute("production") : true;
+	final String league = request!=null && request.getAttribute("league")!=null? (String) request.getAttribute("league") : "";
+	final String player = request!=null && request.getAttribute("player")!=null? (String) request.getAttribute("player") : "";
 %>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-	<meta name="description" content="Futbol 7 Tabladilla (Ex-San Jerónimo), página de la hermandad de las eternas promesas que dieronse a la cerveza">
+	<meta name="description" content="Futbol7.pro<%=!"".equals(league)?" - Liga "+league:""%><%=!"".equals(player)?" - Jugador: "+player:""%> - página de la hermandad de las eternas promesas que dieronse a la cerveza.">
 	<meta content="futbol7, san jeronimo, tabladilla" name="keywords"/>
 	
 	<meta property="fb:app_id" content="1606586212720990"/>
-	<meta property="og:title" content="Futbol 7 Tabladilla (Ex-San Jerónimo)" />
+	<meta property="og:title" content="Futbol7.pro<%=!"".equals(league)?" - "+league:""%><%=!"".equals(player)?" - "+player:""%>" />
 	<meta property="og:type" content="website" />
-	<meta property="og:description" content="Futbol 7 Tabladilla (Ex-San Jerónimo), página de la hermandad de las eternas promesas que dieronse a la cerveza... y Sí, el de arriba a la izquierda es Carlos Marchena y jugó con nosotros" />
+	<meta property="og:description" content="Futbol7.pro<%=!"".equals(league)?" - Liga "+league:""%><%=!"".equals(player)?" - Jugador: "+player:""%> - página de la hermandad de las eternas promesas que dieronse a la cerveza." />
 	<meta property="og:locale" content="es_ES" />
 	<meta property="og:url" content="https://www.futbol7.pro" />
 	<meta property="og:image" content="https://www.futbol7.pro/resources/images/marchena.jpg" />
@@ -22,7 +24,7 @@
 	
 <!-- 	<meta name="google-signin-client_id" content="517911210517-uupk9pfrbcsnce7qblohvpmog4hc6bfu.apps.googleusercontent.com"> -->
     
-    <title>Futbol 7 Tabladilla (Ex-San Jerónimo)</title>
+    <title>Futbol7.pro<%=!"".equals(league)?" - "+league:""%><%=!"".equals(player)?" - "+player:""%></title>
   
 	<%if(!minimized){%>
 	<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" media="all"/>
@@ -74,12 +76,16 @@
 <!-- 	<script src="resources/scripts/merged.min.js" defer></script> -->
 	<%}%>
 	
-<!-- 	<link rel="shortcut icon" href="resources/images/logo.ico" /> -->
-	<link rel="apple-touch-icon" sizes="120x120" href="resources/images/favicon120.png">
+	<link rel="shortcut icon" href="resources/images/favicon.ico" />
+	<link rel="apple-touch-icon" sizes="180x180" href="resources/images/apple-touch-icon.png">
 	<link rel="icon" type="image/png" sizes="120x120" href="resources/images/favicon120.png">
 	<link rel="icon" type="image/png" sizes="32x32" href="resources/images/favicon32.png">
 	<link rel="icon" type="image/png" sizes="16x16" href="resources/images/favicon16.png">
+	<link rel="mask-icon" href="resources/images/safari-pinned-tab.svg" color="#00a300">
 	<link rel="manifest" href="/manifest.json">
-	<meta name="theme-color" content="#222">	
-
+	<meta name="theme-color" content="#ffffff">	
+	<meta name="msapplication-TileColor" content="#00a300">
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="apple-mobile-web-app-status-bar-style" content="#00a300" />
+	<meta name="mobile-web-app-capable" content="yes" />
   </head>

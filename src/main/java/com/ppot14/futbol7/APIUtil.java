@@ -89,6 +89,12 @@ public class APIUtil {
 		return options;
 	}
 
+	public Object getPermanents(Map<String,Object> config) {
+		Map<String, Object> options = new HashMap<String,Object>();
+		options.put("permanents", (Map<String,List<String>>) config.get("permanents"));
+		return options;
+	}
+
 	@SuppressWarnings("unchecked")
 	public synchronized boolean processData(boolean refresh, Map<String,Object> config){
     	

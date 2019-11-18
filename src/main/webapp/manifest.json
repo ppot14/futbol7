@@ -1,7 +1,7 @@
 {
-	"short_name": "Futbol 7",
-    "name": "Futbol 7 Tabladilla (Ex-San Jerónimo)",
-	"description": "Futbol 7 Tabladilla (Ex-San Jerónimo), página de la hermandad de las eternas promesas que dieronse a la cerveza",
+	"short_name": "Futbol7.pro",
+    "name": "Futbol7.pro",
+	"description": "Futbol7.pro - p�gina de la hermandad de las eternas promesas que dieronse a la cerveza",
     "icons": [
         {
             "src": "resources/images/favicon16.png",
@@ -14,7 +14,7 @@
             "type": "image/png"
         },
         {
-            "src": "resources/images/favicon364.png",
+            "src": "resources/images/favicon64.png",
             "sizes": "64x64",
             "type": "image/png"
         },
@@ -49,9 +49,9 @@
             "type": "image/png"
         }
     ],
-    "start_url": "/?utm_source=homescreen",
-    "scope": "/",
-    "theme_color": "#222",
+    "start_url": "/?utm_source=homescreen&utm_medium=webapp",
+    "theme_color": "#ffffff",
     "background_color": "#ffffff",
+  	"orientation": "portrait",
     "display": "standalone"
 }

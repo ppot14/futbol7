@@ -53,11 +53,13 @@ public class Futbol7HTMLServlet extends Futbol7Servlet {
 		
 		String league = request.getParameter("league");
 		String player = request.getParameter("player");
+		if(league!=null) { request.setAttribute("league", league); }
+		if(player!=null) { request.setAttribute("player", player); }
 		
 		request.setAttribute("minimized", getConfig().get("minimized"));
 		request.setAttribute("production", getConfig().get("production"));
 		request.setAttribute("enableVote", getConfig().get("enableVote"));
-		request.setAttribute("options", mapper.writeValueAsString(getApi().getPermanents())); //Only Permanents for now
+		request.setAttribute("options", mapper.writeValueAsString(getApi().getPermanents(getConfig()))); //Only Permanents for now
 		
 		String requestPath = request.getServletPath();
 		if("/league".equals(requestPath)){

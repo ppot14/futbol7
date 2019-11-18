@@ -95,7 +95,7 @@ $(function () {
         appId      : '1606586212720990',
         status	   : true,
         xfbml      : true,
-        version    : 'v2.10',
+        version    : 'v3.3',
         cookie 	   : true
       });
       FB.AppEvents.logPageView(); 
