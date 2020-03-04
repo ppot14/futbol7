@@ -60,6 +60,8 @@ public class APIUtil {
 	private static final List<String> TITLES = Arrays.asList(TROMPITO,DANDY,FRANCES,SILLEGAS,PORCULERO);
 	
 	private static Map<String,List<String>> PERMANENTS = null;
+	
+	private static final long pollingLimit = 4*24*60*60*1000 + 12*60*60*1000;//4 days and half. Friday at midday or Sunday and middays
 
 	private static SimpleDateFormat formatter = new SimpleDateFormat("dd-MMM-yyyy");
 	private static SimpleDateFormat formatter2 = new SimpleDateFormat("dd/MM/yyyy");
@@ -305,7 +307,7 @@ public class APIUtil {
     		}
 		
 		}catch(Exception e){
-			Log.warn("Error getting point series: "+e.getMessage());
+			Log.warn("Error getting point series: "+e.getMessage()+", season: "+season+", user: "+user);
 			e.printStackTrace();
 		}
         
@@ -503,7 +505,9 @@ public class APIUtil {
 		players = new HashMap<String, Set<String>>();
 		
 		for(String seasonName: rawMatches.keySet()){
-			Map<String, String> avgSeasonPlayerScore = avgSeasonPlayerScore(seasonName);
+//			Map<String, String> avgSeasonPlayerScore = avgSeasonPlayerScore(seasonName);
+			
+			Map<String, Integer> mvpsByPlayers = getMVPsByPlayers(seasonName);
 			
 			fullRanking.put(seasonName, new ArrayList<Map<String,String>>());
 	        players.put(seasonName, getListOfPlayers(points, realPoints, wins, draws, loses, matches, seasonName));
@@ -522,17 +526,21 @@ public class APIUtil {
 	        	e.put("loses", loses.get(seasonName).containsKey(name)?loses.get(seasonName).get(name).toString():"0");
 	        	e.put("matches", matches.get(seasonName).get(name).toString());
 	        	e.put("lastMatches", getLastMatches(name,seasonName));
+	        	e.put("MVPs", ""+(mvpsByPlayers.containsKey(name)?mvpsByPlayers.get(name):0));
 	        	boolean valid = matches.get(seasonName).get(name)>=(numMatches.get(seasonName)*MIN_VALID_MATCHES);
 	        	e.put("pointsAVG", (valid?new Float(realPoints.get(seasonName).get(name)*1.0F/matches.get(seasonName).get(name)):"").toString());
 	        	e.put("goalsForAVG", (valid?new Float(goals*1.0F/matches.get(seasonName).get(name)):"").toString());
 //	        	e.put("goalsForAVG", (valid?new Float(goalsFor.get(seasonName).get(name)*1.0F/matches.get(seasonName).get(name)):"").toString());
 //	        	e.put("goalsAgainstAVG", (valid?new Float(goalsAgainst.get(seasonName).get(name)*1.0F/matches.get(seasonName).get(name)):new Float(99.99F)).toString());
-	        	e.put("scoreAVG", (valid&&avgSeasonPlayerScore.containsKey(name))?avgSeasonPlayerScore.get(name):"0");
+//	        	e.put("scoreAVG", (valid&&avgSeasonPlayerScore.containsKey(name))?avgSeasonPlayerScore.get(name):"0");
 	        	fullRanking.get(seasonName).add(e);
 	        }
 		}
 	}
 	
+	/**
+	 * @deprecated
+	 */
 	private Map<String, String> avgSeasonPlayerScore(String seasonName){
 		Document d = DBConnector.getVotes(seasonName);
 		Map<String, String> avgSeasonPlayerScore = new HashMap<String,String>();
@@ -951,15 +959,10 @@ public class APIUtil {
 			Long dateL = jsonNode.get("date").asLong();
 			String date = formatter2.format(new Date(dateL));
 			String season = jsonNode.get("season").asText();
-			String trompito = jsonNode.get("trompito").asText();
-			String dandy = jsonNode.get("dandy").asText();
-			String frances = jsonNode.get("frances").asText();
-			String sillegas = jsonNode.get("sillegas").asText();
-			String porculero = jsonNode.get("porculero").asText();
-			String voter = null;
-			ArrayNode scores = (ArrayNode) jsonNode.get("scores");
-			if(scores==null || scores.size()!=13){
-				logger.warning("No scores saving polling for match "+date+" "+season);
+			String voter = jsonNode.get("voter").asText();
+			String voted = jsonNode.get("voted").asText();
+			if(voter==null || voted==null){
+				logger.warning("No voter neither voted player "+date+" "+season+" "+voter+" "+voted);
 				return null;
 			}
 			Document votes = DBConnector.getVotes(season, date);
@@ -967,30 +970,17 @@ public class APIUtil {
 				Document d = new Document();
 				d.put("season", season);
 				d.put("date", date);
-				d.put("trompito", Arrays.asList(trompito));
-				d.put("dandy", Arrays.asList(dandy));
-				d.put("frances", Arrays.asList(frances));
-				d.put("sillegas", Arrays.asList(sillegas));
-				d.put("porculero", Arrays.asList(porculero));
 				DBConnector.createScore(d);
-			}else{
-				DBConnector.addTitleVote(dateL, season, trompito, dandy, frances, sillegas, porculero);
 			}
-			for(JsonNode p : scores){
-				voter = p.get("voter").asText();
-				String voted = p.get("voted").asText();
-				Double score = p.get("score").asDouble();
-				String comment = p.get("comment").asText();
-				Document hasVoted = DBConnector.hasVotedPlayer(voter, voted, dateL, season);
-				if(hasVoted==null){
-					if(!DBConnector.addPunctuation(voter, voted, score, comment, dateL, season)){
-						logger.warning("Error trying to insert into DB: "+voter+" votes "+voted+" for match "+date+" "+season);
-					}
-				}else{
-					logger.warning(voter+" already voted "+voted+" for match "+date+" "+season);
+			Document hasVoted = DBConnector.hasVoted(jsonNode);
+			if(hasVoted==null){
+				if(!DBConnector.addPunctuation(voter, voted, dateL, season)){
+					logger.warning("Error trying to insert into DB: "+voter+" votes "+voted+" for match "+date+" "+season);
 				}
+			}else{
+				logger.warning(voter+" already voted "+voted+" for match "+date+" "+season);
 			}
-			logger.info(voter+" has voted "+scores.size()+" players, for match "+date+" "+season);
+			logger.info(voter+" has voted "+voted+", for match "+date+" "+season);
 		}catch (Exception e) {
 			e.printStackTrace();
 			return Document.parse("{error: 'savePolling: "+e.getMessage()+"'}");
@@ -1012,6 +1002,7 @@ public class APIUtil {
 
 	public List<Map<String, String>> getUserMatches(String season, String user) {
 		List<Map<String, String>> res = new ArrayList<Map<String,String>>();
+		Map<String, Set<String>> mvps = getMVPs(season);
 		
 		try{
 			for(List<String> match : rawMatches.get(season)){
@@ -1019,7 +1010,8 @@ public class APIUtil {
 				
 				Map<String, String> formattedMatch = new HashMap<String, String>();
 				String date = match.get(0);
-				formattedMatch.put("date", formatter2.format(formatter.parse(date)));
+				String formattedDater = formatter2.format(formatter.parse(date));
+				formattedMatch.put("date", formattedDater);
 				formattedMatch.put("team", "");
 				for(int i=1;i<8;i++){
 					if(user.equals(match.get(i))){
@@ -1037,21 +1029,22 @@ public class APIUtil {
 											scorersByDate.get(season).get(date)!=null && 
 											scorersByDate.get(season).get(date).get(user)!=null)?
 											scorersByDate.get(season).get(date).get(user)+"": "");
-				ObjectNode jsonNode = new ObjectNode(JsonNodeFactory.instance);
-				jsonNode.put("season", season);
-				ObjectNode day = new ObjectNode(JsonNodeFactory.instance);
-				day.put("day", formatter.parse(date).getTime());
-				jsonNode.put("match", day);
-				List<Map.Entry<String,Map<String,Object>>> o = (List<Entry<String, Map<String, Object>>>) getLastMatchResult(jsonNode);
-				if(o!=null){
-					for(Map.Entry<String,Map<String,Object>> e : o){
-						if(user.equals(e.getKey())){
-							formattedMatch.put("score", String.format("%,.2f",e.getValue().get("avg")));
-							formattedMatch.put("titles",  "" );
-							break;
-						}
-					}
-				}
+				formattedMatch.put("mvps", mvps.containsKey(formattedDater)?""+mvps.get(formattedDater).contains(user):"");
+//				ObjectNode jsonNode = new ObjectNode(JsonNodeFactory.instance);
+//				jsonNode.put("season", season);
+//				ObjectNode day = new ObjectNode(JsonNodeFactory.instance);
+//				day.put("day", formatter.parse(date).getTime());
+//				jsonNode.put("match", day);
+//				List<Map.Entry<String,Map<String,Object>>> o = (List<Entry<String, Map<String, Object>>>) getLastMatchResult(jsonNode);
+//				if(o!=null){
+//					for(Map.Entry<String,Map<String,Object>> e : o){
+//						if(user.equals(e.getKey())){
+//							formattedMatch.put("score", String.format("%,.2f",e.getValue().get("avg")));
+//							formattedMatch.put("titles",  "" );
+//							break;
+//						}
+//					}
+//				}
 				res.add(0,formattedMatch);
 			}
 		
@@ -1061,5 +1054,53 @@ public class APIUtil {
 		}
 	
 		return res;
+	}
+	
+	public synchronized Map<String, Set<String>> getMVPs(String seasonName) {
+		Document d = DBConnector.getVotes(seasonName);
+		Map<String, Set<String>> listSeasonPlayerScore = new HashMap<String,Set<String>>();
+		try {
+			for(Entry<String, Object> dateVotes : d.entrySet()){
+				if(formatter2.parse(dateVotes.getKey()).getTime()+pollingLimit<new Date().getTime()) {
+					List<Document> scores = (List<Document>) ((Document)dateVotes.getValue()).get("scoresMVP");
+					if(scores!=null && scores.size()>=5){
+						Map<String, Integer> temp = new HashMap<String,Integer>();
+						for(Document score : scores){
+							String voted = score.getString("voted");
+							temp.put(voted, (temp.containsKey(voted)? temp.get(voted): 0) + 1);
+						}
+						Set<String> mvps = new HashSet<String>();  
+						int max = 2;
+						for(Entry<String, Integer> scoresMVP : temp.entrySet()){
+							if(scoresMVP.getValue()>max) {
+								max = scoresMVP.getValue();
+								mvps = new HashSet<String>();
+								mvps.add(scoresMVP.getKey());
+							}else if(scoresMVP.getValue()==max) {
+								mvps.add(scoresMVP.getKey());
+							}
+						}
+						listSeasonPlayerScore.put(dateVotes.getKey(), mvps);
+					}
+				}
+			}
+		}catch(Exception e) {
+			Log.warn("Error getting MVP: "+e.getMessage());
+			e.printStackTrace();
+		}
+		return listSeasonPlayerScore;
+	}
+	
+	public synchronized Map<String, Integer> getMVPsByPlayers(String seasonName) {
+		Map<String, Integer> mvpsByPlayers =  new HashMap<String, Integer>();
+		Map<String, Set<String>> listSeasonPlayerScore = getMVPs(seasonName);
+		
+		for(Entry<String, Set<String>> dateMVPs : listSeasonPlayerScore.entrySet()){
+			for(String playerMVP : dateMVPs.getValue()) {
+				mvpsByPlayers.put(playerMVP, (mvpsByPlayers.containsKey(playerMVP)? mvpsByPlayers.get(playerMVP): 0) + 1);
+			}
+		}
+		
+		return mvpsByPlayers;
 	}
 }

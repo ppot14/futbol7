@@ -2,11 +2,8 @@
  * login.js
  */
 var usertype;
-var pollingLimit = 4*24*60*60*1000 + 12*60*60*1000;//4 days and half. Friday at midday
-var pollingReady = 23*60*60*1000;//Polling ready at 23:00
 var matchScores;
 var t2;
-var hasVoted = false;
 
 function facebookStatusChangeCallback(response) {
 	if(response.status && response.status == 'connected'){
@@ -31,11 +28,10 @@ function loggedOut(){
   	$('#user-menu-item').slideUp();
   	$('#player-picture').slideUp();
   	$( "td:contains('"+nameweb+"')" ).css( "font-weight", "normal" );
-	$( "tr:contains('"+nameweb+"')" ).removeClass( "info" );
+	$( "tr:contains('"+nameweb+"')" ).removeClass( "table-info" );
 	hideAdmin();
 	nameweb = null;
 	usertype = null;
-	hasVoted = false;
 }
 
 function loggedIn(response,loginType) {
@@ -73,6 +69,7 @@ function loggedIn(response,loginType) {
     				usertype = data.usertype;
     				showAdmin();
     				updateUserName();
+    				action('LOGIN');
 				}else if(data && data.newuser){
 					console.info("New user created: "+data.newuser);
 				}else{

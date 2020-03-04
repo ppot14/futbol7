@@ -18,12 +18,12 @@
 	
 	<div id="home-page" class="container-fluid">
 			
-		<h1>Ligas de esta temporada</h1>
-		<div id="current-season-row" class="row">
+		<h1 class="text-center">Ligas de esta temporada</h1>
+		<div id="current-season-row" class="card-deck">
 		</div>
 		
-		<h1>Ligas pasadas</h1>
-		<div id="past-season-row" class="row">
+		<h1 class="text-center">Ligas pasadas</h1>
+		<div id="past-season-row" class="card-deck">
 		</div>
 		
 	</div>

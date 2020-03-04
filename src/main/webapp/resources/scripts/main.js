@@ -8,19 +8,8 @@
 var options;
 var season, player;
 var selectedSeasonMatches, numMatches, currentMatch;
-var chart;
+var chart, scoresPointsChart;
 var nameweb;
-var titles = [{
-		id: 'trompito', icon: 'undo', name:'El Trompito', title:'Título al más chupón', desc:'El Trompito. Título al más chupón del partido, ese que es capaz de recorrer los cuatro corners con el balon en los pies antes de tirar a puerta. Homenaje del Sr Bordas al Sr Rivera'
-	},{
-		id: 'dandy', icon: 'glass', name:'El Dandy', title:'Título al jugador con más clase y elegante', desc:'El Dandy. Título al jugador con más clase y elegancia, ese que no necesita la posesión y deja unas asistencias a la derecha mirando a la izquierda que más quisiera Michael Laudrup. Homenaje a Sr Revuelta'
-	},{
-		id: 'frances', icon: 'wheelchair-alt', name:'El Francés', title:'TTítulo al más guarro', desc:'El Francés. Título al más guarro, ese que es capaz de dejarte un cardenal del tamaño del obispo de Jerez durante temporada y media y encima dice que no es falta. En honor al Sr Mativet'
-	},{
-		id: 'sillegas', icon: 'clock-o', name:'El Sillegas', title:'Título al más impuntual e impresentable', desc:'El Sillegas. Título al más impuntual e impresentable, ese que es capaz de buscar atascos en Google Maps para no llegar a su hora aunque trabaje menos que un funcionario de la junta. Homenaje a Sr Pozo y Sr Villegas'
-	},{
-		id: 'porculero', icon: 'bullhorn', name:'El Porculero', title:'Título al más protestón y bocazas', desc:'El Porculero. Título al más protestón y bocazas, ese que es capaz de pelearse hasta con los del equipo contrario, que protesta hasta cuando tiene el balón o que tiene a su equipo desquiciado aúnque ganen 10-0. Honorífico a los Sr Bordas, Sr Tristán y Sr Rivera'
-	}];
 
 /*
  * Static Utility Functions
@@ -37,6 +26,12 @@ function parseDate(s){
 function parseDateToLong(s){
 	return parseDate(s).getTime();
 }
+function longToDateTime(l){
+	return new Date(l).toLocaleString('es-ES',{ day:'numeric',weekday: 'long', hour:'numeric',minute:'numeric' });
+}
+function longToDate(l){
+	return new Date(l).toLocaleDateString();
+}
 function getParameterByName(name) {
       name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
       var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
@@ -44,8 +39,11 @@ function getParameterByName(name) {
       return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
 }
   
-function decimal(value, row) {
-	return parseFloat(Math.round(value * 100) / 100).toFixed(2);
+function percentajeString(value, total) {
+	return total>0?(Math.floor((value / total) * 100)+'%'):'';
+}
+function decimalFormatter(value, row) {
+	return value!=""?parseFloat(Math.round(value * 100) / 100).toFixed(2):'-';
 }
 	  
 function lastMatchesFormat(value) {
@@ -53,10 +51,10 @@ function lastMatchesFormat(value) {
 	var len = value.length;
 	var numMatches = 5;
 	for (var i = len-numMatches; i < len; i++) {
-        if(value[i]=='w') ret = ret + '<span class="label label-success label-lastmatch">V</span>';
-        if(value[i]=='d') ret = ret + '<span class="label label-warning label-lastmatch">E</span>';
-        if(value[i]=='l') ret = ret + '<span class="label label-danger label-lastmatch">D</span>';
-        if(value[i]=='-') ret = ret + '<span class="label label-default label-lastmatch">-</span>';
+        if(value[i]=='w') ret = ret + '<span class="badge badge-success badge-pill badge-lastmatch">V</span>';
+        if(value[i]=='d') ret = ret + '<span class="badge badge-warning badge-pill badge-lastmatch">E</span>';
+        if(value[i]=='l') ret = ret + '<span class="badge badge-danger badge-pill badge-lastmatch">D</span>';
+        if(value[i]=='-') ret = ret + '<span class="badge badge-light badge-pill badge-lastmatch">-</span>';
 	}
 	return ret;
 }
@@ -78,12 +76,25 @@ function goalsFormatter(value,row,index){
 	for(var i=0; i<value; i++){ scores+='<i class="fa fa-futbol-o" aria-hidden="true"></i>'; }
 	return scores;
 }
+function mvpsFormatter(value,row,index){
+	if(value == 'true'){ 
+		return '<i class="fa fa-star" aria-hidden="true"></i>'; 
+	}
+	return '';
+}
 function userScoreFormatter(value,row,index){
 	return ( (parseDateToLong(row.date)+pollingLimit)>=new Date().getTime() )?
 			'<i class="fa fa-ban" aria-hidden="true"></i>' : value;
 }
 function nameFormatter(value,row,index){
-	return '<a href="'+window.location.origin+'/player?player='+value+'&league='+season+'">'+value+'</a>';
+	return '<img class="player-picture rounded" src="'+getPlayerPicture(value)+'"  onError="this.onerror=null;this.src=\''+window.location.origin+'/resources/images/unknown-player.jpg\';"> <a href="'+window.location.origin+'/player?player='+value+'&league='+season+'">'+value+'</a>';
+}
+function getPlayerPicture(value){
+	var playerPicture = window.location.origin+'/resources/images/unknown-player.jpg';
+	if(playersPictures[value]){
+		playerPicture = playersPictures[value];
+	}
+	return playerPicture;
 }
 function scoreStyle(value, row, index, field){
 	var res = row.result.split(',');
@@ -92,18 +103,18 @@ function scoreStyle(value, row, index, field){
 	else if(parseInt(res[0])<parseInt(res[1])){ winner = 'white' }
 	if(row.team!=''){
 		if(row.team==winner){
-			return { classes: 'success' };
+			return { classes: 'table-success' };
 		}else if(row.team!=winner && winner!='draw'){
-			return { classes: 'danger' };
+			return { classes: 'table-danger' };
 		}else if(row.team!=winner && winner=='draw'){
-			return { classes: 'warning' };
+			return { classes: 'table-warning' };
 		}
 	}
 	return { classes: '' };
 }
 function rowStyle(row, index){
 	if(row.team==''){
-		return { classes: 'active' };
+		return { classes: 'table-row-not-played' };
 	}
 	return { classes: '' };
 }
@@ -121,7 +132,7 @@ function getParameter(name) {
 function updateUserName(){
 	if(nameweb){
 		$( "td:contains('"+nameweb+"')" ).css( "font-weight", "bold" );
-		$( "tr:contains('"+nameweb+"')" ).addClass( "info" );
+		$( "tr:contains('"+nameweb+"')" ).addClass( "table-info" );
 	}
 }
 
@@ -136,6 +147,28 @@ function showAdmin(){
 
 function hideAdmin(){
 	$('#refresh').slideUp();
+}
+
+/*
+ * Utility functions
+ */
+function getPlayerStats(name){
+	for (var i in fullRanking) {
+		if(fullRanking[i].name == name){
+			return fullRanking[i];
+		}
+	}
+}
+function getMaxScorer(){
+	var maxAux=0, maxScorer;
+	for (var i in scorers) {
+		var score = parseInt(scorers[i].scores);
+		if(score>maxAux){
+			maxAux = score;
+			maxScorer = scorers[i];
+		}
+	}
+	return maxScorer;
 }
 
 //create players chart 
@@ -175,7 +208,215 @@ var createChart = function(pointsSeries, id){
         series: pointsSeries
     });
 }
+var scoresPointsChart = function(permanentsRanking, substitutesRanking, id){
+	var series = [];
+	var data = [];
+	for (var player in permanentsRanking) {
+		data.push([parseInt(permanentsRanking[player].goalsFor), parseInt(permanentsRanking[player].points)]);
+	}
+	series[0] = {name: 'Titulares',
+	        color: 'rgba(223, 83, 83, .5)',
+	        data:data};
+	data = [];
+	for (var player in substitutesRanking) {
+		data.push([parseInt(substitutesRanking[player].goalsFor), parseInt(substitutesRanking[player].points)]);
+	}
+	series[1] = {name: 'Suplentes',
+	        color: 'rgba(119, 152, 191, .5)',
+	        data:data};
+	
+	scoresPointsChart = new Highcharts.Chart({
+        chart: {
+        	renderTo: id,
+            type: 'scatter',
+            zoomType: 'xy'
+        },
+        title: {
+            text: 'Distribución Goles VS Puntos',
+            style: { "display": "none"}
+        },
+        xAxis: {
+            title: {
+                text: 'Goles'
+            }
+        },
+        yAxis: {
+            title: {
+                text: 'Puntos'
+            }
+        },
+
+        series: series
+    });
+	
+}
+
+//Update table with data comparison between players
+var updatePlayerComparison = function(playerOne,playerTwo){
+
+	$.post(
+		'api/comparison.request', 
+		JSON.stringify({season: season, 
+						playerOne: playerOne,
+						playerTwo: playerTwo}), 
+		function( data ) {
+			$('#comparison-message').empty();
+			if(playerOne==playerTwo){
+				$('#comparison-message').html('¿Comparando el mismo jugador carajote? anda elige dos diferentes');
+				return;
+			}
+
+			if(playersPictures[playerOne]){
+				$('#comparison-player-one img').attr('src',playersPictures[playerOne]);
+				$('#comparison-player-one img').attr('onError','this.onerror=null;this.src=\''+window.location.origin+'/resources/images/unknown-player.jpg\';');
+			}else{
+				$('#comparison-player-one img').attr('src',window.location.origin+'/resources/images/unknown-player.jpg');
+			}
+			$('#comparison-player-one h3').text(playerOne);
+			if(playersPictures[playerTwo]){
+				$('#comparison-player-two img').attr('src',playersPictures[playerTwo]);
+				$('#comparison-player-two img').attr('onError','this.onerror=null;this.src=\''+window.location.origin+'/resources/images/unknown-player.jpg\';');
+			}else{
+				$('#comparison-player-two img').attr('src',window.location.origin+'/resources/images/unknown-player.jpg');
+			}
+			$('#comparison-player-two h3').text(playerTwo);
+			
+			var vsTotal = data.againstWin + data.againstDraw + data.againstLose;
+			$('#comparison-player-one-win h4').html(data.againstWin);
+			$('#comparison-player-one-win span').html('Victorias ('+percentajeString(data.againstWin,vsTotal)+')');
+			$('#comparison-player-draw h4').html(data.againstDraw);
+			$('#comparison-player-draw span').html('Empates ('+percentajeString(data.againstDraw,vsTotal)+')');
+			$('#comparison-player-two-win h4').html(data.againstLose);
+			$('#comparison-player-two-win span').html('Victorias ('+percentajeString(data.againstLose,vsTotal)+')');
+			
+			fullRanking.forEach(function (value, i) {
+				if(value.name===playerOne){ $('#comparison-player-one-position h5').html((i+1)+'º'); }
+				if(value.name===playerTwo){ $('#comparison-player-two-position h5').html((i+1)+'º'); }
+			});
+
+			var sameTotal = data.sameWin + data.sameDraw + data.sameLose;
+			$('#comparison-players-win h6').html(data.sameWin);
+			$('#comparison-players-win span').html('Victorias ('+percentajeString(data.sameWin,sameTotal)+')');
+			$('#comparison-players-draw h6').html(data.sameDraw);
+			$('#comparison-players-draw span').html('Empates ('+percentajeString(data.sameDraw,sameTotal)+')');
+			$('#comparison-players-lose h6').html(data.sameLose);
+			$('#comparison-players-lose span').html('Derrotas ('+percentajeString(data.sameLose,sameTotal)+')');
+			
+//			if(data.againstWin || data.againstDraw || data.againstLose){
+//				var playersCircleGraph = new Highcharts.Chart({
+//			        chart: {
+//			        	renderTo: 'players-circle-graph',
+//			            plotBackgroundColor: null,
+//			            plotBorderWidth: null,
+//			            plotShadow: false,
+//			            type: 'pie'
+//			        },
+//			        title: {
+//			            text: 'Comparación entre jugadores',
+//			            style: { "display": "none"}
+//			        },
+//			        series: [{
+//			            name: 'Enfrentamientos',
+//			            data: [{
+//			                name: playerOne,
+//			                y: data.againstWin,
+//			                color: 'DarkOrange'
+//			            }, {
+//			                name: 'Empates',
+//			                y: data.againstDraw,
+//			                color: 'DimGrey'
+//			            },{
+//			                name: playerTwo,
+//			                y: data.againstLose,
+//			                color: 'BlueViolet'
+//			            }]
+//			        }]
+//			    });
+//			}
+		}
+	);
+	
+	$('#players-spider-graph').empty();
+	var maxScorer = getMaxScorer();
+	var playerOneStats = getPlayerStats(playerOne);
+	var playerTwoStats = getPlayerStats(playerTwo);
+	var playersSpiderGraph = new Highcharts.Chart({
+        chart: {
+        	renderTo: 'players-spider-graph',
+            polar: true,
+            type: 'line'
+        },
+        title: {
+            text: 'Comparación entre jugadores',
+            style: { "display": "none"}
+        },
+        xAxis: {
+        	categories: ['Media de Partidos','Media de P. Ganados','Media de P. Perdidos', 'Media de Puntos', 'Media de Goles'],
+            tickmarkPlacement: 'on',
+            lineWidth: 0
+        },
+        yAxis: {
+            gridLineInterpolation: 'polygon',
+            lineWidth: 0,
+            min: 0,
+            max: 1
+        },
+        series: [{
+                name: playerOne,
+                data: [playerOneStats.matches/numMatches, playerOneStats.wins/playerOneStats.matches, 1-playerOneStats.loses/playerOneStats.matches, parseFloat(playerOneStats.pointsAVG?playerOneStats.pointsAVG:0)/3, playerOneStats.goalsFor/maxScorer.scores],
+                pointPlacement: 'on',
+                color: 'DarkOrange'
+            }, {
+                name: playerTwo,
+                data: [playerTwoStats.matches/numMatches, playerTwoStats.wins/playerTwoStats.matches, 1-playerTwoStats.loses/playerTwoStats.matches, parseFloat( playerTwoStats.pointsAVG?playerTwoStats.pointsAVG:0)/3, playerTwoStats.goalsFor/maxScorer.scores],
+                pointPlacement: 'on',
+                color: 'BlueViolet'
+            }]
+    });
+}
   
+//Update scores for players in matches panel
+var updateTeamScorers = function(match, appendTo, withMVP){
+	if(withMVP){
+		 $(appendTo).filter(function() {
+			var playerName = $(this).text().trim();
+			var ret = false;
+			if(mvpsByDate[longToDate(match.day)]){
+				mvpsByDate[longToDate(match.day)].forEach(function (value, i) {
+					if(playerName === value){
+						ret = true; 
+						return; 
+					}
+				});
+			}
+			return ret;
+		 }).append(' <i class="fa fa-star" aria-hidden="true"></i>');
+	}
+	
+	$.post(
+			'api/match-scorers.request', 
+			JSON.stringify({season: season, match: match}), 
+			function( matchScores ) {
+				if(matchScores){
+					for (var name in matchScores) {
+					  var score= matchScores[name];
+					  var icons='';
+					  for(var i=0;i<score;i++){
+						icons += '<i class="fa fa-futbol-o" aria-hidden="true"></i>';
+					  }
+//					  $( "#table-results td:contains('"+name+"')" ).append(icons);
+					  //TODO test this. must be equal not contains
+					  $(appendTo).filter(function() {
+  					    return $(this).text().trim() === name;
+					  }).append(icons);
+					}
+				}else{
+				console.warn("Unknown exception updating team scorers: "+matchScores);
+				}
+			}
+  	);
+}
+
 /*
  * Initialization
  */
@@ -207,29 +448,12 @@ $(function () {
     	for(var i=0; i<num; i++) {
     	    $('#player-one,#player-two').append($('<option/>').val(players[i]).text(players[i]));
     	};
+    	var playerOne = players[Math.floor(Math.random() * num)];
+    	$('#player-one option[value="'+playerOne+'"]').prop('selected', true);
+    	var playerTwo = players[Math.floor(Math.random() * num)];
+    	$('#player-two option[value="'+playerTwo+'"]').prop('selected', true);
+    	updatePlayerComparison(playerOne,playerTwo);
     }
-    
-    //Update scores for players in matches panel
-    var updateTeamScorers = function(match){
-    	$.post(
-  			'api/match-scorers.request', 
-  			JSON.stringify({season: season, match: match}), 
-  			function( matchScores ) {
-  				if(matchScores){
-  					for (var name in matchScores) {
-  					  var score= matchScores[name];
-  					  var icons='';
-  					  for(var i=0;i<score;i++){
-  						icons += '<i class="fa fa-futbol-o" aria-hidden="true"></i>';
-  					  }
-  					  $( "#table-results td:contains('"+name+"')" ).append(icons);
-  					}
-  				}else{
-					console.warn("Unknown exception updating team scorers: "+matchScores);
-  				}
-  			}
-	  	);
-	}
     
     //Matches Panel
     var matchesFunction = function() {
@@ -246,14 +470,14 @@ $(function () {
 	        locale:'es-ES'
 	    });
 	    
-	    $('#table-results thead tr:first th div.th-inner span').text('Jornada '+numMatches+' ('+$.timeago(selectedSeasonMatches[numMatches-1].day)+')'+remarks);
-	    $('#table-results thead tr:first th div.th-inner #match-winner-button').attr('data-match-day',''+(numMatches-1));
+//	    $('#table-results-header span').text('Jornada '+numMatches);
+	    $('#table-results-header span').text('Jornada '+numMatches+' ('+longToDate(selectedSeasonMatches[numMatches-1].day)+')'+remarks);
 	    $('#table-results thead tr:last th:first div.th-inner span').text(parseInt(selectedSeasonMatches[numMatches-1].scoreBlues));
 	    $('#table-results thead tr:last th:last div.th-inner span').text(parseInt(selectedSeasonMatches[numMatches-1].scoreWhites));
 	    
 	    $('#next-match').addClass('disabled');
 	    updateUserName();
-	    updateTeamScorers(selectedSeasonMatches[currentMatch]);
+	    updateTeamScorers(selectedSeasonMatches[currentMatch], "#table-results td", true);
 	    
 	    var updateResult = function(currentMatch){
 			$("#match-winner-button").removeClass("disabled");
@@ -262,13 +486,13 @@ $(function () {
 		    
 		    $('#table-results').bootstrapTable('load',newMatch);
 		    
-		    $('#table-results thead tr:first th div.th-inner span').text('Jornada '+(currentMatch+1)+' ('+$.timeago(selectedSeasonMatches[currentMatch].day)+')'+remarks);
-		    $('#table-results thead tr:first th div.th-inner #match-winner-button').attr('data-match-day',''+currentMatch);
+//		    $('#table-results-header span').text('Jornada '+(currentMatch+1));
+		    $('#table-results-header span').text('Jornada '+(currentMatch+1)+' ('+longToDate(selectedSeasonMatches[currentMatch].day)+')'+remarks);
 		    $('#table-results thead tr:last th:first div.th-inner span').text(parseInt(selectedSeasonMatches[currentMatch].scoreBlues));
 		    $('#table-results thead tr:last th:last div.th-inner span').text(parseInt(selectedSeasonMatches[currentMatch].scoreWhites));
 		    
 		    updateUserName();
-		    updateTeamScorers(selectedSeasonMatches[currentMatch]);
+		    updateTeamScorers(selectedSeasonMatches[currentMatch], "#table-results td", true);
 		};
 		$('#next-match, #previous-match').unbind('click');
 	    $('#next-match').click(function(){
@@ -320,7 +544,7 @@ $(function () {
 	    		$("#goals").text(data.goalsFor);
 	    		$("#matches").text(data.matches);
 	    		$("#avg-points").text(parseFloat(data.pointsAVG).toFixed(2));
-	    		$("#avg-scores").text(parseFloat(data.scoreAVG).toFixed(2));
+	    		$("#mvps").text(mvps[player]?mvps[player]:'0');
 	    		$("#avg-goals").text(parseFloat(data.goalsForAVG).toFixed(2));
 	    	}
 	    });
@@ -351,11 +575,15 @@ $(function () {
 	    $('#table-permanents').bootstrapTable({
 	        data: permanentsRanking,
 	        locale:'es-ES',
+	        fixedColumns: true,
+	        fixedNumber: 1,
 	        onAll: function(name, args){ updateUserName() }
 	    });
 	    $('#table-substitutes').bootstrapTable({
 	        data: substitutesRanking,
 	        locale:'es-ES',
+	        fixedColumns: true,
+	        fixedNumber: 1,
 	        onAll: function(name, args){ updateUserName() }
 	    });
 		    
@@ -375,6 +603,7 @@ $(function () {
 	        onAll: function(name, args){ updateUserName() }
 	    });
 		if(pointsSeries){ createChart(pointsSeries, 'container-graph'); }
+//		if(permanentsRanking && substitutesRanking){ scoresPointsChart(permanentsRanking, substitutesRanking, 'scores-points-graph'); }
 		
 	//index page
 	}else{
@@ -383,17 +612,26 @@ $(function () {
 		var month = todayDate.getMonth();//Starting in 0
 		var thisSeason = (month>7?year:year-1);//7 is August
 		for (var prop in options.permanents) {
-			var rowId = prop.substring(4,0)==thisSeason?'current-season-row':'past-season-row';
-			var body = "Titulares: ";
-			options.permanents[prop].forEach(function (value, i) {
-				body += value + (i<options.permanents[prop].length-1?', ':'.');
-			});
-			var leaguePanel = $('<a href="/league?league='+prop+'"><div class="col-xs-12 col-sm-6 col-md-4 col-lg-3">'+
-									'<div id="" class="panel panel-default" style="min-height: 180px;">'+
-										'<div class="panel-heading">'+
-											'<h3 class="panel-title">'+prop+'</h3>'+
-									'</div><div class="panel-body">'+body+'</div>'+
-								'</div></div></a>').prependTo('#'+rowId);	
+			if(prop != 'default'){
+				var res = prop.split(' ');
+				var rowId = prop.substring(4,0)==thisSeason?'current-season-row':'past-season-row';
+				var body = "Titulares: ";
+				var imageCollage = '';
+				options.permanents[prop].forEach(function (value, i) {
+					body += value + (i<options.permanents[prop].length-1?', ':'.');
+					imageCollage += '<a href="'+window.location.origin+'/player?player='+value+'&league='+prop+'" class="collage-image-link">'+
+						'<img class="player-picture rounded" src="'+getPlayerPicture(value)+'" '+
+						'onError="this.onerror=null;this.src=\''+window.location.origin+'/resources/images/unknown-player.jpg\';"></a>';
+				});
+				var leaguePanel = $('<div class="card text-center" >'+
+										'<div class="card-header">'+imageCollage+'</div>'+
+										'<div class="card-body">'+
+											'<h2 class="card-title">'+prop+'</h2>'+
+											'<p class="card-text">'+body+'</p>'+
+											'<a href="/league?league='+prop+'" class="btn btn-dark btn-lg">Ir a la liga del '+(prop.substring(4,0)==thisSeason?res[1]:prop)+'</a>'+
+										'</div>'+
+									'</div>').prependTo('#'+rowId);	
+			}
 		}
 	}
     
@@ -401,29 +639,7 @@ $(function () {
     $('#player-one,#player-two').change(function() {
     	var playerOne = $( "#player-one option:selected" ).text();
     	var playerTwo = $( "#player-two option:selected" ).text();
-    	$.post(
-    			'api/comparison.request', 
-    			JSON.stringify({season: season, 
-    							playerOne: playerOne,
-    							playerTwo: playerTwo}), 
-    			function( data ) {
-    				$('#table-comparison tbody').empty();
-    				if(playerOne==playerTwo){
-    					$('#table-comparison tbody').append('<tr><td colspan="2">¿Comparando el mismo jugador? Eres carajote</td></tr>');
-    					return;
-    				}
-    				$('#table-comparison tbody').append('<tr><td colspan="2">Como rivales:</td></tr>');
-    				$('#table-comparison tbody').append('<tr class="success"><td colspan="2">'+playerOne+' ha ganado <b>'+data.againstWin+'</b> partidos contra '+playerTwo+'</td></tr>');
-    				$('#table-comparison tbody').append('<tr class="warning"><td colspan="2">'+playerOne+' ha empatado <b>'+data.againstDraw+'</b> partidos contra '+playerTwo+'</td></tr>');
-    				$('#table-comparison tbody').append('<tr class="danger"><td colspan="2">'+playerOne+' ha perdido <b>'+data.againstLose+'</b> partidos contra '+playerTwo+'</td></tr>');
-    				$('#table-comparison tbody').append('<tr class="info"><td colspan="2">'+playerOne+' ha jugado <b>'+(data.againstWin+data.againstDraw+data.againstLose)+'</b> partidos contra '+playerTwo+'</td></tr>');
-    				$('#table-comparison tbody').append('<tr><td colspan="2">En el mismo equipo:</td></tr>');
-    				$('#table-comparison tbody').append('<tr class="success"><td colspan="2">'+playerOne+' y '+playerTwo+' han ganado <b>'+data.sameWin+'</b></td></tr>');
-    				$('#table-comparison tbody').append('<tr class="warning"><td colspan="2">'+playerOne+' y '+playerTwo+' han empatado <b>'+data.sameDraw+'</b></td></tr>');
-    				$('#table-comparison tbody').append('<tr class="danger"><td colspan="2">'+playerOne+' y '+playerTwo+' han perdido <b>'+data.sameLose+'</b></td></tr>');
-    				$('#table-comparison tbody').append('<tr class="info"><td colspan="2">'+playerOne+' y '+playerTwo+' han jugado <b>'+(data.sameWin+data.sameDraw+data.sameLose)+'</b></td></tr>');
-    			}
-    	);
+    	updatePlayerComparison(playerOne,playerTwo);
     });
     
     //refresh and process data, only for admin

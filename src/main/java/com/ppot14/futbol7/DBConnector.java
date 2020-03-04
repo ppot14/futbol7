@@ -64,9 +64,9 @@ public class DBConnector {
 			Bson filter = and(eq("name", name),eq("id",id));
 			FindIterable<Document> result = configCollection.find(filter);
 			if(result!=null && result.first()!=null){
-				Bson update = set("picture", jsonNode.get("picture").asText());
+				Bson update = and(set("picture", jsonNode.get("picture").asText()),set("lastAccess", new Date().getTime()));
 				configCollection.updateOne(filter,update);
-				logger.info("player exists: "+result.first().getString("name")+" ("+result.first().getString("nameweb")+")");
+				logger.fine("player exists: "+result.first().getString("name")+" ("+result.first().getString("nameweb")+")");
 				return (Document) result.first();
 			}else{
 				((ObjectNode)jsonNode).put("created", new Date().getTime());
@@ -96,14 +96,14 @@ public class DBConnector {
 	}
 	
 	public static Document hasVoted(JsonNode jsonNode){
-		String name = jsonNode.get("name").asText();
+		String name = jsonNode.get("name")!=null?jsonNode.get("name").asText():jsonNode.get("voter").asText();
 		String season = jsonNode.get("season").asText();
 		Long dateL = jsonNode.get("date").asLong();
 		String date = formatter.format(new Date(dateL));
 		try {
 			MongoCollection<Document> configCollection;
 			configCollection = getCollection("Scores");
-			Bson filter = and(eq("scores.voter",name),eq("date",date),eq("season",season));
+			Bson filter = and(eq("scoresMVP.voter",name),eq("date",date),eq("season",season));
 			FindIterable<Document> result = configCollection.find(filter);
 			if(result!=null && result.first()!=null){
 				logger.info("player voted: "+jsonNode);
@@ -116,22 +116,6 @@ public class DBConnector {
 		}
 		return null;
 	}
-	
-	public static Document hasVotedPlayer(String name, String voted, Long dateL, String season){
-		String date = formatter.format(new Date(dateL));
-		try {
-			MongoCollection<Document> configCollection;
-			configCollection = getCollection("Scores");
-			Bson filter = and(elemMatch("scores", and(eq("voter",name),eq("voted",voted))) ,eq("date",date), eq("season",season));
-			FindIterable<Document> result = configCollection.find(filter);
-			if(result!=null && result.first()!=null){
-				return (Document) result.first();
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
-	}	
 	
 	public static Document getVotes(String season){
 		Document ret = new Document();
@@ -176,7 +160,7 @@ public class DBConnector {
 			e.printStackTrace();
 		}
 	}
-	public static Boolean addPunctuation(String voter, String voted, Double score, String comment, Long dateL, String season){
+	public static Boolean addPunctuation(String voter, String voted, Long dateL, String season){
 		String date = formatter.format(new Date(dateL));
 		try {
 			MongoCollection<Document> configCollection;
@@ -185,33 +169,11 @@ public class DBConnector {
 			Document s = new Document();
 			s.put("voter", voter);
 			s.put("voted", voted);
-			s.put("score", score);
-			s.put("comment", comment);
-			UpdateResult res = configCollection.updateOne(filter, new Document("$push", new Document("scores", s)));
+			UpdateResult res = configCollection.updateOne(filter, new Document("$push", new Document("scoresMVP", s)));
 			if(res.getModifiedCount()==1){ return true; }
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return false;
-	}
-	
-	public static Boolean addTitleVote(Long dateL, String season, String trompito, String dandy, String frances, String sillegas, String porculero){
-		String date = formatter.format(new Date(dateL));
-		try {
-			MongoCollection<Document> configCollection;
-			configCollection = getCollection("Scores");
-			Bson filter = and(eq("season",season), eq("date",date));
-			Document titles = new Document();
-			titles.put("trompito", trompito);
-			titles.put("dandy", dandy);
-			titles.put("frances", frances);
-			titles.put("sillegas", sillegas);
-			titles.put("porculero", porculero);
-			UpdateResult res = configCollection.updateOne(filter, new Document("$push", titles));
-			if(res.getModifiedCount()==1){ return true; }
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
 	}
 }

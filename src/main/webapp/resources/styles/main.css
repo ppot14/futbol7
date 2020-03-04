@@ -6,6 +6,27 @@
 /**
 *	Common
 */
+a{
+    cursor: pointer;
+}
+body{
+	font-size: 0.9rem;
+}
+.h1, h1 {
+    font-size: 1.75rem;
+}
+.navbar-brand {
+    font-size: 1.25rem;
+}
+.h2, h2 {
+    font-size: 1.5rem;
+}
+.h3, h3 {
+    font-size: 1.25rem;
+}
+.h4, h4 {
+    font-size: 1.1rem;
+}
 .text-blue-team {
     color: royalblue;
 }
@@ -30,19 +51,31 @@ textarea.form-control {
 	cursor: pointer;
 	padding-right:15px;
 }
+.card{
+	 margin-bottom:20px
+}
+.card-body {
+    padding: 0.5rem;
+}
 img#logo{
-	position: absolute;    
-	left: 15px;
+/* 	position: absolute;     */
+/* 	left: 15px; */
+	height: 30px;
 }
 a#web-name.navbar-brand{
-	margin-left: 85px;
-    color: white;
+/* 	margin-left: 85px; */
+/*     color: white; */
 }
-th.column-name{
-	min-width: 137px;
+td.column-name{
+    white-space: nowrap;
+}
+td.column-name .player-picture{
+	height: 24px;
+    width: 24px;
 }
 th[data-field="lastMatches"]{
 	min-width: 117px;
+/* 	min-width: 213px; */
 }
 #player-picture{
     height: 34px;
@@ -92,9 +125,10 @@ ul.white-scorers li{
 .slider{
 	margin-bottom:10px
 }
-.label-lastmatch{
+.badge-lastmatch{
     display: inline-block;
    	width: 20px;
+   	font-size: 70%;
 }
 .player-punctuation-number{
     font-size: 16px;
@@ -126,10 +160,25 @@ div.player-badge:hover{
 div.player-badge:hover i{
     color: IndianRed;
 }
+#home-page h1 ,
+#league-page h1,
+#me-page h2#title{
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
 
 /**
 *	Polling
 */
+#polling-result-header{
+	    padding: 0px 15px;
+}
+#polling-result-header > div{
+	width: 50%;
+}
+#polling-form{
+	width: 100%;
+}
 #polling .form-horizontal .form-group {
     margin-right: 15px;
     margin-left: 15px;
@@ -137,23 +186,29 @@ div.player-badge:hover i{
 .polling-form-group .team-shield{
 	display: none;
 }
+.polling-form-group h4.player-name{
+	margin-left: 15px;
+}
+.polling-form-group .row{
+	margin-bottom: 15px
+}
 @media (max-width: 767px) { 
-	.polling-form-group h4.player-name{
-		text-align: center;
-	}
 	.polling-form-group .team-shield{
-		position: absolute;
-		display: block;
-	    left: calc(50% - 47px);
-	    text-align: center;
-	    top: 3px;
-	    border-radius: 4px 4px 12px 12px;
-	    width: 24px;
-	}
-	.polling-form-group .player-picture{
-	    margin: 0px auto;
+	    position: relative;
 	    display: block;
+	    left: -7px;
+	    top: 16px;
+	    width: 12px;
+    	height: 12px;
+	    font-size: 12px;
 	}
+	.polling-form-group h4.player-name{
+		margin-left: 0px;
+	}
+}
+#polling .player-picture{
+	height: 25px;
+	width: 25px;
 }
 #polling .player-badge{
 	float: right;
@@ -192,10 +247,24 @@ div.player-badge:hover i{
 }
 
 /**
-*	PAGE - me
+*	PAGE - ROOT
+*/
+.card-deck .card-header{
+	padding: 0px;
+}
+.collage-image-link{
+	
+}
+.collage-image-link img{
+	width: 14%;
+/*     height: 100%; */
+}
+/**
+*	PAGE - player
 */
 #user-picture{
 	height: 100px;
+    margin-bottom: 20px;
 }
 #user-name{
 	margin-top: 0px;
@@ -209,6 +278,15 @@ div.player-badge:hover i{
 #table-player-matches .result{
 	width: 55px;
 	display: inline-block;
+}
+#table-player-matches .table-row-not-played{
+	color: rgba(33, 37, 41, 0.2);
+}
+#table-player-matches .table-row-not-played .text-blue-team{
+	color: rgba(65, 105, 225, 0.2);
+}
+#table-player-matches .table-row-not-played .white-team-background{
+	background-color: rgba(169, 169, 169, 0.2);
 }
 .team-bullet{
     height: 17px;
@@ -224,7 +302,7 @@ div.player-badge:hover i{
 }
 @media (max-width: 767px) { 
 	#user-picture{
-		margin: 0px auto;
+		margin: 0px auto 20px;
     	display: block;
 	}	
 	#user-name{
@@ -233,14 +311,82 @@ div.player-badge:hover i{
     	margin-bottom: 15px;
 	}
 }
+.list-group-player{
+	margin-bottom: 20px;
+}
+.list-group-player .list-group-item{
+	padding: 0.5rem 0.75rem;
+}
 
 /**
 * PAGE league
 */
-#table-results i.fa-futbol-o
+#table-results-header{
+	margin-bottom: 10px;
+    text-align: center;
+    line-height: 2.5;
+}
+#table-results-header span{
+    font-weight: bold;
+}
+#table-results i.fa-futbol-o,
+.polling-form-group .row i.fa-futbol-o
 {
 	float: right;
     line-height: 20px;
     font-size: 10px;
     margin-left: 2px;
+}
+.table-md td, .table-md th {
+    padding: .4rem;
+}
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(0,0,0,0.02);
+}
+
+/*comparison*/
+/* .three-columns>div{ */
+/* 	width:33%; */
+/* 	display: inline; */
+/* } */
+.comparison-content h6,
+.comparison-content h5,
+.comparison-content h4{
+	text-align: center;
+}
+#comparison-matches h4{
+	font-size: 5rem;
+}
+#comparison-ranking h5{
+	font-size: 4.5rem;
+}
+#comparison-same-team h6{
+	font-size: 4rem;
+}
+#comparison-matches span,
+#comparison-ranking span,
+#comparison-same-team span{
+	text-align: center;
+    display: block;
+}
+#comparison-pictures img{
+	width: 100%;
+}
+#comparison-player-one img{
+	border: 2px solid DarkOrange;
+}
+#comparison-player-two img{
+	border: 2px solid BlueViolet;
+}
+.comparison-player-one{
+	color: DarkOrange;
+}
+.comparison-player-draw{
+	color: DimGrey;
+}
+.comparison-player-two{
+	color: BlueViolet;
+}
+.comparison-title{
+	margin-top: 20px;
 }

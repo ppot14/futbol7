@@ -60,6 +60,7 @@ public class Futbol7HTMLServlet extends Futbol7Servlet {
 		request.setAttribute("production", getConfig().get("production"));
 		request.setAttribute("enableVote", getConfig().get("enableVote"));
 		request.setAttribute("options", mapper.writeValueAsString(getApi().getPermanents(getConfig()))); //Only Permanents for now
+		request.setAttribute("playersPictures", mapper.writeValueAsString(getApi().getPlayersPictures()) );
 		
 		String requestPath = request.getServletPath();
 		if("/league".equals(requestPath)){
@@ -67,18 +68,18 @@ public class Futbol7HTMLServlet extends Futbol7Servlet {
 				request.setAttribute("fullRanking", mapper.writeValueAsString(getApi().getFullRanking(league)) ); 
 				request.setAttribute("permanentsRanking", mapper.writeValueAsString(getApi().getRankingPermanents(league)) ); 
 				request.setAttribute("substitutesRanking", mapper.writeValueAsString(getApi().getRankingSubstitutes(league)) ); 
-				request.setAttribute("playersPictures", mapper.writeValueAsString(getApi().getPlayersPictures()) );
 				request.setAttribute("vs", mapper.writeValueAsString(getApi().getVS(league)) ); 
 				request.setAttribute("pair", mapper.writeValueAsString(getApi().getPair(league)) );
 				request.setAttribute("scorers", mapper.writeValueAsString(getApi().getFullScorers(league)) );
 				request.setAttribute("matches", mapper.writeValueAsString(getApi().getResults(league)) ); 
 				request.setAttribute("players", mapper.writeValueAsString(getApi().getPlayers(league)) );
 				request.setAttribute("userPointsSeries", mapper.writeValueAsString(getApi().getPointsSeries(league)) );
+				request.setAttribute("mvps", mapper.writeValueAsString(getApi().getMVPsByPlayers(league)) );
+				request.setAttribute("mvpsByDate", mapper.writeValueAsString(getApi().getMVPs(league)) );
 			}else {
 				request.setAttribute("fullRanking", mapper.writeValueAsString(getApi().getFullRanking()) ); 
 				request.setAttribute("permanentsRanking", mapper.writeValueAsString(getApi().getRankingPermanents()) ); 
 				request.setAttribute("substitutesRanking", mapper.writeValueAsString(getApi().getRankingSubstitutes()) );
-				request.setAttribute("playersPictures", mapper.writeValueAsString(getApi().getPlayersPictures()) );
 				request.setAttribute("vs", mapper.writeValueAsString(getApi().getVS()) ); 
 				request.setAttribute("pair", mapper.writeValueAsString(getApi().getPair()) );
 				request.setAttribute("scorers", mapper.writeValueAsString(getApi().getFullScorers()) );
@@ -88,9 +89,9 @@ public class Futbol7HTMLServlet extends Futbol7Servlet {
 			}
 		}else if("/player".equals(requestPath)){
 			request.setAttribute("matches", mapper.writeValueAsString(getApi().getResults(league)) );
-			request.setAttribute("playersPictures", mapper.writeValueAsString(getApi().getPlayersPictures()) );
 			request.setAttribute("userMatches", mapper.writeValueAsString(getApi().getUserMatches(league, (player!=null?player:user) ) ));
 			request.setAttribute("userPointsSeries", mapper.writeValueAsString(getApi().getPointsSeries(league, (player!=null?player:user) ) ));
+			request.setAttribute("mvps", mapper.writeValueAsString(getApi().getMVPsByPlayers(league)) );
 		}
 		requestPath = requestPath.length() > 1 ? requestPath + ".jsp" : "/index.jsp";
 		

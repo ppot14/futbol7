@@ -53,7 +53,7 @@ public class Futbol7APIServlet extends Futbol7Servlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		long startTime = System.currentTimeMillis();
 		HttpSession session = request.getSession(true);
-		String user = session.getAttribute("user")!=null?(String)((Document)session.getAttribute("user")).get("nameweb"):null;
+//		String user = session.getAttribute("user")!=null?(String)((Document)session.getAttribute("user")).get("nameweb"):null;
 		final String requestPath = request.getRequestURI();
 		Map<String, String[]> parameters = request.getParameterMap();
     	ObjectMapper mapper = new ObjectMapper();
@@ -68,7 +68,7 @@ public class Futbol7APIServlet extends Futbol7Servlet {
 		}else if(requestPath.contains("api/logout.request")){
 			session.removeAttribute("user");
 		}else if(requestPath.contains("api/userStats.request")){
-    		reply = user!=null?getApi().getUserStats(parameters.get("season")[0],user):null; 
+    		reply = getApi().getUserStats(parameters.get("season")[0],parameters.get("player")[0]); 
 		}else{
 			logger.warning("Request path not found: "+requestPath);
 		}
@@ -111,6 +111,9 @@ public class Futbol7APIServlet extends Futbol7Servlet {
 				reply = getApi().getMatchScorers(jsonNode);
 			}else if(requestPath.contains("api/save-polling.request")){
 				reply = getApi().savePolling(jsonNode);
+			}else if(requestPath.contains("api/get-mvps.request")){
+				String seasonName = jsonNode.get("season").asText();
+				reply = getApi().getMVPs(seasonName);
 			}else{
 				logger.warning("Request path not found: "+requestPath);
 			}

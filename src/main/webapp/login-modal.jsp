@@ -3,21 +3,21 @@
 	  <div class="modal-dialog" role="document">
 	    <div class="modal-content">
 	      <div class="modal-header">
-	        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 	        <h4 class="modal-title" id="modalLogin">Acceso</h4>
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 	      </div>
 	      <div class="modal-body">
-	      	<div class="well">
-<!-- 	      		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">   -->
+	      	<div class="row">
+	      		<div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">  
 		            <button id="facebook-login-button" type="button" class="btn btn-primary btn-lg btn-block" >
-					  <i class="fa fa-facebook-official pull-left" aria-hidden="true"></i> Acceso con Facebook
+					  <i class="fab fa-facebook-f" aria-hidden="true"></i>
 					</button>   		
-<!-- 	      		</div> -->
-<!-- 	      		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">   -->
+	      		</div>
+	      		<div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">  
 		            <button id="google-login-button" type="button" class="btn btn-danger btn-lg btn-block">
-					  <i class="fa fa-google-plus-official pull-left" aria-hidden="true"></i> Acceso con Gmail
+					  <i class="fab fa-google" aria-hidden="true"></i>
 					</button>   		
-<!-- 	      		</div> -->
+	      		</div>
 	      	</div>
 	      </div>
 	    </div>
