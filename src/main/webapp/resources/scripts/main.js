@@ -58,6 +58,20 @@ function lastMatchesFormat(value) {
 	}
 	return ret;
 }
+function trendingFormat(value) {
+	var sum = 0;
+	var len = value.length;
+	var numMatches = 5;
+	for (var i = len-numMatches; i < len; i++) {
+        if(value[i]=='w') sum += 3; 
+        if(value[i]=='d') sum += 1;
+	}
+	if(sum>=13){ return '<i class="trend-arrow fas fa-angle-double-up" style="color:Turquoise;"></i>'; }
+	else if(sum>=10){ return '<i class="trend-arrow fas fa-angle-up" style="color:YellowGreen;"></i>'; }
+	else if(sum>=7){ return '<i class="trend-arrow fas fa-equals" style="color:Gold;"></i>'; }
+	else if(sum>=4){ return '<i class="trend-arrow fas fa-angle-down" style="color:DarkOrange;"></i>'; }
+	else{ return '<i class="trend-arrow fas fa-angle-double-down" style="color:DarkRed;"></i>'; }
+}
 function teamFormatter(value) {
 	var ret = '-';
 	if(value=='blue'){

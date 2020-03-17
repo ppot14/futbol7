@@ -525,7 +525,9 @@ public class APIUtil {
 	        	e.put("draws", draws.get(seasonName).containsKey(name)?draws.get(seasonName).get(name).toString():"0");
 	        	e.put("loses", loses.get(seasonName).containsKey(name)?loses.get(seasonName).get(name).toString():"0");
 	        	e.put("matches", matches.get(seasonName).get(name).toString());
-	        	e.put("lastMatches", getLastMatches(name,seasonName));
+	        	String lastMatches = getLastMatches(name,seasonName);
+	        	e.put("lastMatches", lastMatches);
+	        	e.put("trendingMatches", lastMatches);
 	        	e.put("MVPs", ""+(mvpsByPlayers.containsKey(name)?mvpsByPlayers.get(name):0));
 	        	boolean valid = matches.get(seasonName).get(name)>=(numMatches.get(seasonName)*MIN_VALID_MATCHES);
 	        	e.put("pointsAVG", (valid?new Float(realPoints.get(seasonName).get(name)*1.0F/matches.get(seasonName).get(name)):"").toString());

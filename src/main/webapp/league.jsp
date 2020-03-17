@@ -33,7 +33,39 @@
 	
 	<div id="league-page" class="container-fluid">
 		<h1 id="title" class="text-center"></h1>
+				
 		<div id="row1" class="row">
+			<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+			
+				<div id="" class="card">
+				  <h3 class="card-header">Clasificación Completa</h3>
+				  <div class="card-body">
+						<table id="table-full" data-sort-name="realPoints" data-sort-order="desc"  data-striped="true" class="table table-striped table-md">
+							<thead>
+								<tr>
+									<th data-field="name" data-formatter="nameFormatter" data-sortable="true" class="column-name">Nombre</th>
+									<th data-field="trendingMatches" data-formatter="trendingFormat" data-sortable="false" data-align="center">T</th>
+									<th data-field="lastMatches" data-formatter="lastMatchesFormat" data-sortable="false" data-align="center">UP</th>
+									<th data-field="realPoints" data-sortable="true" data-align="right">Pts</th>
+									<th data-field="points" data-sortable="true" data-align="right">Pts*</th>
+									<th data-field="wins" data-sortable="true" data-align="right">G</th>
+									<th data-field="draws" data-sortable="true" data-align="right">E</th>
+									<th data-field="loses" data-sortable="true" data-align="right">P</th>
+									<th data-field="matches" data-sortable="true" data-align="right">J</th>
+									<th data-field="goalsFor" data-sortable="true" data-align="right">Gol</th>
+									<th data-field="pointsAVG" data-sortable="true" data-align="right" data-formatter="decimalFormatter"><span style="text-decoration:overline">Pts</span></th>
+									<th data-field="goalsForAVG" data-sortable="true" data-align="right" data-formatter="decimalFormatter"><span style="text-decoration:overline">Gol</span></th>
+									<th data-field="MVPs" data-sortable="true" data-align="right">MVP</th>
+								</tr>
+							</thead>
+						</table>
+					</div>
+				</div>
+			
+			</div>
+		</div>
+		
+		<div id="row2" class="row">
 			<div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
 			
 				<div id="" class="card">
@@ -43,6 +75,7 @@
 							<thead>
 								<tr>
 									<th data-field="name" data-formatter="nameFormatter" data-sortable="true" class="column-name">Nombre</th>
+									<th data-field="trendingMatches" data-formatter="trendingFormat" data-sortable="false" data-align="center">T</th>
 									<th data-field="lastMatches" data-formatter="lastMatchesFormat" data-sortable="false" data-align="center">UP</th>
 									<th data-field="realPoints" data-sortable="true" data-align="right">Pts</th>
 									<th data-field="points" data-sortable="true" data-align="right">Pts*</th>
@@ -69,6 +102,7 @@
 							<thead>
 								<tr>
 									<th data-field="name" data-formatter="nameFormatter" data-sortable="true" class="column-name">Nombre</th>
+									<th data-field="trendingMatches" data-formatter="trendingFormat" data-sortable="false" data-align="center">T</th>
 									<th data-field="lastMatches" data-formatter="lastMatchesFormat" data-sortable="false" data-align="center">UP</th>
 									<th data-field="realPoints" data-sortable="true" data-align="right">Pts</th>
 									<th data-field="points" data-sortable="true" data-align="right">Pts*</th>
@@ -85,36 +119,6 @@
 						</table>
 					</div>
 				</div>
-			</div>
-		</div>
-				
-		<div id="row2" class="row">
-			<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-			
-				<div id="" class="card">
-				  <h3 class="card-header">Clasificación Completa</h3>
-				  <div class="card-body">
-						<table id="table-full" data-sort-name="realPoints" data-sort-order="desc"  data-striped="true" class="table table-striped table-md">
-							<thead>
-								<tr>
-									<th data-field="name" data-formatter="nameFormatter" data-sortable="true" class="column-name">Nombre</th>
-									<th data-field="lastMatches" data-formatter="lastMatchesFormat" data-sortable="false" data-align="center">UP</th>
-									<th data-field="realPoints" data-sortable="true" data-align="right">Pts</th>
-									<th data-field="points" data-sortable="true" data-align="right">Pts*</th>
-									<th data-field="wins" data-sortable="true" data-align="right">G</th>
-									<th data-field="draws" data-sortable="true" data-align="right">E</th>
-									<th data-field="loses" data-sortable="true" data-align="right">P</th>
-									<th data-field="matches" data-sortable="true" data-align="right">J</th>
-									<th data-field="goalsFor" data-sortable="true" data-align="right">Gol</th>
-									<th data-field="pointsAVG" data-sortable="true" data-align="right" data-formatter="decimalFormatter"><span style="text-decoration:overline">Pts</span></th>
-									<th data-field="goalsForAVG" data-sortable="true" data-align="right" data-formatter="decimalFormatter"><span style="text-decoration:overline">Gol</span></th>
-									<th data-field="MVPs" data-sortable="true" data-align="right">MVP</th>
-								</tr>
-							</thead>
-						</table>
-					</div>
-				</div>
-			
 			</div>
 		</div>
 			
