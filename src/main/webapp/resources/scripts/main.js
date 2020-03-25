@@ -549,18 +549,21 @@ $(function () {
 		}
 		$('#title').html('Liga '+season);
 		
-	    $.getJSON('api/userStats.request?season='+season+(player?'&player='+player:''), function(data) {
-	    	if(data){
-	    		$("#points").text(data.realPoints+' ('+data.points+')');
-	    		$("#win").text(data.wins);
-	    		$("#draw").text(data.draws);
-	    		$("#lose").text(data.loses);
-	    		$("#goals").text(data.goalsFor);
-	    		$("#matches").text(data.matches);
-	    		$("#avg-points").text(parseFloat(data.pointsAVG).toFixed(2));
-	    		$("#mvps").text(mvps[player]?mvps[player]:'0');
-	    		$("#avg-goals").text(parseFloat(data.goalsForAVG).toFixed(2));
-	    	}
+		$.post('api/userStats.request', 
+				JSON.stringify({season: season, 
+								player: player?player:''}), 
+				function( data ) {
+			    	if(data){
+			    		$("#points").text(data.realPoints+' ('+data.points+')');
+			    		$("#win").text(data.wins);
+			    		$("#draw").text(data.draws);
+			    		$("#lose").text(data.loses);
+			    		$("#goals").text(data.goalsFor);
+			    		$("#matches").text(data.matches);
+			    		$("#avg-points").text(parseFloat(data.pointsAVG).toFixed(2));
+			    		$("#mvps").text(mvps[player]?mvps[player]:'0');
+			    		$("#avg-goals").text(parseFloat(data.goalsForAVG).toFixed(2));
+			    	}
 	    });
 	    
     	selectedSeasonMatches = matches;

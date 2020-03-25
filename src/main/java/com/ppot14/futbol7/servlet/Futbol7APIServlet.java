@@ -67,8 +67,10 @@ public class Futbol7APIServlet extends Futbol7Servlet {
 			reply = processed; 
 		}else if(requestPath.contains("api/logout.request")){
 			session.removeAttribute("user");
-		}else if(requestPath.contains("api/userStats.request")){
-    		reply = getApi().getUserStats(parameters.get("season")[0],parameters.get("player")[0]); 
+		}else if(requestPath.contains("api/options.request")){
+			reply = getApi().getPermanents(getConfig());
+		}else if(requestPath.contains("api/playersPictures.request")){
+			reply = getApi().getPlayersPictures();
 		}else{
 			logger.warning("Request path not found: "+requestPath);
 		}
@@ -114,6 +116,41 @@ public class Futbol7APIServlet extends Futbol7Servlet {
 			}else if(requestPath.contains("api/get-mvps.request")){
 				String seasonName = jsonNode.get("season").asText();
 				reply = getApi().getMVPs(seasonName);
+			}else if(requestPath.contains("api/fullRanking.request")){
+				String seasonName = jsonNode.get("season").asText();
+				reply =getApi().getFullRanking(seasonName); 
+			}else if(requestPath.contains("api/permanentsRanking.request")){
+				String seasonName = jsonNode.get("season").asText();
+				reply =getApi().getRankingPermanents(seasonName); 
+			}else if(requestPath.contains("api/substitutesRanking.request")){
+				String seasonName = jsonNode.get("season").asText();
+				reply =getApi().getRankingSubstitutes(seasonName); 
+			}else if(requestPath.contains("api/vs.request")){
+				String seasonName = jsonNode.get("season").asText();
+				reply =getApi().getVS(seasonName); 
+			}else if(requestPath.contains("api/pair.request")){
+				String seasonName = jsonNode.get("season").asText();
+				reply =getApi().getPair(seasonName);
+			}else if(requestPath.contains("api/scorers.request")){
+				String seasonName = jsonNode.get("season").asText();
+				reply =getApi().getFullScorers(seasonName);
+			}else if(requestPath.contains("api/matches.request")){
+				String seasonName = jsonNode.get("season").asText();
+				reply =getApi().getResults(seasonName); 
+			}else if(requestPath.contains("api/players.request")){
+				String seasonName = jsonNode.get("season").asText();
+				reply =getApi().getPlayers(seasonName);
+			}else if(requestPath.contains("api/mvps-by-players.request")){
+				String seasonName = jsonNode.get("season").asText();
+				reply =getApi().getMVPsByPlayers(seasonName);
+			}else if(requestPath.contains("api/userMatches.request")){
+				String seasonName = jsonNode.get("season").asText();
+				String player = jsonNode.get("player").asText();
+				reply =getApi().getUserMatches(seasonName, player ) ;
+			}else if(requestPath.contains("api/userStats.request")){
+				String seasonName = jsonNode.get("season").asText();
+				String player = jsonNode.get("player").asText();
+	    		reply = getApi().getUserStats(seasonName,player); 
 			}else{
 				logger.warning("Request path not found: "+requestPath);
 			}
