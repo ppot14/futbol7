@@ -6,6 +6,18 @@
   <packaging>war</packaging>
 
   <name>futbol7</name>
+
+	<!--<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>com.google.cloud</groupId>
+				<artifactId>libraries-bom</artifactId>
+				<version>20.4.0</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>-->
   
 	<dependencies>
 	   
@@ -56,19 +68,43 @@
 			<artifactId>core</artifactId>
 			<version>1.47.1</version>
 		</dependency>
+
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>23.0</version>
+		</dependency>
 		
 	    <dependency>
 	      <groupId>com.google.apis</groupId>
 	      <artifactId>google-api-services-drive</artifactId>
-	      <version>v3-rev97-1.23.0</version>
+	      <version>v3-rev197-1.25.0</version>
 	    </dependency>
+
+		<dependency>
+			<groupId>com.google.api-client</groupId>
+			<artifactId>google-api-client</artifactId>
+			<version>1.31.5</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.google.cloud</groupId>
+			<artifactId>google-cloud-storage</artifactId>
+			<version>1.114.0</version>
+		</dependency>
 		
 		<dependency>
 			<groupId>org.codehaus.jackson</groupId>
 			<artifactId>jackson-mapper-asl</artifactId>
 			<version>1.9.13</version>
 		</dependency>
-		
+
+		<dependency>
+			<groupId>org.apache.tika</groupId>
+			<artifactId>tika-core</artifactId>
+			<version>1.26</version>
+		</dependency>
+
 		<dependency>
 			<groupId>commons-net</groupId>
 			<artifactId>commons-net</artifactId>
@@ -80,7 +116,12 @@
 			<artifactId>mongo-java-driver</artifactId>
 			<version>3.4.2</version>
 		</dependency>
-		
+		<dependency>
+			<groupId>com.adventurebox</groupId>
+			<artifactId>pepe-tests</artifactId>
+			<version>1.23</version>
+		</dependency>
+
 	</dependencies>
 	
 	<properties>

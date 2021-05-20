@@ -47,7 +47,7 @@
 									<th data-field="trendingMatches" data-formatter="trendingFormat" data-sortable="false" data-align="center">T</th>
 									<th data-field="lastMatches" data-formatter="lastMatchesFormat" data-sortable="false" data-align="center">UP</th>
 									<th data-field="realPoints" data-sortable="true" data-align="right">Pts</th>
-									<th data-field="points" data-sortable="true" data-align="right">Pts*</th>
+<!-- 									<th data-field="points" data-sortable="true" data-align="right">Pts*</th> -->
 									<th data-field="wins" data-sortable="true" data-align="right">G</th>
 									<th data-field="draws" data-sortable="true" data-align="right">E</th>
 									<th data-field="loses" data-sortable="true" data-align="right">P</th>
@@ -55,7 +55,7 @@
 									<th data-field="goalsFor" data-sortable="true" data-align="right">Gol</th>
 									<th data-field="pointsAVG" data-sortable="true" data-align="right" data-formatter="decimalFormatter"><span style="text-decoration:overline">Pts</span></th>
 									<th data-field="goalsForAVG" data-sortable="true" data-align="right" data-formatter="decimalFormatter"><span style="text-decoration:overline">Gol</span></th>
-									<th data-field="MVPs" data-sortable="true" data-align="right">MVP</th>
+<!-- 									<th data-field="MVPs" data-sortable="true" data-align="right">MVP</th> -->
 								</tr>
 							</thead>
 						</table>
@@ -78,7 +78,7 @@
 									<th data-field="trendingMatches" data-formatter="trendingFormat" data-sortable="false" data-align="center">T</th>
 									<th data-field="lastMatches" data-formatter="lastMatchesFormat" data-sortable="false" data-align="center">UP</th>
 									<th data-field="realPoints" data-sortable="true" data-align="right">Pts</th>
-									<th data-field="points" data-sortable="true" data-align="right">Pts*</th>
+<!-- 									<th data-field="points" data-sortable="true" data-align="right">Pts*</th> -->
 									<th data-field="wins" data-sortable="true" data-align="right">G</th>
 									<th data-field="draws" data-sortable="true" data-align="right">E</th>
 									<th data-field="loses" data-sortable="true" data-align="right">P</th>
@@ -86,7 +86,7 @@
 									<th data-field="goalsFor" data-sortable="true" data-align="right">Gol</th>
 									<th data-field="pointsAVG" data-sortable="true" data-align="right" data-formatter="decimalFormatter"><span style="text-decoration:overline">Pts</span></th>
 									<th data-field="goalsForAVG" data-sortable="true" data-align="right" data-formatter="decimalFormatter"><span style="text-decoration:overline">Gol</span></th>
-									<th data-field="MVPs" data-sortable="true" data-align="right">MVP</th>
+<!-- 									<th data-field="MVPs" data-sortable="true" data-align="right">MVP</th> -->
 								</tr>
 							</thead>
 						</table>
@@ -105,7 +105,7 @@
 									<th data-field="trendingMatches" data-formatter="trendingFormat" data-sortable="false" data-align="center">T</th>
 									<th data-field="lastMatches" data-formatter="lastMatchesFormat" data-sortable="false" data-align="center">UP</th>
 									<th data-field="realPoints" data-sortable="true" data-align="right">Pts</th>
-									<th data-field="points" data-sortable="true" data-align="right">Pts*</th>
+<!-- 									<th data-field="points" data-sortable="true" data-align="right">Pts*</th> -->
 									<th data-field="wins" data-sortable="true" data-align="right">G</th>
 									<th data-field="draws" data-sortable="true" data-align="right">E</th>
 									<th data-field="loses" data-sortable="true" data-align="right">P</th>
@@ -113,7 +113,7 @@
 									<th data-field="goalsFor" data-sortable="true" data-align="right">Gol</th>
 									<th data-field="pointsAVG" data-sortable="true" data-align="right" data-formatter="decimalFormatter"><span style="text-decoration:overline">Pts</span></th>
 									<th data-field="goalsForAVG" data-sortable="true" data-align="right" data-formatter="decimalFormatter"><span style="text-decoration:overline">Gol</span></th>
-									<th data-field="MVPs" data-sortable="true" data-align="right">MVP</th>
+<!-- 									<th data-field="MVPs" data-sortable="true" data-align="right">MVP</th> -->
 								</tr>
 							</thead>
 						</table>

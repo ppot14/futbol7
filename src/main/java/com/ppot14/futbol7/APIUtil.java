@@ -130,8 +130,13 @@ public class APIUtil {
 						item.getValue().remove(0);
 						Iterator<List<String>> i = item.getValue().iterator();
 						while (i.hasNext()) {
-						   if(isRowEmpty(i.next())){
+							List<String> row = i.next();
+						   if(isRowEmpty(row)){
 							   i.remove();
+						   }else {
+							   while(row.size()<20) {
+								   row.add("");
+							   }
 						   }
 						}
 						numMatches.put(s, item.getValue().size());
@@ -198,14 +203,15 @@ public class APIUtil {
 					Map<String, Object> formattedMatch = new HashMap<String, Object>();
 					
 					formattedMatch.put("day", formatter.parse(match.get(0)));
-					formattedMatch.put("scoreBlues", match.get(8));
-					formattedMatch.put("scoreWhites", match.get(9));
-					formattedMatch.put("remarks", match.size()>17?match.get(17):"");
+					formattedMatch.put("scoreBlues", match.get(9));//8
+					formattedMatch.put("scoreWhites", match.get(10));//9
+					formattedMatch.put("remarks", match.size()>19?match.get(19):"");//17
 					List<Map<String,String>> teams = new ArrayList<Map<String,String>>();
-					for(int i=1;i<8;i++){
+					for(int i=1;i<9;i++){//8
 						Map<String,String> r = new HashMap<String, String>();
+						if(match.get(i).isEmpty() && match.get(i+10).isEmpty()) {continue;}
 						r.put("blue", match.get(i));
-						r.put("white", match.get(i+9));
+						r.put("white", match.get(i+10));//9
 						teams.add(r);
 					}
 					formattedMatch.put("data", teams);
@@ -233,7 +239,7 @@ public class APIUtil {
 		
 		try{
 			for(String name : players.get(season)){
-				if(user==null || user.equals(name)){
+				if((user==null || user.equals(name)) && !name.isEmpty()){
 	    			int points = 0;
 	            	List<List<Object>> playerData = new ArrayList<List<Object>>();
 	            	List<List<Object>> playerData2 = new ArrayList<List<Object>>();
@@ -246,11 +252,11 @@ public class APIUtil {
 			        		String colour=null;
 			        		for(String cell : row){
 			        			if(i==0){date=cell;}
-			        			if(i==8){gA=Math.round(Float.parseFloat(cell));}
-			        			if(i==9){gB=Math.round(Float.parseFloat(cell));}
+			        			if(i==9){gA=Math.round(Float.parseFloat(cell));}//8
+			        			if(i==10){gB=Math.round(Float.parseFloat(cell));}//9
 			            		if(cell.equals(name)){
-			            			if(i<9){colour="a";}
-			            			if(i>8){colour="b";}
+			            			if(i<10){colour="a";}//8
+			            			if(i>9){colour="b";}//9
 			            		}
 			            		i++;
 			            	}
@@ -322,12 +328,17 @@ public class APIUtil {
 			Map<Set<String>,Integer> vs = new HashMap<Set<String>,Integer>();
 			
 			for(List<String> row: seasonMatches.getValue()){
+				try {
 				if(isRowEmpty(row)) break;
-				for(int i=1;i<8;i++){
-					for(int j=10;j<17;j++){
+				for(int i=1;i<9;i++){//8
+					for(int j=11;j<19;j++){//10 17
+						if(row.get(i).isEmpty() || row.get(j).isEmpty()) {continue;}
 						Set<String> pair = new HashSet<String>(Arrays.asList(row.get(i), row.get(j)));
 						vs.put(pair, ((vs.containsKey(pair))?vs.get(pair):0) + 1);
 					}
+				}}catch (Exception e) {
+					logger.severe("EEHEHHHH: "+row+" - "+seasonMatches.getKey());
+					throw e;
 				}
 			}
 			
@@ -358,14 +369,16 @@ public class APIUtil {
 			
 			for(List<String> row: seasonMatches.getValue()){
 				if(isRowEmpty(row)) break;
-				for(int i=1;i<8;i++){
-					for(int j=(i+1);j<8;j++){
+				for(int i=1;i<9;i++){//8
+					for(int j=(i+1);j<9;j++){//8
+						if(row.get(i).isEmpty() || row.get(j).isEmpty()) {continue;}
 						Set<String> pair = new HashSet<String>(Arrays.asList(row.get(i), row.get(j)));
 						vs.put(pair, ((vs.containsKey(pair))?vs.get(pair):0) + 1);
 					}
 				}
-				for(int i=10;i<17;i++){
-					for(int j=(i+1);j<17;j++){
+				for(int i=11;i<19;i++){//10 17
+					for(int j=(i+1);j<19;j++){//10 17
+						if(row.get(i).isEmpty() || row.get(j).isEmpty()) {continue;}
 						Set<String> pair = new HashSet<String>(Arrays.asList(row.get(i), row.get(j)));
 						vs.put(pair, ((vs.containsKey(pair))?vs.get(pair):0) + 1);
 					}
@@ -406,7 +419,7 @@ public class APIUtil {
 					PERMANENTS.get(season.getKey()):
 					PERMANENTS.get("default");
 			for(Map<String, String> row : season.getValue()){
-	        	if(seasonPermanents.contains(row.get("name")) ){
+	        	if(seasonPermanents.contains(row.get("name")) && !row.get("name").isEmpty() ){
 	        		permanents.get(season.getKey()).add(row);
 	        	}
 			}
@@ -426,7 +439,7 @@ public class APIUtil {
 					PERMANENTS.get(season.getKey()):
 					PERMANENTS.get("default");
 			for(Map<String, String> row : season.getValue()){
-	        	if(!seasonPermanents.contains(row.get("name")) ){
+	        	if(!seasonPermanents.contains(row.get("name")) && !row.get("name").isEmpty() ){
 	        		substitutes.get(season.getKey()).add(row);
 	        	}
 			}
@@ -615,8 +628,8 @@ public class APIUtil {
 			if(isRowEmpty(row)) break;
 			if(row.contains(name)){
 				int i = row.indexOf(name);
-				int gFor = ((i<8)?Math.round(Float.parseFloat(row.get(8))):Math.round(Float.parseFloat(row.get(9))));
-				int gAgainst = ((i<8)?Math.round(Float.parseFloat(row.get(9))):Math.round(Float.parseFloat(row.get(8))));
+				int gFor = ((i<9)?Math.round(Float.parseFloat(row.get(9))):Math.round(Float.parseFloat(row.get(10))));
+				int gAgainst = ((i<9)?Math.round(Float.parseFloat(row.get(10))):Math.round(Float.parseFloat(row.get(9))));
 				if(gFor>gAgainst) ret += "w";
 				if(gFor<gAgainst) ret += "l";
 				if(gFor==gAgainst) ret += "d";
@@ -693,14 +706,14 @@ public class APIUtil {
 			if(isRowEmpty(row)) break;
 //			SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
 //			Date date = formatter.parse(row.get(0));
-			Integer goalsA = Math.round(Float.parseFloat(row.get(8)));
-			Integer goalsB = Math.round(Float.parseFloat(row.get(9)));
+			Integer goalsA = Math.round(Float.parseFloat(row.get(9)));
+			Integer goalsB = Math.round(Float.parseFloat(row.get(10)));
 			for(int i=0;i<row.size();i++){
 				String player = row.get(i);
-				if(i!=0&&i!=8&&i!=9&&i!=17){
-					names.add(row.get(i));
-					int gFor = ((i<8)?goalsA:goalsB);
-					int gAgainst = ((i<8)?goalsB:goalsA);
+				if(i!=0&&i!=9&&i!=10&&i!=19&&!player.isEmpty()){
+					names.add(player);
+					int gFor = ((i<9)?goalsA:goalsB);
+					int gAgainst = ((i<9)?goalsB:goalsA);
 					int pointsM = ((gFor>gAgainst)?3:((gFor<gAgainst)?1:2));
 					int pointsN = ((gFor>gAgainst)?3:((gFor<gAgainst)?0:1));
 //					goalsFor.get(seasonName).put(player, (goalsFor.get(seasonName).get(player)!=null?
@@ -755,15 +768,15 @@ public class APIUtil {
 			
 			boolean p1w=false, p1b=false, p2w=false, p2b=false;
 			if(isRowEmpty(row)) break;
-			for(int i=1;i<8;i++){
+			for(int i=1;i<9;i++){
 				if(playerOne.equals(row.get(i))){
 					p1b=true;
 				}else if(playerTwo.equals(row.get(i))){
 					p2b=true;
 				}
 			}
-			int dif = Math.round( Float.parseFloat(row.get(8))-Float.parseFloat(row.get(9)) );//>1 Blue win
-			for(int j=10;j<17;j++){
+			int dif = Math.round( Float.parseFloat(row.get(9))-Float.parseFloat(row.get(10)) );//>1 Blue win
+			for(int j=11;j<19;j++){
 				if(playerOne.equals(row.get(j))){
 					p1w=true;
 				}else if(playerTwo.equals(row.get(j))){
@@ -989,6 +1002,10 @@ public class APIUtil {
 		}
 		return null;
 	}
+
+	public synchronized Object uploadAvatar(Map<String,Object> config, JsonNode jsonNode) {
+		String imageURL = GoogleImporter.uploadObject(config,jsonNode.get("player").asText(),jsonNode.get("file"));
+	}
 	
 	public Object login(JsonNode jsonNode){
 		return DBConnector.getPlayer(jsonNode);
@@ -1015,18 +1032,18 @@ public class APIUtil {
 				String formattedDater = formatter2.format(formatter.parse(date));
 				formattedMatch.put("date", formattedDater);
 				formattedMatch.put("team", "");
-				for(int i=1;i<8;i++){
+				for(int i=1;i<9;i++){
 					if(user.equals(match.get(i))){
 						formattedMatch.put("team", "blue");
 						break;
 					}
-					if(user.equals(match.get(i+9))){
+					if(user.equals(match.get(i+10))){
 						formattedMatch.put("team", "white");
 						break;
 					}
 				}
 				
-				formattedMatch.put("result",  match.get(8)+","+match.get(9) );
+				formattedMatch.put("result",  match.get(9)+","+match.get(10) );
 				formattedMatch.put("goals", (scorersByDate.get(season)!=null && 
 											scorersByDate.get(season).get(date)!=null && 
 											scorersByDate.get(season).get(date).get(user)!=null)?

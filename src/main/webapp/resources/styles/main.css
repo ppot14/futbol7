@@ -127,8 +127,9 @@ ul.white-scorers li{
 }
 .badge-lastmatch{
     display: inline-block;
-   	width: 20px;
-   	font-size: 70%;
+    width: 16px;
+    font-size: 70%;
+    padding: .3em .5em;
 }
 .fas.trend-arrow{
 	font-size: large;
@@ -268,6 +269,27 @@ div.player-badge:hover i{
 #user-picture{
 	height: 100px;
     margin-bottom: 20px;
+}
+#user-picture.uploading{
+	animation-name: blur;
+	animation-duration: 5s;
+	animation-iteration-count: infinite;
+}
+#user-picture.error{
+	-webkit-filter: grayscale(100%);
+	filter: grayscale(100%);
+}
+@keyframes grayscale {
+	50% {
+		-webkit-filter: grayscale(100%);
+		filter: grayscale(100%);
+	}
+}
+@keyframes blur {
+	50% {
+		-webkit-filter: blur(15px);
+		filter: blur(15px);
+	}
 }
 #user-name{
 	margin-top: 0px;

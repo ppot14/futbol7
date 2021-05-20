@@ -7,6 +7,7 @@ import static com.mongodb.client.model.Filters.exists;
 import static com.mongodb.client.model.Updates.set;
 
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,6 +20,9 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.node.ObjectNode;
 
 import com.mongodb.MongoClient;
+import com.mongodb.MongoClientOptions;
+import com.mongodb.MongoCredential;
+import com.mongodb.ServerAddress;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.result.UpdateResult;
@@ -26,14 +30,16 @@ import com.mongodb.client.result.UpdateResult;
 public class DBConnector {
 	private static final Logger logger = Logger.getLogger(DBConnector.class.getName());
 	private static final String LOCAL_DB_SERVER = "127.0.0.1";
+	private static final String PROD_DB_SERVER = "vps238730.ovh.net";
 	private static MongoClient mongo;
-	private static String dbServer = LOCAL_DB_SERVER;
+	private static String dbServer = PROD_DB_SERVER;
 
 	private static SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
 
 	private static MongoCollection<Document> getCollection(String collectionName) throws Exception {
 		if (mongo == null){
-			mongo = new MongoClient(dbServer, 27017);
+			MongoCredential credential = MongoCredential.createCredential("ppot14", "admin", "1468314a".toCharArray());
+			mongo = new MongoClient(new ServerAddress(dbServer, 27017), Arrays.asList(credential));
 		}
 		MongoCollection<Document> collection = mongo.getDatabase("futbol7").getCollection(collectionName);
 		return collection;

@@ -548,6 +548,41 @@ $(function () {
 			$('#user-picture').attr('src',window.location.origin+'/resources/images/unknown-player.jpg');
 		}
 		$('#title').html('Liga '+season);
+
+		listen('LOGIN', function(){
+			var form = $('<form method="post" action="" encType="multipart/form-data" id="upload-picture-form"></form>');
+			form.append('<input type="file" id="upload-picture-form-file" name="upload-picture-form-file"/>');
+			$('#user-picture').after(form);
+			$('#user-picture').click(function(event){
+				console.log('click upload');
+				$('#user-picture').addClass('uploading');
+				$('#upload-picture-form-file').trigger('click');
+				console.log('open upload');
+				$('#upload-picture-form-file').change(function(){
+					console.log('file added');
+					var fd = new FormData();
+					var files = $('#upload-picture-form-file')[0].files;
+					if(files.length > 0 ){
+						fd.append('file',files[0]);
+						console.log('file sent');
+						$.post(
+							'api/upload-avatar.request',
+							fd,
+							function( data ) {
+								$('#user-picture').removeClass('uploading');
+								if(!data || !data.error){
+									console.log('file added: '+data.imageURL);
+									//TODO change image with new path
+								}else{
+									$('#user-picture').removeClass('error');
+									console.log('file error');
+								}
+							}
+						);
+					}
+				});
+			});
+		});
 		
 		$.post('api/userStats.request', 
 				JSON.stringify({season: season, 
@@ -661,6 +696,7 @@ $(function () {
     
     //refresh and process data, only for admin
     $('#refresh').click(function(){
+    	$('#refresh i').addClass('fa-spin');
     	$.getJSON('api/refresh.request', function (data) {
     		if(data=='true' || data==true){
     			location.reload();

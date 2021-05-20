@@ -51,7 +51,7 @@
 			</div>
 			<div class="col-xs-4 col-sm-4 col-md-2 col-lg-2">
 				<ul class="list-group list-group-player">
-					<li class="list-group-item">MVPs <span id="mvps" class="float-right"></span></li>
+<!-- 					<li class="list-group-item">MVPs <span id="mvps" class="float-right"></span></li> -->
 					<li class="list-group-item">Media Puntos <span id="avg-points" class="float-right"></span></li>
 					<li class="list-group-item">Media Goles <span id="avg-goals" class="float-right"></span></li>
 				</ul>
