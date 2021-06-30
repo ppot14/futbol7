@@ -283,14 +283,14 @@ var updatePlayerComparison = function(playerOne,playerTwo){
 			}
 
 			if(playersPictures[playerOne]){
-				$('#comparison-player-one img').attr('src',playersPictures[playerOne]);
+				$('#comparison-player-one img').attr('src',getPlayerPicture(playerOne));
 				$('#comparison-player-one img').attr('onError','this.onerror=null;this.src=\''+window.location.origin+'/resources/images/unknown-player.jpg\';');
 			}else{
 				$('#comparison-player-one img').attr('src',window.location.origin+'/resources/images/unknown-player.jpg');
 			}
 			$('#comparison-player-one h3').text(playerOne);
 			if(playersPictures[playerTwo]){
-				$('#comparison-player-two img').attr('src',playersPictures[playerTwo]);
+				$('#comparison-player-two img').attr('src',getPlayerPicture(playerTwo));
 				$('#comparison-player-two img').attr('onError','this.onerror=null;this.src=\''+window.location.origin+'/resources/images/unknown-player.jpg\';');
 			}else{
 				$('#comparison-player-two img').attr('src',window.location.origin+'/resources/images/unknown-player.jpg');
@@ -541,11 +541,11 @@ $(function () {
 		
 		$('#user-name').text(player);
 		$('#user-picture').on('error', function () {
-			console.warn('No se puede cargar fotos de '+player+': '+playersPictures[player]);
+			console.warn('No se puede cargar fotos de '+player+': '+getPlayerPicture(player));
 			$('#user-picture').attr('src',window.location.origin+'/resources/images/unknown-player.jpg');
 		});
 		if(playersPictures[player]){
-			$('#user-picture').attr('src',playersPictures[player]);
+			$('#user-picture').attr('src',getPlayerPicture(player));
 		}else{
 			$('#user-picture').attr('src',window.location.origin+'/resources/images/unknown-player.jpg');
 		}
