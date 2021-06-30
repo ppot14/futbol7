@@ -1002,10 +1002,6 @@ public class APIUtil {
 		}
 		return null;
 	}
-
-	public synchronized Object uploadAvatar(Map<String,Object> config, JsonNode jsonNode) {
-		String imageURL = GoogleImporter.uploadObject(config,jsonNode.get("player").asText(),jsonNode.get("file"));
-	}
 	
 	public Object login(JsonNode jsonNode){
 		return DBConnector.getPlayer(jsonNode);

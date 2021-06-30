@@ -84,50 +84,53 @@ public class GoogleImporter {
 	
 
 	public static void main(String[] args) throws Exception {
-
 		Map<String,Object> config = DBConnector.getConfig();
 		if("upload".equals(args[0])){
 			String path = args[1];
 			GoogleImporter.uploadToGoogleDrive(config, path, (String)config.get("backup-folder-google-drive-id"));
 		}else if("list-bucket".equals(args[0])){
 			listAvatars(config);
-		}else if("upload-storage".equals(args[0])){
-			uploadObject(config,"test.jpg",args[1]);
+		}else if("upload-storage".equals(args[0])) {
+			uploadObject(config, "test.jpg", args[1], new FileInputStream(args[1]));
 		}
-	
 	}
 
 	public static void listAvatars(Map<String,Object> config) throws Exception {
-		Storage storage = StorageOptions.newBuilder().setCredentials(getGoogleCloudCredentials(config)).build().getService();
+		Storage storage = StorageOptions.newBuilder().setCredentials(getGoogleCloudCredentials()).build().getService();
 		Page<Blob> blobs = storage.list(BUCKET_NAME);
 		for (Blob blob : blobs.iterateAll()) {
 			System.out.println(blob.getName());
 		}
 	}
-	public static String uploadObject(Map<String,Object> config, String objectName, String filePath) throws Exception {
-		Storage storage = StorageOptions.newBuilder().setCredentials(getGoogleCloudCredentials(config)).build().getService();
-		BlobId blobId = BlobId.of(BUCKET_NAME, "players/avatars/"+objectName);
-		Tika tika = new Tika();
-		java.io.File imageFile = new java.io.File(filePath);
-		String mimeType = tika.detect(imageFile);
-		logger.fine("mimeType: "+mimeType);
-		BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType(mimeType).build();
-		BufferedImage targetImage = resizeImage(ImageIO.read(imageFile), 400, 400);
+	public static String uploadObject(Map<String,Object> config, String player, String fileName, InputStream fileContent) throws Exception {
 		java.io.File tempFile = java.io.File.createTempFile("futbol7", null);
 		logger.fine("tempFile: "+tempFile.getAbsolutePath());
 		tempFile.deleteOnExit();
-		ImageIO.write(targetImage, FilenameUtils.getExtension(filePath), tempFile);
+		BufferedImage targetImage = resizeImage(ImageIO.read(fileContent), 400, 400);
+		String extension = FilenameUtils.getExtension(fileName);
+		ImageIO.write(targetImage, extension, tempFile);
+		Storage storage = StorageOptions.newBuilder().setCredentials(getGoogleCloudCredentials()).build().getService();
+		String objectName = "players/avatars/"+player+"."+extension;
+		BlobId blobId = BlobId.of(BUCKET_NAME, objectName);
+		Tika tika = new Tika();
+		String mimeType = tika.detect(tempFile);
+		logger.fine("mimeType: "+mimeType);
+		BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType(mimeType).build();
 		Blob result = storage.create(blobInfo, Files.readAllBytes(Paths.get(tempFile.getAbsolutePath())));
-		logger.fine("File " + filePath + " uploaded to bucket " + BUCKET_NAME + " as " + objectName);
-		return "players/avatars/"+objectName;
+		logger.info("File " + fileName + " uploaded to bucket " + BUCKET_NAME + " as " + result.getName());
+		return objectName;
 	}
 
 	private static BufferedImage resizeImage(BufferedImage originalImage, int targetWidth, int targetHeight) throws IOException {
 		logger.info("originalImage " + originalImage.getHeight() + "x" + originalImage.getWidth());
-		Image resultingImage = originalImage.getScaledInstance(targetWidth, targetHeight, Image.SCALE_DEFAULT);
+		int side = Math.min(originalImage.getWidth(), originalImage.getHeight());
+		int x = (originalImage.getWidth() - side) / 2;
+		int y = (originalImage.getHeight() - side) / 2;
+		BufferedImage cropped = originalImage.getSubimage(x, y, side, side);
+		Image resultingImage = cropped.getScaledInstance(targetWidth, targetHeight, Image.SCALE_DEFAULT);
 		BufferedImage outputImage = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_RGB);
 		outputImage.getGraphics().drawImage(resultingImage, 0, 0, null);
-		logger.info("outputImage " + outputImage.getHeight() + "x" + outputImage.getWidth());
+		logger.fine("outputImage " + outputImage.getHeight() + "x" + outputImage.getWidth());
 		return outputImage;
 	}
 	
@@ -176,11 +179,11 @@ public class GoogleImporter {
 		return null;
 	}
 
-	private static GoogleCredentials getGoogleCloudCredentials(Map<String,Object> config) throws Exception {
+	private static GoogleCredentials getGoogleCloudCredentials() throws Exception {
 		ClassLoader classLoader = GoogleImporter.class.getClassLoader();
 		URL url = classLoader.getResource(GOOGLE_SECRET_JSON);
 		logger.info("Credentials in file: " + url.getPath());
-		return GoogleCredentials.fromStream(new FileInputStream("C:/Users/Pepe/Projects/futbol7/target/classes/api-project-517911210517-cfe395aaee80.json"))
+		return GoogleCredentials.fromStream(new FileInputStream(url.getPath()))
 				.createScoped(Lists.newArrayList("https://www.googleapis.com/auth/cloud-platform"));
 	}
 }

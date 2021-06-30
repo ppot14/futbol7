@@ -116,11 +116,6 @@
 			<artifactId>mongo-java-driver</artifactId>
 			<version>3.4.2</version>
 		</dependency>
-		<dependency>
-			<groupId>com.adventurebox</groupId>
-			<artifactId>pepe-tests</artifactId>
-			<version>1.23</version>
-		</dependency>
 
 	</dependencies>
 	

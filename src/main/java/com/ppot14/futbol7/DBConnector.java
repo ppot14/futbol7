@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import org.bson.BsonDocument;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.codehaus.jackson.JsonNode;
@@ -70,7 +71,8 @@ public class DBConnector {
 			Bson filter = and(eq("name", name),eq("id",id));
 			FindIterable<Document> result = configCollection.find(filter);
 			if(result!=null && result.first()!=null){
-				Bson update = and(set("picture", jsonNode.get("picture").asText()),set("lastAccess", new Date().getTime()));
+				Bson update = set("lastAccess", new Date().getTime());
+				//Bson update = and(set("picture", jsonNode.get("picture").asText()),set("lastAccess", new Date().getTime()));
 				configCollection.updateOne(filter,update);
 				logger.fine("player exists: "+result.first().getString("name")+" ("+result.first().getString("nameweb")+")");
 				return (Document) result.first();
@@ -99,6 +101,21 @@ public class DBConnector {
 			e.printStackTrace();
 		}
 		return playersPictures;
+	}
+
+	public static boolean setPlayerPicture(String player, String picture){
+		boolean result = false;
+		try {
+			MongoCollection<Document> configCollection;
+			configCollection = getCollection("Players");
+			UpdateResult updateResult = configCollection.updateMany(eq("nameweb", player),set("picture", picture));
+			logger.info("setPlayerPicture "+player+" with "+picture+" to "+updateResult.getModifiedCount()+" records");
+			result = updateResult.getModifiedCount()>0;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+
 	}
 	
 	public static Document hasVoted(JsonNode jsonNode){

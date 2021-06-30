@@ -105,7 +105,9 @@ function nameFormatter(value,row,index){
 }
 function getPlayerPicture(value){
 	var playerPicture = window.location.origin+'/resources/images/unknown-player.jpg';
-	if(playersPictures[value]){
+	if(playersPictures[value] && playersPictures[value].indexOf('players/avatar')>-1){
+		playerPicture = 'https://storage.googleapis.com/futbol7/'+playersPictures[value];
+	}else if(playersPictures[value]){
 		playerPicture = playersPictures[value];
 	}
 	return playerPicture;
@@ -551,34 +553,43 @@ $(function () {
 
 		listen('LOGIN', function(){
 			var form = $('<form method="post" action="" encType="multipart/form-data" id="upload-picture-form"></form>');
-			form.append('<input type="file" id="upload-picture-form-file" name="upload-picture-form-file"/>');
+			form.append('<input type="file" id="upload-file" name="upload-file" style="display: none!important;"/>');
 			$('#user-picture').after(form);
 			$('#user-picture').click(function(event){
 				console.log('click upload');
 				$('#user-picture').addClass('uploading');
-				$('#upload-picture-form-file').trigger('click');
+				$('#upload-file').trigger('click');
 				console.log('open upload');
-				$('#upload-picture-form-file').change(function(){
+				$('#upload-file').change(function(){
 					console.log('file added');
 					var fd = new FormData();
-					var files = $('#upload-picture-form-file')[0].files;
+					var files = $('#upload-file')[0].files;
 					if(files.length > 0 ){
 						fd.append('file',files[0]);
-						console.log('file sent');
-						$.post(
-							'api/upload-avatar.request',
-							fd,
-							function( data ) {
+						fd.append('player',player);
+						console.log('file sent: '+fd);
+						$.ajax({
+							url: 'avatar.upload',
+							data: fd,
+							type: 'POST',
+							dataType: 'json',
+							cache: false,
+							contentType: false,
+							processData: false
+						}).done(function(data) {
 								$('#user-picture').removeClass('uploading');
-								if(!data || !data.error){
-									console.log('file added: '+data.imageURL);
-									//TODO change image with new path
-								}else{
-									$('#user-picture').removeClass('error');
-									console.log('file error');
+								if (data && !data.error) {
+									console.log('file added: ' + data.imageURL);
+									$('#user-picture').attr('src','https://storage.googleapis.com/futbol7/'+data.imageURL);
+								} else {
+									$('#user-picture').addClass('error');
+									console.log('file error: '+data.error);
 								}
-							}
-						);
+						}).fail(function(error) {
+							$('#user-picture').addClass('error');
+							$('#user-picture').removeClass('uploading');
+							console.log('file error: '+error);
+						});
 					}
 				});
 			});

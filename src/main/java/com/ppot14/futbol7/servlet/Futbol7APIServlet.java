@@ -151,8 +151,6 @@ public class Futbol7APIServlet extends Futbol7Servlet {
 				String seasonName = jsonNode.get("season").asText();
 				String player = jsonNode.get("player").asText();
 	    		reply = getApi().getUserStats(seasonName,player);
-			}else if(requestPath.contains("api/upload-avatar.request")){
-				reply = getApi().uploadAvatar(getConfig(), jsonNode);
 			}else{
 				logger.warning("Request path not found: "+requestPath);
 			}

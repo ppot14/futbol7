@@ -25,6 +25,15 @@
       <servlet-name>Futbol7APIServlet</servlet-name>
       <url-pattern>*.request</url-pattern>
   	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>Futbol7UploadServlet</servlet-name>
+		<servlet-class>com.ppot14.futbol7.servlet.Futbol7UploadServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>Futbol7UploadServlet</servlet-name>
+		<url-pattern>*.upload</url-pattern>
+	</servlet-mapping>
   	
 	<servlet>
       <servlet-name>Futbol7HTMLServlet</servlet-name>
